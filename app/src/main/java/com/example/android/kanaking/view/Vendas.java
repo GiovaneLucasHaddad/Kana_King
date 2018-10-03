@@ -27,16 +27,21 @@ import java.util.ArrayList;
 import static com.example.android.kanaking.Constantes.ABACAXI;
 import static com.example.android.kanaking.Constantes.COCO;
 import static com.example.android.kanaking.Constantes.COCO_FRUTA;
+import static com.example.android.kanaking.Constantes.CONCLUIR;
 import static com.example.android.kanaking.Constantes.COPO_300;
 import static com.example.android.kanaking.Constantes.COPO_400;
 import static com.example.android.kanaking.Constantes.COPO_500;
 import static com.example.android.kanaking.Constantes.GARRAFA_1000;
 import static com.example.android.kanaking.Constantes.GARRAFA_500;
 import static com.example.android.kanaking.Constantes.GENGIBRE;
+import static com.example.android.kanaking.Constantes.NENHUMA;
+import static com.example.android.kanaking.Constantes.OBSERVACAO;
+import static com.example.android.kanaking.Constantes.POUCO_GELO;
 import static com.example.android.kanaking.Constantes.PURO;
 import static com.example.android.kanaking.Constantes.QUANTIDADE;
 import static com.example.android.kanaking.Constantes.RECIPIENTE;
 import static com.example.android.kanaking.Constantes.SABOR;
+import static com.example.android.kanaking.Constantes.SEM_GELO;
 import static com.example.android.kanaking.Constantes.SICILIANO;
 import static com.example.android.kanaking.Constantes.TAITI;
 
@@ -50,8 +55,8 @@ public class Vendas extends AppCompatActivity{
 
     //Item de Pedido temporário
     private ItemPedido itemAux;
-
     private int etapa = 0;
+    private Double soma = 0.0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,7 +65,7 @@ public class Vendas extends AppCompatActivity{
 
         //Configurando NumberPicker
         comanda = (NumberPicker)findViewById(R.id.add_comanda);
-        comanda.setMaxValue(99);
+        comanda.setMaxValue(20);
         comanda.setMinValue(1);
 
         //Configurando Spinner Forma de pagamento
@@ -98,6 +103,10 @@ public class Vendas extends AppCompatActivity{
         pedidoAdapter.notifyDataSetChanged();
     }
 
+    public void zerar(View view){
+        Toast.makeText(Vendas.this,"Zerar",Toast.LENGTH_SHORT).show();
+    }
+
     public void menuPopup(View v){
         PopupMenu popup = new PopupMenu(this, v);
         popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
@@ -122,31 +131,31 @@ public class Vendas extends AppCompatActivity{
 
     public void adicionarItem(final View v){
         //Para adicionar itens de pedido
+        PopupMenu popup = new PopupMenu(this, v);
+
+        //Código copiado de https://readyandroid.wordpress.com/popup-menu-with-icon/
+        //para forçar que o ícone seja mostrado
+        try {
+            Field[] fields = popup.getClass().getDeclaredFields();
+            for (Field field : fields) {
+                if ("mPopup".equals(field.getName())) {
+                    field.setAccessible(true);
+                    Object menuPopupHelper = field.get(popup);
+                    Class<?> classPopupHelper = Class.forName(menuPopupHelper.getClass().getName());
+                    Method setForceIcons = classPopupHelper.getMethod("setForceShowIcon", boolean.class);
+                    setForceIcons.invoke(menuPopupHelper, true);
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        //Até aqui (Código copiado)
         switch(etapa){
             case SABOR:
                 itemAux = new ItemPedido();
 
-                PopupMenu popup1 = new PopupMenu(this, v);
-
-                //Código copiado de https://readyandroid.wordpress.com/popup-menu-with-icon/
-                try {
-                    Field[] fields = popup1.getClass().getDeclaredFields();
-                    for (Field field : fields) {
-                        if ("mPopup".equals(field.getName())) {
-                            field.setAccessible(true);
-                            Object menuPopupHelper = field.get(popup1);
-                            Class<?> classPopupHelper = Class.forName(menuPopupHelper.getClass().getName());
-                            Method setForceIcons = classPopupHelper.getMethod("setForceShowIcon", boolean.class);
-                            setForceIcons.invoke(menuPopupHelper, true);
-                            break;
-                        }
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                //Até aqui (Código copiado)
-
-                popup1.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
                         int escolha = -1;
@@ -172,38 +181,19 @@ public class Vendas extends AppCompatActivity{
                             case R.id.cancelar:
                                 return true;
                         }
-                        etapa = RECIPIENTE;
                         itemAux.setSabor(escolha);
                         //CONTROLE DE TESTES
-                        Toast.makeText(Vendas.this,"Item: Sabor:"+itemAux.getSabor()+ " Recip:"+ itemAux.getRecipiente() + " Qtd:" + itemAux.getQuantidade(),Toast.LENGTH_SHORT).show();
+                        Toast.makeText(Vendas.this,"Item: Sabor:"+itemAux.getSabor()+ " Recip:"+ itemAux.getRecipiente() + " Qtd:" + itemAux.getQuantidade() + " Obs:"+ itemAux.getObservacao(),Toast.LENGTH_SHORT).show();
+                        etapa = RECIPIENTE;
                         adicionarItem(v);
                         return true;
                     }
                 });
-                popup1.inflate(R.menu.menu_sabor_item);
-                popup1.show();
+                popup.inflate(R.menu.menu_sabor_item);
+                popup.show();
                 break;
 
             case RECIPIENTE:
-                PopupMenu popup2 = new PopupMenu(this, v);
-
-                //Código copiado de https://readyandroid.wordpress.com/popup-menu-with-icon/
-                try {
-                    Field[] fields = popup2.getClass().getDeclaredFields();
-                    for (Field field : fields) {
-                        if ("mPopup".equals(field.getName())) {
-                            field.setAccessible(true);
-                            Object menuPopupHelper = field.get(popup2);
-                            Class<?> classPopupHelper = Class.forName(menuPopupHelper.getClass().getName());
-                            Method setForceIcons = classPopupHelper.getMethod("setForceShowIcon", boolean.class);
-                            setForceIcons.invoke(menuPopupHelper, true);
-                            break;
-                        }
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                //Até aqui (Código copiado)
 
                 if (itemAux == null){
                     Toast.makeText(Vendas.this,"Desculpe, tente novamente.",Toast.LENGTH_SHORT).show();
@@ -211,7 +201,7 @@ public class Vendas extends AppCompatActivity{
                 }
                 if(itemAux.getSabor() == COCO){
                     //Se o sabor for COCO
-                    popup2.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                         @Override
                         public boolean onMenuItemClick(MenuItem item) {
                             int escolha = -1;
@@ -232,19 +222,19 @@ public class Vendas extends AppCompatActivity{
                                     etapa = SABOR;//Retorna à 1a etapa
                                     return true;
                             }
-                            etapa = QUANTIDADE;
                             itemAux.setRecipiente(escolha);
                             //CONTROLE DE TESTES
-                            Toast.makeText(Vendas.this,"Item: Sabor:"+itemAux.getSabor()+ " Recip:"+ itemAux.getRecipiente() + " Qtd:" + itemAux.getQuantidade(),Toast.LENGTH_SHORT).show();
+                            Toast.makeText(Vendas.this,"Item: Sabor:"+itemAux.getSabor()+ " Recip:"+ itemAux.getRecipiente() + " Qtd:" + itemAux.getQuantidade() + " Obs:"+ itemAux.getObservacao(),Toast.LENGTH_SHORT).show();
+                            etapa = CONCLUIR;
                             adicionarItem(v);
                             return true;
                         }
                     });
 
-                    popup2.inflate(R.menu.menu_recipiente_coco_item);
+                    popup.inflate(R.menu.menu_recipiente_coco_item);
                 }else{
                     //Se for caldo de cana mesmo
-                    popup2.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                         @Override
                         public boolean onMenuItemClick(MenuItem item) {
                             int escolha = -1;
@@ -268,17 +258,17 @@ public class Vendas extends AppCompatActivity{
                                     etapa = SABOR;//Retorna à 1a etapa
                                     return true;
                             }
-                            etapa = QUANTIDADE;
                             itemAux.setRecipiente(escolha);
                             //CONTROLE DE TESTES
-                            Toast.makeText(Vendas.this,"Item: Sabor:"+itemAux.getSabor()+ " Recip:"+ itemAux.getRecipiente() + " Qtd:" + itemAux.getQuantidade(),Toast.LENGTH_SHORT).show();
+                            Toast.makeText(Vendas.this,"Item: Sabor:"+itemAux.getSabor()+ " Recip:"+ itemAux.getRecipiente() + " Qtd:" + itemAux.getQuantidade() + " Obs:"+ itemAux.getObservacao(),Toast.LENGTH_SHORT).show();
+                            etapa = CONCLUIR;
                             adicionarItem(v);
                             return true;
                         }
                     });
 
-                    popup2.inflate(R.menu.menu_recipiente_sabor_item);
-                    Menu menu = popup2.getMenu();
+                    popup.inflate(R.menu.menu_recipiente_sabor_item);
+                    Menu menu = popup.getMenu();
                     MenuItem menuItem;
                     switch(itemAux.getSabor()){
                         case SICILIANO:
@@ -367,11 +357,138 @@ public class Vendas extends AppCompatActivity{
                             break;
                     }
                 }
-                popup2.show();
+                popup.show();
                 break;
+            case CONCLUIR:
+
+                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        switch (item.getItemId()){
+                            case R.id.qtde:
+                                etapa = QUANTIDADE;
+                                adicionarItem(v);
+                                break;
+                            case R.id.obs:
+                                etapa = OBSERVACAO;
+                                adicionarItem(v);
+                                break;
+                            case R.id.confirmar:
+                                etapa = SABOR;
+                                //TODO - aqui o ItemPedido está pronto para ser lançado
+                                break;
+                            case R.id.cancelar:
+                                etapa = SABOR;//Retorna à 1a etapa
+                                return true;
+                        }
+                        //CONTROLE DE TESTES
+                        Toast.makeText(Vendas.this,"Item: Sabor:"+itemAux.getSabor()+ " Recip:"+ itemAux.getRecipiente() + " Qtd:" + itemAux.getQuantidade() + " Obs:"+ itemAux.getObservacao(),Toast.LENGTH_SHORT).show();
+                        return true;
+                    }
+                });
+                popup.inflate(R.menu.menu_finalizar_item);
+                Menu menu_fin = popup.getMenu();
+                MenuItem menuItem_fin;
+
+                menuItem_fin = (MenuItem) menu_fin.findItem(R.id.qtde);
+                menuItem_fin.setTitle("Quantidade: " + itemAux.getQuantidade());
+
+                menuItem_fin = (MenuItem) menu_fin.findItem(R.id.obs);
+                switch(itemAux.getObservacao()){
+                    case SEM_GELO:
+                        menuItem_fin.setTitle("Obs: Sem Gelo");
+                        break;
+
+                    case POUCO_GELO:
+                        menuItem_fin.setTitle("Obs: Pouco Gelo");
+                        break;
+                }
+                popup.show();
+                break;
+
             case QUANTIDADE:
-                Toast.makeText(Vendas.this,"Quantidade",Toast.LENGTH_SHORT).show();
-                etapa = SABOR;
+                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        int escolha = -1;
+                        switch (item.getItemId()){
+                            case R.id.qtd_1:
+                                escolha = 1;
+                                break;
+                            case R.id.qtd_2:
+                                escolha = 2;
+                                break;
+                            case R.id.qtd_3:
+                                escolha = 3;
+                                break;
+                            case R.id.qtd_4:
+                                escolha = 4;
+                                break;
+                            case R.id.qtd_5:
+                                escolha = 5;
+                                break;
+                            case R.id.qtd_6:
+                                escolha = 6;
+                                break;
+                            case R.id.qtd_7:
+                                escolha = 7;
+                                break;
+                            case R.id.qtd_8:
+                                escolha = 8;
+                                break;
+                            case R.id.qtd_9:
+                                escolha = 9;
+                                break;
+                            case R.id.qtd_10:
+                                escolha = 10;
+                                break;
+                            case R.id.cancelar:
+                                escolha = itemAux.getQuantidade();
+                                break;
+                        }
+                        itemAux.setQuantidade(escolha);
+                        //CONTROLE DE TESTES
+                        Toast.makeText(Vendas.this,"Item: Sabor:"+itemAux.getSabor()+ " Recip:"+ itemAux.getRecipiente() + " Qtd:" + itemAux.getQuantidade() + " Obs:"+ itemAux.getObservacao(),Toast.LENGTH_SHORT).show();
+                        etapa = CONCLUIR;
+                        adicionarItem(v);
+                        return true;
+                    }
+                });
+                popup.inflate(R.menu.menu_quantidade_item);
+                popup.show();
+
+                break;
+
+            case OBSERVACAO:
+                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        int escolha = -1;
+                        switch (item.getItemId()){
+                            case R.id.sem_gelo:
+                                escolha = SEM_GELO;
+                                break;
+                            case R.id.pouco_gelo:
+                                escolha = POUCO_GELO;
+                                break;
+                            case R.id.nenhuma:
+                                escolha = NENHUMA;
+                                break;
+                            case R.id.cancelar:
+                                escolha = itemAux.getObservacao();
+                                break;
+                        }
+                        itemAux.setObservacao(escolha);
+                        //CONTROLE DE TESTES
+                        Toast.makeText(Vendas.this,"Item: Sabor:"+itemAux.getSabor()+ " Recip:"+ itemAux.getRecipiente() + " Qtd:" + itemAux.getQuantidade() + " Obs:"+ itemAux.getObservacao(),Toast.LENGTH_SHORT).show();
+                        etapa = CONCLUIR;
+                        adicionarItem(v);
+                        return true;
+                    }
+                });
+                popup.inflate(R.menu.menu_observacao_item);
+                popup.show();
+
                 break;
         }
 

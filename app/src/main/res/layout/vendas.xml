@@ -26,7 +26,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="2" />
+            android:text="3" />
 
         <Button
             android:id="@+id/adicionar_item"
@@ -49,100 +49,25 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"/>
-
-        <Button
-            android:id="@+id/adicionar"
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:onClick="adicionar"
-            android:text=">" />
+            android:orientation="vertical">
+            <Button
+                android:id="@+id/adicionar"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:onClick="adicionar"
+                android:background="@drawable/confirmar"/>
+            <Button
+                android:id="@+id/zerar"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:onClick="zerar"
+                android:background="@drawable/cancelar" />
+        </LinearLayout>
     </LinearLayout>
-    <!--<ListView-->
-        <!--android:id="@+id/lista_pedidos"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="0dp"-->
-        <!--android:layout_weight="9"/>-->
-    <!--<LinearLayout-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="0dp"-->
-        <!--android:layout_weight="1"-->
-        <!--android:orientation="horizontal" >-->
-
-        <!--<TextView-->
-            <!--android:id="@+id/comanda_lancar"-->
-            <!--android:layout_width="0dp"-->
-            <!--android:layout_height="match_parent"-->
-            <!--android:layout_gravity="center"-->
-            <!--android:layout_weight="1"-->
-            <!--android:gravity="center"-->
-            <!--android:text="12"-->
-            <!--android:textColor="@android:color/black"-->
-            <!--android:textSize="30sp" />-->
-
-        <!--<HorizontalScrollView-->
-            <!--android:layout_width="0dp"-->
-            <!--android:layout_height="match_parent"-->
-            <!--android:layout_weight="3">-->
-
-            <!--<LinearLayout-->
-                <!--android:layout_width="wrap_content"-->
-                <!--android:layout_height="match_parent"-->
-                <!--android:orientation="horizontal">-->
-
-                <!--<TextView-->
-                    <!--android:layout_width="0dp"-->
-                    <!--android:layout_height="match_parent"-->
-                    <!--android:layout_weight="1"-->
-                    <!--android:gravity="center"-->
-                    <!--android:text="Lim * 3 (500ml)"-->
-                    <!--android:textColor="@android:color/black" />-->
-
-                <!--<TextView-->
-                    <!--android:layout_width="0dp"-->
-                    <!--android:layout_height="match_parent"-->
-                    <!--android:layout_weight="1"-->
-                    <!--android:gravity="center"-->
-                    <!--android:text="Aba * 1 (300ml)"-->
-                    <!--android:textColor="@android:color/black" />-->
-
-                <!--<TextView-->
-                    <!--android:layout_width="0dp"-->
-                    <!--android:layout_height="match_parent"-->
-                    <!--android:layout_weight="1"-->
-                    <!--android:gravity="center"-->
-                    <!--android:text="Gen * 1 (1L)"-->
-                    <!--android:textColor="@android:color/black" />-->
-            <!--</LinearLayout>-->
-
-        <!--</HorizontalScrollView>-->
-
-        <!--<TextView-->
-            <!--android:id="@+id/valor_lancar"-->
-            <!--android:layout_width="0dp"-->
-            <!--android:layout_height="match_parent"-->
-            <!--android:layout_weight="1"-->
-            <!--android:gravity="center"-->
-            <!--android:text="34"-->
-            <!--android:textColor="@android:color/black"-->
-            <!--android:textSize="24sp" />-->
-
-        <!--<TextView-->
-            <!--android:id="@+id/pagamento_lancar"-->
-            <!--android:layout_width="0dp"-->
-            <!--android:layout_height="match_parent"-->
-            <!--android:layout_weight="1"-->
-            <!--android:gravity="center"-->
-            <!--android:text="1"-->
-            <!--android:textColor="@android:color/black"-->
-            <!--android:textSize="24sp" />-->
-
-        <!--<Button-->
-            <!--android:id="@+id/lancar"-->
-            <!--android:layout_width="0dp"-->
-            <!--android:layout_height="match_parent"-->
-            <!--android:layout_weight="0.5"-->
-            <!--android:onClick="lancar"-->
-            <!--android:text=">" />-->
-    <!--</LinearLayout>-->
 </LinearLayout>

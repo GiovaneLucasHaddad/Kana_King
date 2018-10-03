@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/qtde"
+        android:title="Quantidade: " />
+    <item
+        android:id="@+id/obs"
+        android:title="Obs:" />
+    <item
+        android:id="@+id/confirmar"
+        android:icon="@drawable/confirmar"
+        android:title="Confirmar" />
+    <item
+        android:id="@+id/cancelar"
+        android:icon="@drawable/cancelar"
+        android:title="Cancelar" />
+</menu>

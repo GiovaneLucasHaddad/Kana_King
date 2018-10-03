@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/sem_gelo"
+        android:title="Sem gelo" />
+    <item
+        android:id="@+id/pouco_gelo"
+        android:title="Pouco gelo" />
+    <item
+        android:id="@+id/nenhuma"
+        android:title="Nenhuma" />
+    <item
+        android:id="@+id/cancelar"
+        android:icon="@drawable/cancelar"
+        android:title="Cancelar" />
+</menu>

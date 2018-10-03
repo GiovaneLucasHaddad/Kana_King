@@ -11,6 +11,7 @@ public class ItemPedido {
     private int observacao;
 
     public ItemPedido() {
+        quantidade = 1;
     }
 
     public long getId() {
