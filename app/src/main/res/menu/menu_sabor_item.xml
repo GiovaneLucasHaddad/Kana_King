@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/taiti"
+        android:icon="@drawable/t"
+        android:title="Limão Taiti" />
+    <item
+        android:id="@+id/siciliano"
+        android:icon="@drawable/s"
+        android:title="Limão Siciliano" />
+    <item
+        android:id="@+id/abacaxi"
+        android:icon="@drawable/a"
+        android:title="Abacaxi" />
+    <item
+        android:id="@+id/puro"
+        android:icon="@drawable/p"
+        android:title="Puro" />
+    <item
+        android:id="@+id/gengibre"
+        android:icon="@drawable/g"
+        android:title="Gengibre" />
+    <item
+        android:id="@+id/coco"
+        android:icon="@drawable/c"
+        android:title="Coco" />
+    <item
+        android:id="@+id/cancelar"
+        android:icon="@drawable/cancelar"
+        android:title="Cancelar" />
+</menu>

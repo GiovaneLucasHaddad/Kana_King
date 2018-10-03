@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/c_300"
+        android:icon="@drawable/a_c"
+        android:title="Copo 300ml" />
+    <item
+        android:id="@+id/c_400"
+        android:icon="@drawable/a_c"
+        android:title="Copo 400ml" />
+    <item
+        android:id="@+id/c_500"
+        android:icon="@drawable/a_c"
+        android:title="Copo 500ml" />
+    <item
+        android:id="@+id/g_500"
+        android:icon="@drawable/a_g"
+        android:title="Garrafa 500ml" />
+    <item
+        android:id="@+id/g_1000"
+        android:icon="@drawable/a_g"
+        android:title="Garrafa 1L" />
+    <item
+        android:id="@+id/cancelar"
+        android:icon="@drawable/cancelar"
+        android:title="Cancelar" />
+</menu>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/c_fruta"
+        android:icon="@drawable/c"
+        android:title="Fruta" />
+    <item
+        android:id="@+id/c_c_500"
+        android:icon="@drawable/c_c"
+        android:title="Copo 500ml" />
+    <item
+        android:id="@+id/c_g_500"
+        android:icon="@drawable/c_g"
+        android:title="Garrafa 500ml" />
+    <item
+        android:id="@+id/c_g_1000"
+        android:icon="@drawable/c_g"
+        android:title="Garrafa 1L" />
+    <item
+        android:id="@+id/cancelar"
+        android:icon="@drawable/cancelar"
+        android:title="Cancelar" />
+</menu>
