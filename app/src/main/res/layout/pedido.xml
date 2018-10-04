@@ -34,45 +34,17 @@
         android:gravity="center"
         android:textColor="@android:color/black"
         android:textSize="30sp" />
-
-    <HorizontalScrollView
-    android:layout_width="0dp"
-    android:layout_height="match_parent"
-    android:layout_weight="3">
-
-    <LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="horizontal">
-
-    <TextView
-    android:layout_width="0dp"
-    android:layout_height="match_parent"
-    android:layout_weight="1"
-    android:gravity="center"
-    android:text="Lim * 3 (500ml)"
-    android:textColor="@android:color/black" />
-
-    <TextView
-    android:layout_width="0dp"
-    android:layout_height="match_parent"
-    android:layout_weight="1"
-    android:gravity="center"
-    android:text="Aba * 1 (300ml)"
-    android:textColor="@android:color/black" />
-
-    <TextView
-    android:layout_width="0dp"
-    android:layout_height="match_parent"
-    android:layout_weight="1"
-    android:gravity="center"
-    android:text="Gen * 1 (1L)"
-    android:textColor="@android:color/black" />
-    </LinearLayout>
-
-    </HorizontalScrollView>
-
-
+    <GridView
+        android:id="@+id/add_itens"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="3"
+        android:columnWidth="90dp"
+        android:numColumns="auto_fit"
+        android:verticalSpacing="10dp"
+        android:horizontalSpacing="10dp"
+        android:stretchMode="columnWidth"
+        android:gravity="center"/>
     <FrameLayout
         android:layout_width="0dp"
         android:layout_height="match_parent"

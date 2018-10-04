@@ -1,5 +1,7 @@
 package com.example.android.kanaking.model;
 
+import java.util.ArrayList;
+
 public class Pedido {
     private long id;
     private int venda;
@@ -9,8 +11,15 @@ public class Pedido {
     private int formaPagamento;
     private int data;
     private int hora;
+    private ArrayList<ItemPedido> itemPedidos;
+    private Caixa caixa;
 
     public Pedido() {
+    }
+
+    public void addItemPedido(ItemPedido itemPedido){
+        itemPedidos.add(itemPedido);
+        itemPedido.setPedido(this);
     }
 
     public Pedido(long id, int venda, int comanda, int estado, double valor, int formaPagamento, int data, int hora) {
@@ -86,5 +95,13 @@ public class Pedido {
 
     public void setHora(int hora) {
         this.hora = hora;
+    }
+
+    public Caixa getCaixa() {
+        return caixa;
+    }
+
+    public void setCaixa(Caixa caixa) {
+        this.caixa = caixa;
     }
 }

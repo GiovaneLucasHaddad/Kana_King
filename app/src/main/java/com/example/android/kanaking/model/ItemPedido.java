@@ -24,6 +24,7 @@ public class ItemPedido {
     private int entregue;
     private int ordem;
     private int observacao;
+    private Pedido pedido;
 
     public ItemPedido() {
         quantidade = 1;
@@ -241,5 +242,13 @@ public class ItemPedido {
 
     public void setObservacao(int observacao) {
         this.observacao = observacao;
+    }
+
+    public Pedido getPedido() {
+        return pedido;
+    }
+
+    public void setPedido(Pedido pedido) {
+        this.pedido = pedido;
     }
 }
