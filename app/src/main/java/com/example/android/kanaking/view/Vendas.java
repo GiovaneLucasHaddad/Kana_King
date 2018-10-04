@@ -5,7 +5,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.EditText;
+import android.widget.GridView;
 import android.widget.ListView;
 import android.widget.NumberPicker;
 import android.widget.PopupMenu;
@@ -13,6 +15,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.android.kanaking.ItemPedidoAdapter;
 import com.example.android.kanaking.Pagamento;
 import com.example.android.kanaking.PagamentoAdapter;
 import com.example.android.kanaking.PedidoAdapter;
@@ -37,6 +40,7 @@ import static com.example.android.kanaking.Constantes.GENGIBRE;
 import static com.example.android.kanaking.Constantes.NENHUMA;
 import static com.example.android.kanaking.Constantes.OBSERVACAO;
 import static com.example.android.kanaking.Constantes.POUCO_GELO;
+import static com.example.android.kanaking.Constantes.PRECOS;
 import static com.example.android.kanaking.Constantes.PURO;
 import static com.example.android.kanaking.Constantes.QUANTIDADE;
 import static com.example.android.kanaking.Constantes.RECIPIENTE;
@@ -52,6 +56,9 @@ public class Vendas extends AppCompatActivity{
     private ArrayList<Pedido> pedidosList;
     private Spinner pagamento;
     private PagamentoAdapter pagtoAdapter;
+    private GridView itemGrid;
+    private ItemPedidoAdapter itemAdapter;
+    private ArrayList<ItemPedido> itensList;
 
     //Item de Pedido temporário
     private ItemPedido itemAux;
@@ -77,6 +84,34 @@ public class Vendas extends AppCompatActivity{
         pagtoAdapter = new PagamentoAdapter(this,R.layout.lista_imagem,listaPagto);
         pagamento.setAdapter(pagtoAdapter);
 
+        //Configurando GridView onde aparecerão os itens do pedido a lançar
+        itemGrid = (GridView) findViewById(R.id.add_itens);
+        if (itensList == null) {
+            itensList = new ArrayList<>();
+        }
+
+        if (itemAdapter == null){
+            itemAdapter = new ItemPedidoAdapter(this,itensList);
+            itemGrid.setAdapter(itemAdapter);
+        }else {
+            itemAdapter.notifyDataSetChanged();
+        }
+        //Tratamento de cliques
+        itemGrid.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                Toast.makeText(Vendas.this, "Clique longo",Toast.LENGTH_SHORT).show();
+                return false;
+            }
+        });
+        itemGrid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Toast.makeText(Vendas.this, "Clique simples",Toast.LENGTH_SHORT).show();
+            }
+
+        });
+
         //Configurando o ArrayAdapter PedidoAdapter para a ListView listaPedidos
         listView = (ListView) findViewById(R.id.lista_pedidos);
 
@@ -93,18 +128,30 @@ public class Vendas extends AppCompatActivity{
     }
 
     public void adicionar(View view){
-        TextView sValor, sEstado;
-        sValor = (EditText)findViewById(R.id.add_valor);
-        sEstado = (EditText)findViewById(R.id.add_estado);
+        TextView valor, estado;
+        valor = (EditText)findViewById(R.id.add_valor);
+        estado = (EditText)findViewById(R.id.add_estado);
 
         int imgPagto = pagamento.getSelectedItemPosition();
 
-        pedidosList.add(0,new Pedido(1,1,comanda.getValue(),Integer.valueOf(sEstado.getText().toString()),Double.valueOf(sValor.getText().toString()),imgPagto,21092018,1613));
+        pedidosList.add(0,new Pedido(1,1,comanda.getValue(),Integer.valueOf(estado.getText().toString()),Double.valueOf(valor.getText().toString()),imgPagto,21092018,1613));
         pedidoAdapter.notifyDataSetChanged();
+        zerar(view);
     }
 
     public void zerar(View view){
-        Toast.makeText(Vendas.this,"Zerar",Toast.LENGTH_SHORT).show();
+        TextView valor, estado;
+        valor = (EditText)findViewById(R.id.add_valor);
+        estado = (EditText)findViewById(R.id.add_estado);
+
+        itensList.clear();
+        soma = 0.0;
+        valor.setText("0");
+
+        //TODO - será retirado
+        estado.setText("3");
+
+        pagamento.setSelection(0);
     }
 
     public void menuPopup(View v){
@@ -375,7 +422,16 @@ public class Vendas extends AppCompatActivity{
                                 break;
                             case R.id.confirmar:
                                 etapa = SABOR;
-                                //TODO - aqui o ItemPedido está pronto para ser lançado
+
+                                soma += calcSoma(itemAux);
+                                TextView valor;
+                                valor = (EditText)findViewById(R.id.add_valor);
+                                valor.setText(String.valueOf(soma));
+
+                                itensList.add(0,itemAux);
+                                itemAdapter.notifyDataSetChanged();
+                                //TODO - Colocar formatador de String
+
                                 break;
                             case R.id.cancelar:
                                 etapa = SABOR;//Retorna à 1a etapa
@@ -492,5 +548,8 @@ public class Vendas extends AppCompatActivity{
                 break;
         }
 
+    }
+    private Double calcSoma (ItemPedido item){
+        return (item.getQuantidade()* PRECOS[item.getRecipiente()]);
     }
 }

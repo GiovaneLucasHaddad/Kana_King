@@ -50,4 +50,9 @@ public interface Constantes {
     public static final int NENHUMA = 0;
     public static final int SEM_GELO = 1;
     public static final int POUCO_GELO = 2;
+
+    //PREÇOS
+    public static final Double PRECOS [] =
+        //COCO_FRUTA, COPO_300, COPO_400, COPO_500, GARRAFA_500, GARRAFA_1000
+    {0.0, 6.0,        4.0,      5.0,      6.0,      7.0,         12.0};
 }

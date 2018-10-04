@@ -40,10 +40,10 @@ public class PedidoAdapter extends ArrayAdapter<Pedido> {
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
         View listItem = convertView;
+        Pedido pedidoAtual = pedidosList.get(position);
+
         if(listItem == null)
             listItem = LayoutInflater.from(mContext).inflate(R.layout.pedido,parent,false);
-
-        Pedido pedidoAtual = pedidosList.get(position);
 
         TextView name = (TextView)listItem.findViewById(R.id.comanda);
         name.setText(String.valueOf(pedidoAtual.getComanda()));
