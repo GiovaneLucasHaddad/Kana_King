@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/conectar"
+        android:title="Conectar"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/abrirCaixa"
+        android:title="Abrir Caixa"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/relAgora"
+        android:title="Vendas até agora"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/relPeriodo"
+        android:title="Vendas por período"
+        app:showAsAction="ifRoom" />
+</menu>

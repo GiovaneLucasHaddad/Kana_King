@@ -1,5 +1,6 @@
 package com.example.android.kanaking.view;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
@@ -28,6 +29,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 
 import static com.example.android.kanaking.Constantes.ABACAXI;
+import static com.example.android.kanaking.Constantes.CAIXA;
 import static com.example.android.kanaking.Constantes.COCO;
 import static com.example.android.kanaking.Constantes.COCO_FRUTA;
 import static com.example.android.kanaking.Constantes.CONCLUIR;
@@ -37,6 +39,8 @@ import static com.example.android.kanaking.Constantes.COPO_500;
 import static com.example.android.kanaking.Constantes.GARRAFA_1000;
 import static com.example.android.kanaking.Constantes.GARRAFA_500;
 import static com.example.android.kanaking.Constantes.GENGIBRE;
+import static com.example.android.kanaking.Constantes.LANCADO;
+import static com.example.android.kanaking.Constantes.MOENDA;
 import static com.example.android.kanaking.Constantes.NENHUMA;
 import static com.example.android.kanaking.Constantes.OBSERVACAO;
 import static com.example.android.kanaking.Constantes.POUCO_GELO;
@@ -50,6 +54,9 @@ import static com.example.android.kanaking.Constantes.SICILIANO;
 import static com.example.android.kanaking.Constantes.TAITI;
 
 public class Vendas extends AppCompatActivity{
+
+    private static String MODO;
+
     private ListView listView;
     private NumberPicker comanda;
     private PedidoAdapter pedidoAdapter;
@@ -65,10 +72,15 @@ public class Vendas extends AppCompatActivity{
     private int etapa = 0;
     private Double soma = 0.0;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.vendas);
+
+        Intent intent = getIntent();
+        String modo = intent.getStringExtra("MODO");
+        MODO = modo;
 
         //Configurando NumberPicker
         comanda = (NumberPicker)findViewById(R.id.add_comanda);
@@ -127,14 +139,28 @@ public class Vendas extends AppCompatActivity{
         }
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        switch(MODO){
+            case CAIXA:
+                getMenuInflater().inflate(R.menu.menu_caixa, menu);
+                break;
+            case MOENDA:
+                getMenuInflater().inflate(R.menu.menu_moenda, menu);
+                break;
+        }
+
+        return true;
+    }
+
     public void adicionar(View view){
         TextView valor, estado;
         valor = (EditText)findViewById(R.id.add_valor);
-        estado = (EditText)findViewById(R.id.add_estado);
+//        estado = (EditText)findViewById(R.id.add_estado);
 
         int imgPagto = pagamento.getSelectedItemPosition();
 
-        pedidosList.add(0,new Pedido(1,1,comanda.getValue(),Integer.valueOf(estado.getText().toString()),Double.valueOf(valor.getText().toString()),imgPagto,21092018,1613));
+        pedidosList.add(0,new Pedido(1,1,comanda.getValue(),LANCADO,Double.valueOf(valor.getText().toString()),imgPagto,21092018,1613,itensList));
         pedidoAdapter.notifyDataSetChanged();
         zerar(view);
     }
@@ -142,14 +168,10 @@ public class Vendas extends AppCompatActivity{
     public void zerar(View view){
         TextView valor, estado;
         valor = (EditText)findViewById(R.id.add_valor);
-        estado = (EditText)findViewById(R.id.add_estado);
 
         itensList.clear();
         soma = 0.0;
         valor.setText("0");
-
-        //TODO - será retirado
-        estado.setText("3");
 
         pagamento.setSelection(0);
     }
@@ -427,6 +449,7 @@ public class Vendas extends AppCompatActivity{
                                 TextView valor;
                                 valor = (EditText)findViewById(R.id.add_valor);
                                 valor.setText(String.valueOf(soma));
+
 
                                 itensList.add(0,itemAux);
                                 itemAdapter.notifyDataSetChanged();

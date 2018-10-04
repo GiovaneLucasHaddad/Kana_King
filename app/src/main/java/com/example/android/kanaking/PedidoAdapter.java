@@ -8,11 +8,15 @@ import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.example.android.kanaking.model.ItemPedido;
 import com.example.android.kanaking.model.Pedido;
 
 import java.util.ArrayList;
@@ -45,8 +49,28 @@ public class PedidoAdapter extends ArrayAdapter<Pedido> {
         if(listItem == null)
             listItem = LayoutInflater.from(mContext).inflate(R.layout.pedido,parent,false);
 
-        TextView name = (TextView)listItem.findViewById(R.id.comanda);
-        name.setText(String.valueOf(pedidoAtual.getComanda()));
+        TextView comanda = (TextView)listItem.findViewById(R.id.comanda);
+        comanda.setText(String.valueOf(pedidoAtual.getComanda()));
+
+        //Configurando GridView
+        GridView itemGrid = listItem.findViewById(R.id.itens);
+        ItemPedidoAdapter itemAdapter = new ItemPedidoAdapter(mContext,pedidoAtual.getItemPedidos());
+        itemGrid.setAdapter(itemAdapter);
+
+        itemGrid.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                Toast.makeText(mContext, "Clique longo",Toast.LENGTH_SHORT).show();
+                return false;
+            }
+        });
+        itemGrid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Toast.makeText(mContext, "Clique simples",Toast.LENGTH_SHORT).show();
+            }
+
+        });
 
         TextView valor = (TextView)listItem.findViewById(R.id.valor);
         valor.setText(String.valueOf(pedidoAtual.getValor()));

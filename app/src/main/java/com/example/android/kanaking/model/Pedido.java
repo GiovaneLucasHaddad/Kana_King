@@ -17,12 +17,7 @@ public class Pedido {
     public Pedido() {
     }
 
-    public void addItemPedido(ItemPedido itemPedido){
-        itemPedidos.add(itemPedido);
-        itemPedido.setPedido(this);
-    }
-
-    public Pedido(long id, int venda, int comanda, int estado, double valor, int formaPagamento, int data, int hora) {
+    public Pedido(long id, int venda, int comanda, int estado, double valor, int formaPagamento, int data, int hora, ArrayList<ItemPedido> itens) {
         this.id = id;
         this.venda = venda;
         this.comanda = comanda;
@@ -31,6 +26,12 @@ public class Pedido {
         this.formaPagamento = formaPagamento;
         this.data = data;
         this.hora = hora;
+        this.itemPedidos = itens;
+    }
+
+    public void addItemPedido(ItemPedido itemPedido){
+        itemPedidos.add(itemPedido);
+        itemPedido.setPedido(this);
     }
 
     public long getId() {
@@ -95,6 +96,10 @@ public class Pedido {
 
     public void setHora(int hora) {
         this.hora = hora;
+    }
+
+    public ArrayList<ItemPedido> getItemPedidos() {
+        return itemPedidos;
     }
 
     public Caixa getCaixa() {
