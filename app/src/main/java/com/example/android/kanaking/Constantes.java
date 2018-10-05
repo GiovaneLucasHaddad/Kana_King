@@ -2,6 +2,17 @@ package com.example.android.kanaking;
 
 public interface Constantes {
 
+    // Tipos de mensagens enviados do Handler do BluetoothChatService
+    public static final int MENSAGEM_MUDANCA_ESTADO = 1;
+    public static final int MENSAGEM_LER = 2;
+    public static final int MENSAGEM_ESCREVER = 3;
+    public static final int MENSAGEM_NOME_DISPOSITIVO = 4;
+    public static final int MENSAGEM_TOAST = 5;
+
+    // Nomes chave recebidos do Handler do BluetoothChatService
+    public static final String DEVICE_NAME = "device_name";
+    public static final String TOAST = "toast";
+
     public static final String CAIXA = "CAIXA";
     public static final String MOENDA = "MOENDA";
 
