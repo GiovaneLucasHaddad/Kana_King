@@ -3,4 +3,18 @@
     <string name="caixa">Caixa</string>
     <string name="app_name">KanaKing</string>
     <string name="moenda">Moenda</string>
+    <string name="fechar_caixa">Fechar Caixa</string>
+    <string name="abrir_caixa">Abrir Caixa</string>
+    <string name="reabrir_caixa">Reabrir Caixa</string>
+    <string name="conectar">Conectar</string>
+    <string name="relAgora">Vendas até agora</string>
+    <string name="relPeriodo">Vendas por período</string>
+    <string name="visivel">Tornar-se visível</string>
+    <string name="title_paired_devices">Dispositivos Pareados</string>
+    <string name="title_other_devices">Outros Dispositivos</string>
+    <string name="none_paired">Nenhum Dispositivo pareado</string>
+    <string name="button_scan">Buscar Dispositivos</string>
+    <string name="scanning">Procurando dispositivos...</string>
+    <string name="select_device">Escolha com quem conectar</string>
+    <string name="none_found">Nenhum dispositivo encontrado</string>
 </resources>

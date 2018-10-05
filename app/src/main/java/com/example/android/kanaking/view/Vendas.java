@@ -1,5 +1,7 @@
 package com.example.android.kanaking.view;
 
+import android.app.Activity;
+import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -21,6 +23,7 @@ import com.example.android.kanaking.Pagamento;
 import com.example.android.kanaking.PagamentoAdapter;
 import com.example.android.kanaking.PedidoAdapter;
 import com.example.android.kanaking.R;
+import com.example.android.kanaking.control.BluetoothService;
 import com.example.android.kanaking.model.ItemPedido;
 import com.example.android.kanaking.model.Pedido;
 
@@ -56,6 +59,12 @@ import static com.example.android.kanaking.Constantes.TAITI;
 public class Vendas extends AppCompatActivity{
 
     private static String MODO;
+
+    //Relacionado ao Bluetooth
+    private static final int SOLICITACAO_CONEXAO = 1;
+    private static final int SOLICITACAO_ATIVACAO = 2;
+    BluetoothAdapter bluetoothAdapter;
+    BluetoothService servicoBluetooth;
 
     private ListView listView;
     private NumberPicker comanda;
@@ -137,6 +146,39 @@ public class Vendas extends AppCompatActivity{
         }else {
             pedidoAdapter.notifyDataSetChanged();
         }
+        //Obtendo o adaptador Bluetooth e verificando se é suportado
+        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (bluetoothAdapter == null){
+            Toast.makeText(Vendas.this,"Bluetooth não suportado!",Toast.LENGTH_LONG).show();
+            finish();
+        }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        //Verificando e solicitando ativação do Bluetooth
+        if(!bluetoothAdapter.isEnabled()){
+            Intent solicitaAtivacao = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(solicitaAtivacao,SOLICITACAO_ATIVACAO);
+        }else if (servicoBluetooth == null){
+            configuraTransmissao();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (servicoBluetooth != null){
+            //TODO - Parar o serviço Bluetooth
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+
     }
 
     @Override
@@ -144,13 +186,63 @@ public class Vendas extends AppCompatActivity{
         switch(MODO){
             case CAIXA:
                 getMenuInflater().inflate(R.menu.menu_caixa, menu);
-                break;
+                return true;
             case MOENDA:
                 getMenuInflater().inflate(R.menu.menu_moenda, menu);
-                break;
+                return true;
         }
 
-        return true;
+        return false;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.conectar:
+                //Ver a lista de dispositivos
+                Intent intentServidor = new Intent(this,ListaDeDispositivos.class);
+                startActivityForResult(intentServidor,SOLICITACAO_CONEXAO);
+                return true;
+            case R.id.visivel:
+                //TODO - Tornar Visível
+                tornarVisivel();
+                return true;
+            case R.id.abrirCaixa:
+                Toast.makeText(this,""+item.getTitle(),Toast.LENGTH_SHORT).show();
+                switch(item.getTitle().toString()){
+                    case "Abrir Caixa":
+                        item.setTitle(R.string.fechar_caixa);
+                        return true;
+                    case "Fechar Caixa":
+                        item.setTitle(R.string.reabrir_caixa);
+                        //TODO - Chamar tela com o relatório do caixa
+                        return true;
+                    case "Reabrir Caixa":
+                        item.setTitle(R.string.fechar_caixa);
+                        return true;
+                }
+                return true;
+            case R.id.relAgora:
+
+                return true;
+            case R.id.relPeriodo:
+
+                return true;
+        }
+        return false;
+    }
+
+    private void configuraTransmissao(){
+
+    }
+
+    private void tornarVisivel(){
+        //Torna visível por 5 minutos
+        if(bluetoothAdapter.getScanMode() != BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE){
+            Intent intentVisivel = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+            intentVisivel.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION,300);
+            startActivity(intentVisivel);
+        }
     }
 
     public void adicionar(View view){
@@ -572,7 +664,31 @@ public class Vendas extends AppCompatActivity{
         }
 
     }
+    //TODO - Por esta função no Model
     private Double calcSoma (ItemPedido item){
         return (item.getQuantidade()* PRECOS[item.getRecipiente()]);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode){
+            case SOLICITACAO_ATIVACAO:
+                //Quando a solicitação de ativação do Bluetooth retorna
+                if(resultCode == Activity.RESULT_OK){
+                    Toast.makeText(Vendas.this,"Bluetooth Ativado",Toast.LENGTH_SHORT).show();
+                    configuraTransmissao();
+                }else{
+                    Toast.makeText(Vendas.this,"Bluetooth Não Ativado",Toast.LENGTH_SHORT).show();
+                }
+            case SOLICITACAO_CONEXAO:
+                //Quando é retornado um dispositivp escolhido a conectar
+                if(resultCode == Activity.RESULT_OK){
+                    conectarDispositivo(data);
+                }
+        }
+    }
+
+    private void conectarDispositivo(Intent data){
+
     }
 }

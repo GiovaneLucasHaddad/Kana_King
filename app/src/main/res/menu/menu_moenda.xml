@@ -2,12 +2,12 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/descoberta"
-        android:title="Tornar-se Visível"
+        android:id="@+id/visivel"
+        android:title="@string/visivel"
         app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/relAgora"
-        android:title="Vendas até agora"
+        android:title="@string/relAgora"
         app:showAsAction="ifRoom" />
 </menu>
