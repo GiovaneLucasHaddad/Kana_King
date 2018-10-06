@@ -357,7 +357,7 @@ public class Vendas extends AppCompatActivity{
 
                     Toast.makeText(activity,"Escrever: " + writeMessage,Toast.LENGTH_LONG);
 
-                    pedidosList.add(0,new Pedido(1,1,numComanda,LANCADO,valor,formaPagto,21092018,1613,itensList));
+                    pedidosList.add(0,new Pedido(1,numComanda,LANCADO,valor,formaPagto,21092018,1613,itensList));
                     pedidoAdapter.notifyDataSetChanged();
                     break;
 
@@ -377,7 +377,7 @@ public class Vendas extends AppCompatActivity{
                     }catch(JSONException e){
                         e.printStackTrace();
                     }
-                    pedidosList.add(0,new Pedido(1,1,numComanda,LANCADO,valor,formaPagto,21092018,1613,itensList));
+                    pedidosList.add(0,new Pedido(1,numComanda,LANCADO,valor,formaPagto,21092018,1613,itensList));
                     pedidoAdapter.notifyDataSetChanged();
                     break;
                 case MENSAGEM_NOME_DISPOSITIVO:

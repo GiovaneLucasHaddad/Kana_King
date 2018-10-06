@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 public class Pedido {
     private long id;
-    private int venda;
     private int comanda;
     private int estado;
     private double valor;
@@ -17,9 +16,8 @@ public class Pedido {
     public Pedido() {
     }
 
-    public Pedido(long id, int venda, int comanda, int estado, double valor, int formaPagamento, int data, int hora, ArrayList<ItemPedido> itens) {
+    public Pedido(long id, int comanda, int estado, double valor, int formaPagamento, int data, int hora, ArrayList<ItemPedido> itens) {
         this.id = id;
-        this.venda = venda;
         this.comanda = comanda;
         this.estado = estado;
         this.valor = valor;
@@ -40,14 +38,6 @@ public class Pedido {
 
     public void setId(long id) {
         this.id = id;
-    }
-
-    public int getVenda() {
-        return venda;
-    }
-
-    public void setVenda(int venda) {
-        this.venda = venda;
     }
 
     public int getComanda() {

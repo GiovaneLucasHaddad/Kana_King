@@ -3,7 +3,7 @@ package com.example.android.kanaking.model;
 import java.util.ArrayList;
 
 public class Caixa {
-    private int numero;
+    private long numero;
     private int dataAbertura;
     private int horaAbertura;
     private int dataFechamento;
@@ -15,11 +15,11 @@ public class Caixa {
         pedido.setCaixa(this);
     }
 
-    public int getNumero() {
+    public long getNumero() {
         return numero;
     }
 
-    public void setNumero(int numero) {
+    public void setNumero(long numero) {
         this.numero = numero;
     }
 
