@@ -3,4 +3,17 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
+
+    <!--Cores definidas com base no site http://erikasarti.com/html/tabela-cores/-->
+    <color name="corConectado">#008000</color>
+    <color name="corConectando">#808080</color>
+    <color name="corOuvindo">#7b68ee</color>
+    <color name="corNaoConectado">#FF0000</color>
+
+    <color name="corLancado">#0000FF</color>
+    <color name="corPreparando">#FF8C00</color>
+    <color name="corPronto">#00FF00</color>
+    <color name="corCancelado">#FF0000</color>
+    <color name="corTerminado">#A9A9A9</color>
+    <color name="branco">#ffffff</color>
 </resources>

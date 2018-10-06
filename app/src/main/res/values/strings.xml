@@ -20,7 +20,8 @@
     <string name="fechar_caixa">Fechar Caixa</string>
     <string name="abrir_caixa">Abrir Caixa</string>
     <string name="reabrir_caixa">Reabrir Caixa</string>
-    <string name="conectar">Conectar</string>
+    <string name="conectar_seguro">Conectar (Seguro)</string>
+    <string name="conectar_inseguro">Conectar (Inseguro)</string>
     <string name="relAgora">Vendas até agora</string>
     <string name="relPeriodo">Vendas por período</string>
     <string name="visivel">Tornar-se visível</string>
@@ -31,8 +32,11 @@
     <string name="scanning">Procurando dispositivos...</string>
     <string name="select_device">Escolha com quem conectar</string>
     <string name="none_found">Nenhum dispositivo encontrado</string>
-    <string name="title_not_connected">não conectado</string>
+    <string name="nao_conectado">Não conectado com um dispositivo</string>
 
-    <string name="title_connected_to">conectado com <xliff:g id="device_name">%1$s</xliff:g></string>
+    <!--Estados de conexão-->
+    <string name="title_not_connected">Não conectado</string>
+    <string name="title_connected_to">Conectado com <xliff:g id="device_name">%1$s</xliff:g></string>
     <string name="title_connecting">Conectando...</string>
+    <string name="title_listening">Aguardando conexão...</string>
 </resources>

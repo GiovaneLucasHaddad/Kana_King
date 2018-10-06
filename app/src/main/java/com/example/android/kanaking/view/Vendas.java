@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.ColorSpace;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -14,6 +16,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.GridView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.NumberPicker;
 import android.widget.PopupMenu;
@@ -77,12 +80,13 @@ public class Vendas extends AppCompatActivity{
     private static String MODO;
 
     //Relacionado ao Bluetooth
-    private static final int SOLICITACAO_CONEXAO = 1;
-    private static final int SOLICITACAO_ATIVACAO = 2;
+    private static final int SOLICITACAO_CONEXAO_SEGURA = 1;
+    private static final int SOLICITACAO_CONEXAO_INSEGURA = 2;
+    private static final int SOLICITACAO_ATIVACAO = 3;
     private BluetoothAdapter bluetoothAdapter;
     private BluetoothService servicoBluetooth;
     private StringBuffer bufferSaida;
-    private String NomeDispositivoConectado = null;
+    private String nomeDispositivoConectado = null;
 
     private ListView listView;
     private NumberPicker comanda;
@@ -98,6 +102,8 @@ public class Vendas extends AppCompatActivity{
     private TextView textValor;
     private Double valor;
     private int imgPagto;
+    private LinearLayout barraEstado;
+    private TextView estado;
 
     //Item de Pedido temporário
     private ItemPedido itemAux;
@@ -177,6 +183,9 @@ public class Vendas extends AppCompatActivity{
         }
 
         textValor = (EditText)findViewById(R.id.add_valor);
+
+        barraEstado = (LinearLayout)findViewById(R.id.fundo_estado);
+        estado = (TextView)findViewById(R.id.estado);
     }
 
     @Override
@@ -195,7 +204,7 @@ public class Vendas extends AppCompatActivity{
     protected void onDestroy() {
         super.onDestroy();
         if (servicoBluetooth != null){
-            //TODO - Parar o serviço Bluetooth
+            servicoBluetooth.stop();
         }
     }
 
@@ -203,59 +212,18 @@ public class Vendas extends AppCompatActivity{
     protected void onResume() {
         super.onResume();
 
-
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        switch(MODO){
-            case CAIXA:
-                getMenuInflater().inflate(R.menu.menu_caixa, menu);
-                return true;
-            case MOENDA:
-                getMenuInflater().inflate(R.menu.menu_moenda, menu);
-                return true;
+        // Realizando essa verificação abrange-se o caso do Bluetooth estar desabilitado
+        // durante o onStart(), então a tela está pausada para habilitá-lo...
+        // onResume() será chamado quando a atividade SOLICITACAO_ATIVACAO retornar.
+        if (servicoBluetooth != null) {
+            // Somente se o estado for ESTADO_NENHUM, sabemos se ainda não iniciamos
+            if (servicoBluetooth.getState() == servicoBluetooth.ESTADO_NENHUM) {
+                // Iniciar o serviço BluetothService
+                servicoBluetooth.start();
+            }
         }
-
-        return false;
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()){
-            case R.id.conectar:
-                //Ver a lista de dispositivos
-                Intent intentServidor = new Intent(this,ListaDeDispositivos.class);
-                startActivityForResult(intentServidor,SOLICITACAO_CONEXAO);
-                return true;
-            case R.id.visivel:
-                //TODO - Tornar Visível
-                tornarVisivel();
-                return true;
-            case R.id.abrirCaixa:
-                Toast.makeText(this,""+item.getTitle(),Toast.LENGTH_SHORT).show();
-                switch(item.getTitle().toString()){
-                    case "Abrir Caixa":
-                        item.setTitle(R.string.fechar_caixa);
-                        return true;
-                    case "Fechar Caixa":
-                        item.setTitle(R.string.reabrir_caixa);
-                        //TODO - Chamar tela com o relatório do caixa
-                        return true;
-                    case "Reabrir Caixa":
-                        item.setTitle(R.string.fechar_caixa);
-                        return true;
-                }
-                return true;
-            case R.id.relAgora:
-
-                return true;
-            case R.id.relPeriodo:
-
-                return true;
-        }
-        return false;
-    }
 
     private void configuraTransmissao(){
         //Inicializar serviço para conexões Bluetooth
@@ -321,8 +289,9 @@ public class Vendas extends AppCompatActivity{
     }
 
     private void enviar(String conteudo){
-        if (servicoBluetooth.getEstado() != BluetoothService.ESTADO_CONECTADO) {
-            Toast.makeText(this, R.string.title_not_connected, Toast.LENGTH_SHORT).show();
+        //Verificar se estamos conectados antes de tentar algo
+        if (servicoBluetooth.getState() != BluetoothService.ESTADO_CONECTADO) {
+            Toast.makeText(this, R.string.nao_conectado, Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -338,27 +307,25 @@ public class Vendas extends AppCompatActivity{
     }
 
     private void setStatus(int resId) {
-//        FragmentActivity activity = getActivity();
-//        if (null == activity) {
-//            return;
-//        }
-//        final ActionBar actionBar = activity.getActionBar();
-//        if (null == actionBar) {
-//            return;
-//        }
-//        actionBar.setSubtitle(resId);
+        estado.setText(resId);
+
+        switch(resId){
+            case R.string.title_connecting:
+                barraEstado.setBackgroundResource(R.color.corConectando);
+                break;
+            case R.string.title_listening:
+                barraEstado.setBackgroundResource(R.color.corOuvindo);
+                break;
+            case R.string.title_not_connected:
+                barraEstado.setBackgroundResource(R.color.corNaoConectado);
+                break;
+        }
     }
 
     private void setStatus(CharSequence subTitle) {
-//        FragmentActivity activity = getActivity();
-//        if (null == activity) {
-//            return;
-//        }
-//        final ActionBar actionBar = activity.getActionBar();
-//        if (null == actionBar) {
-//            return;
-//        }
-//        actionBar.setSubtitle(subTitle);
+        //Não verificado pois só um estado chama esta função
+        estado.setText(subTitle);
+        barraEstado.setBackgroundResource(R.color.corConectado);
     }
 
     private final Handler handler = new Handler(){
@@ -369,14 +336,15 @@ public class Vendas extends AppCompatActivity{
                 case MENSAGEM_MUDANCA_ESTADO:
                     switch (msg.arg1) {
                         case BluetoothService.ESTADO_CONECTADO:
-                            setStatus(getString(R.string.title_connected_to, NomeDispositivoConectado));
+                            setStatus(getString(R.string.title_connected_to, nomeDispositivoConectado));
                             pedidosList.clear();
-
                             break;
                         case BluetoothService.ESTADO_CONECTANDO:
                             setStatus(R.string.title_connecting);
                             break;
-                        case BluetoothService.ESTADO_OUVINDO:
+                        case BluetoothService.ESTADO_OUVIR:
+                            setStatus(R.string.title_listening);
+                            break;
                         case BluetoothService.ESTADO_NENHUM:
                             setStatus(R.string.title_not_connected);
                             break;
@@ -387,14 +355,18 @@ public class Vendas extends AppCompatActivity{
                     // Construir uma string com o buffer
                     String writeMessage = new String(writeBuf);
 
+                    Toast.makeText(activity,"Escrever: " + writeMessage,Toast.LENGTH_LONG);
+
                     pedidosList.add(0,new Pedido(1,1,numComanda,LANCADO,valor,formaPagto,21092018,1613,itensList));
                     pedidoAdapter.notifyDataSetChanged();
                     break;
 
                 case MENSAGEM_LER:
                     byte[] readBuf = (byte[]) msg.obj;
-                    // Construir um string com os bytes validos do buff
+                    // Construir um string com os bytes validos do buffer
                     String readMessage = new String(readBuf, 0, msg.arg1);
+
+                    Toast.makeText(activity,"Ler: " + readMessage,Toast.LENGTH_LONG);
 
                     JSONObject jsonPedido;
                     try{
@@ -410,9 +382,9 @@ public class Vendas extends AppCompatActivity{
                     break;
                 case MENSAGEM_NOME_DISPOSITIVO:
                     // save the connected device's name
-                    NomeDispositivoConectado = msg.getData().getString(DEVICE_NAME);
+                    nomeDispositivoConectado = msg.getData().getString(DEVICE_NAME);
                     if (null != activity) {
-                        Toast.makeText(activity, "Conectado com " + NomeDispositivoConectado, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(activity, "Conectado com " + nomeDispositivoConectado, Toast.LENGTH_SHORT).show();
                     }
                     break;
                 case MENSAGEM_TOAST:
@@ -838,37 +810,87 @@ public class Vendas extends AppCompatActivity{
                 }else{
                     Toast.makeText(Vendas.this,"Bluetooth Não Ativado",Toast.LENGTH_SHORT).show();
                 }
-            case SOLICITACAO_CONEXAO:
+            case SOLICITACAO_CONEXAO_SEGURA:
                 //Quando é retornado um dispositivp escolhido a conectar
                 if(resultCode == Activity.RESULT_OK){
-                    conectarDispositivo(data);
+                    conectarDispositivo(data,true);
+                }
+            case SOLICITACAO_CONEXAO_INSEGURA:
+                //Quando é retornado um dispositivp escolhido a conectar
+                if(resultCode == Activity.RESULT_OK){
+                    conectarDispositivo(data, false);
                 }
         }
     }
 
-    private void conectarDispositivo(Intent data){
+    private void conectarDispositivo(Intent data, boolean seguro){
         // Obter o endereço MAC
         String address = data.getExtras().getString(ListaDeDispositivos.EXTRA_DEVICE_ADDRESS);
         // Obter o objeto BluetoothDevice
         BluetoothDevice device = bluetoothAdapter.getRemoteDevice(address);
         // Tentar conectar ao dispositivo
-        servicoBluetooth.connect(device);//, secure);//TODO- Potencial
+        servicoBluetooth.connect(device, seguro);//TODO- Potencial
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        switch(MODO){
+            case CAIXA:
+                getMenuInflater().inflate(R.menu.menu_caixa, menu);
+                return true;
+            case MOENDA:
+                getMenuInflater().inflate(R.menu.menu_moenda, menu);
+                return true;
+        }
+
+        return false;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.conectar_seguro: {
+                //Ver a lista de dispositivos
+                Intent intentServidor = new Intent(this, ListaDeDispositivos.class);
+                startActivityForResult(intentServidor, SOLICITACAO_CONEXAO_SEGURA);
+                return true;
+            }
+            case R.id.conectar_inseguro: {
+                //Ver a lista de dispositivos
+                Intent intentServidor = new Intent(this, ListaDeDispositivos.class);
+                startActivityForResult(intentServidor, SOLICITACAO_CONEXAO_INSEGURA);
+                return true;
+            }
+            case R.id.visivel: {
+                //Tornar Visível aos outros dispositivos
+                tornarVisivel();
+                return true;
+            }
+            case R.id.abrirCaixa: {
+                Toast.makeText(this, "" + item.getTitle(), Toast.LENGTH_SHORT).show();
+                switch (item.getTitle().toString()) {
+                    case "Abrir Caixa":
+                        item.setTitle(R.string.fechar_caixa);
+                        return true;
+                    case "Fechar Caixa":
+                        item.setTitle(R.string.reabrir_caixa);
+                        //TODO - Chamar tela com o relatório do caixa
+                        return true;
+                    case "Reabrir Caixa":
+                        item.setTitle(R.string.fechar_caixa);
+                        return true;
+                }
+                return true;
+            }
+            case R.id.relAgora: {
+
+                return true;
+            }
+            case R.id.relPeriodo: {
+
+                return true;
+            }
+        }
+        return false;
     }
 }
-//PALETA
-//Manipulando JSON
-//
-//JSONObject jsonPedido = new JSONObject();
-//                    try {
-////                        jsonPedido.put("mensagem",message);
-//                            jsonPedido.put(COMANDA,sComanda);
-//                            jsonPedido.put(VALOR,sValor);
-//                            jsonPedido.put(PAGAMENTO,sPagamento);
-//                            } catch (JSONException e) {
-//                            e.printStackTrace();
-//                            return;
-//                            }
-//
-//                            message = jsonPedido.toString();
-//
-//                            sendMessage(message);

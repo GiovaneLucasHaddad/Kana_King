@@ -88,19 +88,19 @@ public class PedidoAdapter extends ArrayAdapter<Pedido> {
         LinearLayout fundo = (LinearLayout)listItem.findViewById(R.id.fundo);
         switch(pedidoAtual.getEstado()){
             case LANCADO://cores escolhidas com a ajuda de http://erikasarti.com/html/tabela-cores/
-                fundo.setBackgroundColor(Color.parseColor("#0000FF"));//RGB(0,0,255) Blue
+                fundo.setBackgroundResource(R.color.corLancado);
                 break;
             case PREPARANDO:
-                fundo.setBackgroundColor(Color.parseColor("#FF8C00"));//RGB(255,140,0) DarkOrange
+                fundo.setBackgroundResource(R.color.corPreparando);
                 break;
             case PRONTO:
-                fundo.setBackgroundColor(Color.parseColor("#00FF00"));//RGB(0,255,0) Lime
+                fundo.setBackgroundResource(R.color.corPronto);
                 break;
             case CANCELADO:
-                fundo.setBackgroundColor(Color.parseColor("#E9967A"));//RGB	(255,160,122) LightSalmon
+                fundo.setBackgroundResource(R.color.corCancelado);
                 break;
             case TERMINADO:
-                fundo.setBackgroundColor(Color.parseColor("#696969"));//RGB	(105,105,105) DimGray
+                fundo.setBackgroundResource(R.color.corTerminado);
                 break;
         }
 
