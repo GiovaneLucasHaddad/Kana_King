@@ -31,8 +31,18 @@ public class DaoItemPedido {
 
     public int remover(ItemPedido itemPedido){
         String selecao = Esquema.ItemPedido._ID + " LIKE ?";
-        String[] selecaoArgs = { ""+itemPedido.getId() };
-        int linhas = db.delete(Esquema.Pedido.TABELA, selecao, selecaoArgs);
+        String[] args = { ""+itemPedido.getId() };
+        int linhas = db.delete(Esquema.Pedido.TABELA, selecao, args);
         return linhas;
+    }
+
+    public int atualizarEstado(ItemPedido itemPedido){
+        ContentValues valores = new ContentValues();
+        valores.put(Esquema.ItemPedido.ENTREGUE,itemPedido.getEntregue());
+
+        String selecao = Esquema.ItemPedido._ID + " = ?";
+        String[] selecaoArgs = {"" + itemPedido.getId()};
+        int linhas = db.update(Esquema.ItemPedido.TABELA,valores,selecao,selecaoArgs);
+        return  linhas;
     }
 }
