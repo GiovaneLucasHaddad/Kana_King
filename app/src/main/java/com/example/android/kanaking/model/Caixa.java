@@ -54,4 +54,12 @@ public class Caixa {
     public void setHoraFechamento(int horaFechamento) {
         this.horaFechamento = horaFechamento;
     }
+
+    public ArrayList<Pedido> getPedidos() {
+        return pedidos;
+    }
+
+    public void setPedidos(ArrayList<Pedido> pedidos) {
+        this.pedidos = pedidos;
+    }
 }

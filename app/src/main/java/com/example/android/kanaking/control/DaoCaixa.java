@@ -22,8 +22,7 @@ public class DaoCaixa {
         valores.put(Esquema.Caixa.DATA_ABERTURA,caixa.getDataAbertura());
         valores.put(Esquema.Caixa.HORA_ABERTURA,caixa.getHoraAbertura());
 
-        long id = db.insert(Esquema.Caixa.TABELA,null,valores);
-        return id;
+        return db.insert(Esquema.Caixa.TABELA,null,valores);
     }
 
     public int fecharCaixa(Caixa caixa){
@@ -33,11 +32,10 @@ public class DaoCaixa {
 
         String selecao = Esquema.Caixa._ID + " = ?";
         String[] args = {"" + caixa.getNumero()};
-        int linhas = db.update(Esquema.Caixa.TABELA,valores,selecao,args);
-        return  linhas;
+        return  db.update(Esquema.Caixa.TABELA,valores,selecao,args);
     }
 
-    public Caixa ultimoCaixa(){
+    public Caixa ultimoCaixa(){//Traz o último registro de caixa para iniciar a lista de Pedidos
         String[] projecao = {
                 Esquema.Caixa._ID,
                 Esquema.Caixa.DATA_ABERTURA,
@@ -58,10 +56,11 @@ public class DaoCaixa {
             caixa.setDataFechamento(cursor.getInt(cursor.getColumnIndexOrThrow(Esquema.Caixa.DATA_FECHAMENTO)));
             caixa.setHoraFechamento(cursor.getInt(cursor.getColumnIndexOrThrow(Esquema.Caixa.HORA_FECHAMENTO)));
         }
+        cursor.close();
         return caixa;
     }
 
-    public long ultimoId(){
+    private long ultimoId(){
         String consulta = "SELECT MAX(" + Esquema.Caixa._ID + ") FROM " + Esquema.Caixa.TABELA;
         Cursor cursor = db.rawQuery(consulta,null);
         cursor.moveToFirst();
