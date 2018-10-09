@@ -11,6 +11,7 @@ import static com.example.android.kanaking.Constantes.COPO_500;
 import static com.example.android.kanaking.Constantes.GARRAFA_1000;
 import static com.example.android.kanaking.Constantes.GARRAFA_500;
 import static com.example.android.kanaking.Constantes.GENGIBRE;
+import static com.example.android.kanaking.Constantes.PRECOS;
 import static com.example.android.kanaking.Constantes.PURO;
 import static com.example.android.kanaking.Constantes.SICILIANO;
 import static com.example.android.kanaking.Constantes.TAITI;
@@ -26,6 +27,10 @@ public class ItemPedido {
 
     public ItemPedido() {
         quantidade = 1;
+    }
+
+    public Double calcSoma (){
+        return (quantidade* PRECOS[recipiente]);
     }
 
     public int getImgSaborRec(){

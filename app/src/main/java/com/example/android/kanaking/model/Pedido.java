@@ -14,6 +14,7 @@ public class Pedido {
     private Caixa caixa;
 
     public Pedido() {
+        itemPedidos = new ArrayList<>();
     }
 
     public Pedido(long id, int comanda, int estado, double valor, int formaPagamento, int data, int hora, ArrayList<ItemPedido> itens) {
@@ -24,7 +25,8 @@ public class Pedido {
         this.formaPagamento = formaPagamento;
         this.data = data;
         this.hora = hora;
-        this.itemPedidos = itens;
+        this.itemPedidos = new ArrayList<>();
+        this.itemPedidos.addAll(itens);
     }
 
     public void addItemPedido(ItemPedido itemPedido){

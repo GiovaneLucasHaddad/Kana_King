@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -30,21 +31,35 @@ import static com.example.android.kanaking.Constantes.PREPARANDO;
 import static com.example.android.kanaking.Constantes.PRONTO;
 import static com.example.android.kanaking.Constantes.TERMINADO;
 
-public class PedidoAdapter extends ArrayAdapter<Pedido> {
+public class PedidoAdapter extends BaseAdapter {
     private Context mContext;
-    private List<Pedido> pedidosList = new ArrayList<>();
+    private List<Pedido> listaPedidos = new ArrayList<>();
 
-    public PedidoAdapter(@NonNull Context context, @LayoutRes ArrayList<Pedido> list) {
-        super(context, 0 , list);
+    public PedidoAdapter(@NonNull Context context,  ArrayList<Pedido> list) {
         mContext = context;
-        pedidosList = list;
+        listaPedidos = list;
+    }
+
+    @Override
+    public int getCount() {
+        return listaPedidos.size();
+    }
+
+    @Override
+    public Object getItem(int position) {
+        return listaPedidos.get(position);
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return position;
     }
 
     @NonNull
     @Override
-    public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+    public View getView(int position, View convertView, ViewGroup parent) {
         View listItem = convertView;
-        Pedido pedidoAtual = pedidosList.get(position);
+        Pedido pedidoAtual = listaPedidos.get(position);
 
         if(listItem == null)
             listItem = LayoutInflater.from(mContext).inflate(R.layout.pedido,parent,false);
@@ -57,6 +72,7 @@ public class PedidoAdapter extends ArrayAdapter<Pedido> {
         ItemPedidoAdapter itemAdapter = new ItemPedidoAdapter(mContext,pedidoAtual.getItemPedidos());
         itemGrid.setAdapter(itemAdapter);
 
+
         itemGrid.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
@@ -64,6 +80,7 @@ public class PedidoAdapter extends ArrayAdapter<Pedido> {
                 return false;
             }
         });
+
         itemGrid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {

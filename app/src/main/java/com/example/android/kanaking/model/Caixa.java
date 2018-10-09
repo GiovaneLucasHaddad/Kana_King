@@ -10,6 +10,10 @@ public class Caixa {
     private int horaFechamento;
     private ArrayList<Pedido> pedidos;
 
+    public Caixa(){
+        pedidos = new ArrayList<>();
+    }
+
     public void addPedido(Pedido pedido){
         pedidos.add(pedido);
         pedido.setCaixa(this);

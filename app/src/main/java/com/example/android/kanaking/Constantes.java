@@ -25,9 +25,24 @@ public interface Constantes {
     public static final int CANCELADO = 6;
     public static final int TERMINADO = 7;
 
-    public static final String COMANDA = "comanda";
-    public static final String VALOR = "valor";
-    public static final String PAGAMENTO = "pagamento";
+    // Campos titulo para o JSON
+    //Pedido
+    public static final String P_ID = "P_ID";
+    public static final String P_COMANDA = "P_COMANDA";
+    public static final String P_ESTADO = "P_ESTADO";
+    public static final String P_VALOR = "P_VALOR";
+    public static final String P_PAGTO = "P_PAGTO";
+    public static final String P_DATA = "P_DATA";
+    public static final String P_HORA = "P_HORA";
+    public static final String P_CAIXA_ID = "P_CAIXA_ID";
+    //ItemPedido
+    public static final String IP_ID = "IP_ID";
+    public static final String IP_SABOR = "IP_SABOR";
+    public static final String IP_RECIP = "IP_RECIP";
+    public static final String IP_QTD = "IP_QTD";
+    public static final String IP_ENTREGUE = "IP_ENTREGUE";
+    public static final String IP_OBS = "IP_OBS";
+    public static final String IP_PEDIDO_ID = "IP_PEDIDO_ID";
 
     //Formas de pagamento
     public static final int CARTAO = 1;

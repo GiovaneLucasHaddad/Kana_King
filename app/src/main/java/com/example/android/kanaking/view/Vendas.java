@@ -4,8 +4,6 @@ import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.ColorSpace;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -33,18 +31,19 @@ import com.example.android.kanaking.control.BluetoothService;
 import com.example.android.kanaking.model.ItemPedido;
 import com.example.android.kanaking.model.Pedido;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 import static com.example.android.kanaking.Constantes.ABACAXI;
 import static com.example.android.kanaking.Constantes.CAIXA;
 import static com.example.android.kanaking.Constantes.COCO;
 import static com.example.android.kanaking.Constantes.COCO_FRUTA;
-import static com.example.android.kanaking.Constantes.COMANDA;
 import static com.example.android.kanaking.Constantes.CONCLUIR;
 import static com.example.android.kanaking.Constantes.COPO_300;
 import static com.example.android.kanaking.Constantes.COPO_400;
@@ -53,6 +52,7 @@ import static com.example.android.kanaking.Constantes.DEVICE_NAME;
 import static com.example.android.kanaking.Constantes.GARRAFA_1000;
 import static com.example.android.kanaking.Constantes.GARRAFA_500;
 import static com.example.android.kanaking.Constantes.GENGIBRE;
+import static com.example.android.kanaking.Constantes.IP_ID;
 import static com.example.android.kanaking.Constantes.LANCADO;
 import static com.example.android.kanaking.Constantes.MENSAGEM_ESCREVER;
 import static com.example.android.kanaking.Constantes.MENSAGEM_LER;
@@ -62,10 +62,15 @@ import static com.example.android.kanaking.Constantes.MENSAGEM_TOAST;
 import static com.example.android.kanaking.Constantes.MOENDA;
 import static com.example.android.kanaking.Constantes.NENHUMA;
 import static com.example.android.kanaking.Constantes.OBSERVACAO;
-import static com.example.android.kanaking.Constantes.PAGAMENTO;
 import static com.example.android.kanaking.Constantes.POUCO_GELO;
-import static com.example.android.kanaking.Constantes.PRECOS;
 import static com.example.android.kanaking.Constantes.PURO;
+import static com.example.android.kanaking.Constantes.P_COMANDA;
+import static com.example.android.kanaking.Constantes.P_DATA;
+import static com.example.android.kanaking.Constantes.P_ESTADO;
+import static com.example.android.kanaking.Constantes.P_HORA;
+import static com.example.android.kanaking.Constantes.P_ID;
+import static com.example.android.kanaking.Constantes.P_PAGTO;
+import static com.example.android.kanaking.Constantes.P_VALOR;
 import static com.example.android.kanaking.Constantes.QUANTIDADE;
 import static com.example.android.kanaking.Constantes.RECIPIENTE;
 import static com.example.android.kanaking.Constantes.SABOR;
@@ -73,7 +78,6 @@ import static com.example.android.kanaking.Constantes.SEM_GELO;
 import static com.example.android.kanaking.Constantes.SICILIANO;
 import static com.example.android.kanaking.Constantes.TAITI;
 import static com.example.android.kanaking.Constantes.TOAST;
-import static com.example.android.kanaking.Constantes.VALOR;
 
 public class Vendas extends AppCompatActivity{
 
@@ -105,7 +109,8 @@ public class Vendas extends AppCompatActivity{
     private LinearLayout barraEstado;
     private TextView estado;
 
-    //Item de Pedido temporário
+    //Pedido temporário
+    private Pedido pedidoAux;
     private ItemPedido itemAux;
     private int etapa = 0;
     private Double soma = 0.0;
@@ -117,8 +122,7 @@ public class Vendas extends AppCompatActivity{
         setContentView(R.layout.vendas);
 
         Intent intent = getIntent();
-        String modo = intent.getStringExtra("MODO");
-        MODO = modo;
+        MODO = intent.getStringExtra("MODO");
 
         //Configurando NumberPicker
         comanda = (NumberPicker)findViewById(R.id.add_comanda);
@@ -217,7 +221,7 @@ public class Vendas extends AppCompatActivity{
         // onResume() será chamado quando a atividade SOLICITACAO_ATIVACAO retornar.
         if (servicoBluetooth != null) {
             // Somente se o estado for ESTADO_NENHUM, sabemos se ainda não iniciamos
-            if (servicoBluetooth.getState() == servicoBluetooth.ESTADO_NENHUM) {
+            if (servicoBluetooth.getState() == BluetoothService.ESTADO_NENHUM) {
                 // Iniciar o serviço BluetothService
                 servicoBluetooth.start();
             }
@@ -243,38 +247,43 @@ public class Vendas extends AppCompatActivity{
     }
 
     public void adicionar(View view){
-        //TODO - talvez este conteudo estará no Handler
+        pedidoAux = new Pedido(comanda.getValue(),comanda.getValue(),LANCADO,Double.valueOf(textValor.getText().toString().replace(",",".")),pagamento.getSelectedItemPosition(),1,1,itensList);
 
+        DecimalFormat df = new DecimalFormat(",##0.00");
         numComanda = comanda.getValue();
+        valor = Double.valueOf(textValor.getText().toString().replace(",","."));
 
-        valor = Double.valueOf(textValor.getText().toString());
-
+        //TODO - Verificar viabilidade de retirar essas atribuições
         formaPagto = pagamento.getSelectedItemPosition();
 
         JSONObject jsonPedido = new JSONObject();
+        JSONArray jsonItens = new JSONArray();
+        JSONObject jsonItem = new JSONObject();
             try {
-                jsonPedido.put(COMANDA,numComanda);
-                jsonPedido.put(VALOR,valor);
-                jsonPedido.put(PAGAMENTO,formaPagto);
+                    jsonPedido.put(P_ID,pedidoAux.getId());//TODO - Ver se será necessário por o ID ou colocar outro identificador comum
+                    jsonPedido.put(P_COMANDA,pedidoAux.getComanda());
+                    jsonPedido.put(P_ESTADO,pedidoAux.getEstado());
+                    jsonPedido.put(P_VALOR,pedidoAux.getValor());
+                    jsonPedido.put(P_PAGTO,pedidoAux.getFormaPagamento());
+                    jsonPedido.put(P_DATA,pedidoAux.getData());
+                    jsonPedido.put(P_HORA,pedidoAux.getHora());
+//                    jsonPedido.put(CAIXA_ID,);//TODO - Complementar
+                    for(int cont = 0; cont < itensList.size(); cont++){
+                        itemAux = itensList.get(cont);
+                        jsonItem.put(IP_ID,itemAux.getId());//TODO - Parei aqui, continuar montando o JSON
+                        jsonItens.put(jsonItem);
+                    }
+
                 } catch (JSONException e) {
-                e.printStackTrace();
-                return;
+                    e.printStackTrace();
+                    return;
                 }
                 String conteudo = jsonPedido.toString();
-
-//        pedidosList.add(0,new Pedido(1,1,comanda.getValue(),LANCADO,Double.valueOf(valor.getText().toString()),imgPagto,21092018,1613,itensList));
 
         enviar(conteudo);
     }
     public void zerar(View view){
-        TextView valor, estado;
-        valor = (EditText)findViewById(R.id.add_valor);
-
-        itensList.clear();
-        soma = 0.0;
-        valor.setText("0");
-
-        pagamento.setSelection(0);
+        zerar();
     }
 
     public void zerar(){
@@ -283,7 +292,8 @@ public class Vendas extends AppCompatActivity{
 
         itensList.clear();
         soma = 0.0;
-        valor.setText("0");
+        DecimalFormat df = new DecimalFormat(",##0.00");
+        valor.setText(df.format(0));
 
         pagamento.setSelection(0);
     }
@@ -358,6 +368,7 @@ public class Vendas extends AppCompatActivity{
                     Toast.makeText(activity,"Escrever: " + writeMessage,Toast.LENGTH_LONG);
 
                     pedidosList.add(0,new Pedido(1,numComanda,LANCADO,valor,formaPagto,21092018,1613,itensList));
+                    zerar();
                     pedidoAdapter.notifyDataSetChanged();
                     break;
 
@@ -667,15 +678,13 @@ public class Vendas extends AppCompatActivity{
                             case R.id.confirmar:
                                 etapa = SABOR;
 
-                                soma += calcSoma(itemAux);
-                                TextView valor;
-                                valor = (EditText)findViewById(R.id.add_valor);
-                                valor.setText(String.valueOf(soma));
-
+                                //Calculando e mostrando a soma dos preços
+                                soma += itemAux.calcSoma();
+                                DecimalFormat df = new DecimalFormat(",##0.00");
+                                textValor.setText(df.format(soma));
 
                                 itensList.add(0,itemAux);
                                 itemAdapter.notifyDataSetChanged();
-                                //TODO - Colocar formatador de String
 
                                 break;
                             case R.id.cancelar:
@@ -794,13 +803,11 @@ public class Vendas extends AppCompatActivity{
         }
 
     }
-    //TODO - Por esta função no Model
-    private Double calcSoma (ItemPedido item){
-        return (item.getQuantidade()* PRECOS[item.getRecipiente()]);
-    }
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Toast.makeText(Vendas.this,"Resultado chegou",Toast.LENGTH_SHORT).show();
         switch (requestCode){
             case SOLICITACAO_ATIVACAO:
                 //Quando a solicitação de ativação do Bluetooth retorna
