@@ -36,6 +36,7 @@ public interface Constantes {
     public static final String P_HORA = "P_HORA";
     public static final String P_CAIXA_ID = "P_CAIXA_ID";
     //ItemPedido
+    public static final String ITEM_PEDIDOS = "ITEM_PEDIDOS";
     public static final String IP_ID = "IP_ID";
     public static final String IP_SABOR = "IP_SABOR";
     public static final String IP_RECIP = "IP_RECIP";

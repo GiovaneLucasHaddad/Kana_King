@@ -52,7 +52,14 @@ import static com.example.android.kanaking.Constantes.DEVICE_NAME;
 import static com.example.android.kanaking.Constantes.GARRAFA_1000;
 import static com.example.android.kanaking.Constantes.GARRAFA_500;
 import static com.example.android.kanaking.Constantes.GENGIBRE;
+import static com.example.android.kanaking.Constantes.IP_ENTREGUE;
 import static com.example.android.kanaking.Constantes.IP_ID;
+import static com.example.android.kanaking.Constantes.IP_OBS;
+import static com.example.android.kanaking.Constantes.IP_PEDIDO_ID;
+import static com.example.android.kanaking.Constantes.IP_QTD;
+import static com.example.android.kanaking.Constantes.IP_RECIP;
+import static com.example.android.kanaking.Constantes.IP_SABOR;
+import static com.example.android.kanaking.Constantes.ITEM_PEDIDOS;
 import static com.example.android.kanaking.Constantes.LANCADO;
 import static com.example.android.kanaking.Constantes.MENSAGEM_ESCREVER;
 import static com.example.android.kanaking.Constantes.MENSAGEM_LER;
@@ -248,7 +255,6 @@ public class Vendas extends AppCompatActivity{
 
     public void adicionar(View view){
         pedidoAux = new Pedido(comanda.getValue(),comanda.getValue(),LANCADO,Double.valueOf(textValor.getText().toString().replace(",",".")),pagamento.getSelectedItemPosition(),1,1,itensList);
-
         DecimalFormat df = new DecimalFormat(",##0.00");
         numComanda = comanda.getValue();
         valor = Double.valueOf(textValor.getText().toString().replace(",","."));
@@ -256,31 +262,7 @@ public class Vendas extends AppCompatActivity{
         //TODO - Verificar viabilidade de retirar essas atribuições
         formaPagto = pagamento.getSelectedItemPosition();
 
-        JSONObject jsonPedido = new JSONObject();
-        JSONArray jsonItens = new JSONArray();
-        JSONObject jsonItem = new JSONObject();
-            try {
-                    jsonPedido.put(P_ID,pedidoAux.getId());//TODO - Ver se será necessário por o ID ou colocar outro identificador comum
-                    jsonPedido.put(P_COMANDA,pedidoAux.getComanda());
-                    jsonPedido.put(P_ESTADO,pedidoAux.getEstado());
-                    jsonPedido.put(P_VALOR,pedidoAux.getValor());
-                    jsonPedido.put(P_PAGTO,pedidoAux.getFormaPagamento());
-                    jsonPedido.put(P_DATA,pedidoAux.getData());
-                    jsonPedido.put(P_HORA,pedidoAux.getHora());
-//                    jsonPedido.put(CAIXA_ID,);//TODO - Complementar
-                    for(int cont = 0; cont < itensList.size(); cont++){
-                        itemAux = itensList.get(cont);
-                        jsonItem.put(IP_ID,itemAux.getId());//TODO - Parei aqui, continuar montando o JSON
-                        jsonItens.put(jsonItem);
-                    }
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    return;
-                }
-                String conteudo = jsonPedido.toString();
-
-        enviar(conteudo);
+        enviar(PedidoToStringJSON(pedidoAux));
     }
     public void zerar(View view){
         zerar();
@@ -367,7 +349,8 @@ public class Vendas extends AppCompatActivity{
 
                     Toast.makeText(activity,"Escrever: " + writeMessage,Toast.LENGTH_LONG);
 
-                    pedidosList.add(0,new Pedido(1,numComanda,LANCADO,valor,formaPagto,21092018,1613,itensList));
+                    pedidoAux = JSONStringToPedido(writeMessage);
+                    pedidosList.add(0,pedidoAux);
                     zerar();
                     pedidoAdapter.notifyDataSetChanged();
                     break;
@@ -379,16 +362,8 @@ public class Vendas extends AppCompatActivity{
 
                     Toast.makeText(activity,"Ler: " + readMessage,Toast.LENGTH_LONG);
 
-                    JSONObject jsonPedido;
-                    try{
-                        jsonPedido = new JSONObject(readMessage);
-                        numComanda = jsonPedido.getInt(COMANDA);
-                        valor = jsonPedido.getDouble(VALOR);
-                        formaPagto = jsonPedido.getInt(PAGAMENTO);
-                    }catch(JSONException e){
-                        e.printStackTrace();
-                    }
-                    pedidosList.add(0,new Pedido(1,numComanda,LANCADO,valor,formaPagto,21092018,1613,itensList));
+                    pedidoAux = JSONStringToPedido(readMessage);
+                    pedidosList.add(0,pedidoAux);
                     pedidoAdapter.notifyDataSetChanged();
                     break;
                 case MENSAGEM_NOME_DISPOSITIVO:
@@ -899,5 +874,74 @@ public class Vendas extends AppCompatActivity{
             }
         }
         return false;
+    }
+    public String PedidoToStringJSON(Pedido pedido){
+        JSONObject jsonPedido = new JSONObject();
+        JSONArray jsonItens = new JSONArray();
+        JSONObject jsonItem;
+        try {
+            jsonPedido.put(P_ID,pedido.getId());//TODO - Ver se será necessário por o ID ou colocar outro identificador comum
+            jsonPedido.put(P_COMANDA,pedido.getComanda());
+            jsonPedido.put(P_ESTADO,pedido.getEstado());
+            jsonPedido.put(P_VALOR,pedido.getValor());
+            jsonPedido.put(P_PAGTO,pedido.getFormaPagamento());
+            jsonPedido.put(P_DATA,pedido.getData());
+            jsonPedido.put(P_HORA,pedido.getHora());
+//                    jsonPedido.put(CAIXA_ID,pedidoAux.getCaixa().getNumero());
+            for(int cont = 0; cont < itensList.size(); cont++){
+                itemAux = itensList.get(cont);
+                jsonItem = new JSONObject();
+                jsonItem.put(IP_ID,itemAux.getId());
+                jsonItem.put(IP_SABOR,itemAux.getSabor());
+                jsonItem.put(IP_RECIP,itemAux.getRecipiente());
+                jsonItem.put(IP_QTD,itemAux.getQuantidade());
+                jsonItem.put(IP_ENTREGUE,itemAux.getEntregue());
+                jsonItem.put(IP_OBS,itemAux.getObservacao());
+//                jsonItem.put(IP_PEDIDO_ID,itemAux.getPedido().getId());
+                jsonItens.put(jsonItem);
+            }
+            jsonPedido.put(ITEM_PEDIDOS,jsonItens);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+        return jsonPedido.toString();
+    }
+
+    public Pedido JSONStringToPedido(String stringJSON){
+        JSONObject jsonPedido;
+        JSONArray jsonItens;
+        JSONObject jsonItem;
+
+        Pedido pedido = new Pedido();
+        ItemPedido itemPedido;
+        try{
+            jsonPedido = new JSONObject(stringJSON);
+            pedido.setId(jsonPedido.getLong(P_ID));
+            pedido.setComanda(jsonPedido.getInt(P_COMANDA));
+            pedido.setEstado(jsonPedido.getInt(P_ESTADO));
+            pedido.setValor(jsonPedido.getInt(P_VALOR));
+            pedido.setFormaPagamento(jsonPedido.getInt(P_PAGTO));
+            pedido.setData(jsonPedido.getInt(P_DATA));
+            pedido.setHora(jsonPedido.getInt(P_HORA));
+//            pedido.setCaixa(caixa);
+            jsonItens = jsonPedido.getJSONArray(ITEM_PEDIDOS);
+            for(int cont = 0; cont < jsonItens.length();cont++){
+                jsonItem = jsonItens.getJSONObject(cont);
+                itemPedido = new ItemPedido();
+                itemPedido.setId(jsonItem.getLong(IP_ID));
+                itemPedido.setSabor(jsonItem.getInt(IP_SABOR));
+                itemPedido.setRecipiente(jsonItem.getInt(IP_RECIP));
+                itemPedido.setQuantidade(jsonItem.getInt(IP_QTD));
+                itemPedido.setEntregue(jsonItem.getInt(IP_ENTREGUE));
+                itemPedido.setObservacao(jsonItem.getInt(IP_OBS));
+                itemPedido.setPedido(pedido);
+                pedido.addItemPedido(itemPedido);
+            }
+        }catch(JSONException e){
+            e.printStackTrace();
+        }
+
+        return pedido;
     }
 }
