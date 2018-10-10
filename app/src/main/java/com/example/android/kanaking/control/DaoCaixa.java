@@ -51,10 +51,10 @@ public class DaoCaixa {
             cursor.moveToFirst();
             caixa = new Caixa();
             caixa.setNumero(cursor.getLong(cursor.getColumnIndexOrThrow(Esquema.Caixa._ID)));
-            caixa.setDataAbertura(cursor.getInt(cursor.getColumnIndexOrThrow(Esquema.Caixa.DATA_ABERTURA)));
-            caixa.setHoraAbertura(cursor.getInt(cursor.getColumnIndexOrThrow(Esquema.Caixa.HORA_ABERTURA)));
-            caixa.setDataFechamento(cursor.getInt(cursor.getColumnIndexOrThrow(Esquema.Caixa.DATA_FECHAMENTO)));
-            caixa.setHoraFechamento(cursor.getInt(cursor.getColumnIndexOrThrow(Esquema.Caixa.HORA_FECHAMENTO)));
+            caixa.setDataAbertura(cursor.getString(cursor.getColumnIndexOrThrow(Esquema.Caixa.DATA_ABERTURA)));
+            caixa.setHoraAbertura(cursor.getString(cursor.getColumnIndexOrThrow(Esquema.Caixa.HORA_ABERTURA)));
+            caixa.setDataFechamento(cursor.getString(cursor.getColumnIndexOrThrow(Esquema.Caixa.DATA_FECHAMENTO)));
+            caixa.setHoraFechamento(cursor.getString(cursor.getColumnIndexOrThrow(Esquema.Caixa.HORA_FECHAMENTO)));
         }
         cursor.close();
         return caixa;

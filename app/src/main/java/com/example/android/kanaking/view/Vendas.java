@@ -28,6 +28,7 @@ import com.example.android.kanaking.PagamentoAdapter;
 import com.example.android.kanaking.PedidoAdapter;
 import com.example.android.kanaking.R;
 import com.example.android.kanaking.control.BluetoothService;
+import com.example.android.kanaking.model.Caixa;
 import com.example.android.kanaking.model.ItemPedido;
 import com.example.android.kanaking.model.Pedido;
 
@@ -99,24 +100,19 @@ public class Vendas extends AppCompatActivity{
     private StringBuffer bufferSaida;
     private String nomeDispositivoConectado = null;
 
-    private ListView listView;
     private NumberPicker comanda;
-    private int numComanda;
-    private int formaPagto;
+    private ListView listaPedidos;
     private PedidoAdapter pedidoAdapter;
     private ArrayList<Pedido> pedidosList;
     private Spinner pagamento;
-    private PagamentoAdapter pagtoAdapter;
-    private GridView itemGrid;
     private ItemPedidoAdapter itemAdapter;
     private ArrayList<ItemPedido> itensList;
     private TextView textValor;
-    private Double valor;
-    private int imgPagto;
     private LinearLayout barraEstado;
     private TextView estado;
 
-    //Pedido temporário
+    //Controle de objetos
+    private Caixa caixa;
     private Pedido pedidoAux;
     private ItemPedido itemAux;
     private int etapa = 0;
@@ -131,50 +127,56 @@ public class Vendas extends AppCompatActivity{
         Intent intent = getIntent();
         MODO = intent.getStringExtra("MODO");
 
-        //Configurando NumberPicker
-        comanda = (NumberPicker)findViewById(R.id.add_comanda);
-        comanda.setMaxValue(20);
-        comanda.setMinValue(1);
+        if(MODO.equals(CAIXA)) {
 
-        //Configurando Spinner Forma de pagamento
-        ArrayList<Pagamento> listaPagto = new ArrayList<>();
-        listaPagto.add(new Pagamento(R.drawable.dinheiro));
-        listaPagto.add(new Pagamento(R.drawable.cartao));
+            //Configurando NumberPicker
+            comanda = (NumberPicker) findViewById(R.id.add_comanda);
+            comanda.setMaxValue(20);
+            comanda.setMinValue(1);
 
-        pagamento = findViewById(R.id.add_pagamento);
-        pagtoAdapter = new PagamentoAdapter(this,R.layout.lista_imagem,listaPagto);
-        pagamento.setAdapter(pagtoAdapter);
+            //Configurando Spinner Forma de pagamento
+            ArrayList<Pagamento> listaPagto = new ArrayList<>();
+            listaPagto.add(new Pagamento(R.drawable.dinheiro));
+            listaPagto.add(new Pagamento(R.drawable.cartao));
 
-        //Configurando GridView onde aparecerão os itens do pedido a lançar
-        itemGrid = (GridView) findViewById(R.id.add_itens);
-        if (itensList == null) {
-            itensList = new ArrayList<>();
-        }
+            pagamento = findViewById(R.id.add_pagamento);
+            PagamentoAdapter pagtoAdapter = new PagamentoAdapter(this, R.layout.lista_imagem, listaPagto);
+            pagamento.setAdapter(pagtoAdapter);
 
-        if (itemAdapter == null){
-            itemAdapter = new ItemPedidoAdapter(this,itensList);
-            itemGrid.setAdapter(itemAdapter);
-        }else {
-            itemAdapter.notifyDataSetChanged();
-        }
-        //Tratamento de cliques
-        itemGrid.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                Toast.makeText(Vendas.this, "Clique longo",Toast.LENGTH_SHORT).show();
-                return false;
-            }
-        });
-        itemGrid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Toast.makeText(Vendas.this, "Clique simples",Toast.LENGTH_SHORT).show();
+            //Configurando GridView onde aparecerão os itens do pedido a lançar
+            GridView itemGrid = (GridView) findViewById(R.id.add_itens);
+            if (itensList == null) {
+                itensList = new ArrayList<>();
             }
 
-        });
+            if (itemAdapter == null) {
+                itemAdapter = new ItemPedidoAdapter(this, itensList);
+                itemGrid.setAdapter(itemAdapter);
+            } else {
+                itemAdapter.notifyDataSetChanged();
+            }
+            //Tratamento de cliques
+            itemGrid.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+                @Override
+                public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                    Toast.makeText(Vendas.this, "Clique longo", Toast.LENGTH_SHORT).show();
+                    return false;
+                }
+            });
+            itemGrid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    Toast.makeText(Vendas.this, "Clique simples", Toast.LENGTH_SHORT).show();
+                }
+
+            });
+        }else if(MODO.equals(MOENDA)){
+            LinearLayout barraLancamento = findViewById(R.id.barra_lancamento);
+            barraLancamento.setVisibility(View.GONE);
+        }
 
         //Configurando o ArrayAdapter PedidoAdapter para a ListView listaPedidos
-        listView = (ListView) findViewById(R.id.lista_pedidos);
+        listaPedidos = findViewById(R.id.lista_pedidos);
 
         if (pedidosList == null) {
             pedidosList = new ArrayList<>();
@@ -182,7 +184,7 @@ public class Vendas extends AppCompatActivity{
 
         if (pedidoAdapter == null){
             pedidoAdapter = new PedidoAdapter(this,pedidosList);
-            listView.setAdapter(pedidoAdapter);
+            listaPedidos.setAdapter(pedidoAdapter);
         }else {
             pedidoAdapter.notifyDataSetChanged();
         }
@@ -197,6 +199,14 @@ public class Vendas extends AppCompatActivity{
 
         barraEstado = (LinearLayout)findViewById(R.id.fundo_estado);
         estado = (TextView)findViewById(R.id.estado);
+
+        caixa = new Caixa();
+        if (caixa.isAberto()) {
+            Toast.makeText(this,"Caixa aberto", Toast.LENGTH_SHORT).show();
+        }else{
+            Toast.makeText(this,"Caixa fechado", Toast.LENGTH_SHORT).show();
+//            listaPedidos.setEnabled(false);
+        }
     }
 
     @Override
@@ -254,16 +264,19 @@ public class Vendas extends AppCompatActivity{
     }
 
     public void adicionar(View view){
-        pedidoAux = new Pedido(comanda.getValue(),comanda.getValue(),LANCADO,Double.valueOf(textValor.getText().toString().replace(",",".")),pagamento.getSelectedItemPosition(),1,1,itensList);
-        DecimalFormat df = new DecimalFormat(",##0.00");
-        numComanda = comanda.getValue();
-        valor = Double.valueOf(textValor.getText().toString().replace(",","."));
-
-        //TODO - Verificar viabilidade de retirar essas atribuições
-        formaPagto = pagamento.getSelectedItemPosition();
-
-        enviar(PedidoToStringJSON(pedidoAux));
+        if (caixa.isAberto()){
+            Double valor = Double.valueOf(textValor.getText().toString().replace(",","."));
+            if(valor > 0.0) {
+                Pedido pedido = new Pedido(comanda.getValue(), comanda.getValue(), LANCADO, valor, pagamento.getSelectedItemPosition(), "", "", itensList);
+                enviar(PedidoToStringJSON(pedido));
+            }else{
+                Toast.makeText(this,"Pedido sem preço", Toast.LENGTH_SHORT).show();
+            }
+        }else{
+            Toast.makeText(this,"Caixa fechado", Toast.LENGTH_SHORT).show();
+        }
     }
+
     public void zerar(View view){
         zerar();
     }
@@ -351,6 +364,7 @@ public class Vendas extends AppCompatActivity{
 
                     pedidoAux = JSONStringToPedido(writeMessage);
                     pedidosList.add(0,pedidoAux);
+                    caixa.addPedido(pedidoAux);
                     zerar();
                     pedidoAdapter.notifyDataSetChanged();
                     break;
@@ -364,6 +378,7 @@ public class Vendas extends AppCompatActivity{
 
                     pedidoAux = JSONStringToPedido(readMessage);
                     pedidosList.add(0,pedidoAux);
+                    caixa.addPedido(pedidoAux);
                     pedidoAdapter.notifyDataSetChanged();
                     break;
                 case MENSAGEM_NOME_DISPOSITIVO:
@@ -819,12 +834,18 @@ public class Vendas extends AppCompatActivity{
         switch(MODO){
             case CAIXA:
                 getMenuInflater().inflate(R.menu.menu_caixa, menu);
+                MenuItem menuItem;
+                menuItem = (MenuItem) menu.findItem(R.id.abrirCaixa);
+                if (caixa.isAberto()){
+                    menuItem.setTitle(R.string.fechar_caixa);
+                }else{
+                    menuItem.setTitle(R.string.abrir_caixa);
+                }
                 return true;
             case MOENDA:
                 getMenuInflater().inflate(R.menu.menu_moenda, menu);
                 return true;
         }
-
         return false;
     }
 
@@ -850,19 +871,28 @@ public class Vendas extends AppCompatActivity{
             }
             case R.id.abrirCaixa: {
                 Toast.makeText(this, "" + item.getTitle(), Toast.LENGTH_SHORT).show();
-                switch (item.getTitle().toString()) {
-                    case "Abrir Caixa":
-                        item.setTitle(R.string.fechar_caixa);
-                        return true;
-                    case "Fechar Caixa":
-                        item.setTitle(R.string.reabrir_caixa);
-                        //TODO - Chamar tela com o relatório do caixa
-                        return true;
-                    case "Reabrir Caixa":
-                        item.setTitle(R.string.fechar_caixa);
-                        return true;
+                if(caixa.isAberto()) {
+                    item.setTitle(R.string.fechar_caixa);
+                    listaPedidos.setEnabled(true);
+                    return true;
+                }else{//Fechado
+                    item.setTitle(R.string.abrir_caixa);
+                    listaPedidos.setEnabled(false);
+
+                    //Habilitar reabrir caixa - TODO ou ver outra forma de fazê-lo
+//                    MenuItem menuItem;
+//                    menuItem = (MenuItem) R.menu.menu_caixa.fin
+                    //TODO - Chamar tela com o relatório do caixa
+                    return true;
                 }
-                return true;
+            }
+            case R.id.reabrirCaixa:{
+                Toast.makeText(this, "" + item.getTitle(), Toast.LENGTH_SHORT).show();
+                if (item.isEnabled()){
+                    item.setEnabled(false);
+                }else{
+                    item.setEnabled(true);
+                }
             }
             case R.id.relAgora: {
 
@@ -922,8 +952,8 @@ public class Vendas extends AppCompatActivity{
             pedido.setEstado(jsonPedido.getInt(P_ESTADO));
             pedido.setValor(jsonPedido.getInt(P_VALOR));
             pedido.setFormaPagamento(jsonPedido.getInt(P_PAGTO));
-            pedido.setData(jsonPedido.getInt(P_DATA));
-            pedido.setHora(jsonPedido.getInt(P_HORA));
+            pedido.setData(jsonPedido.getString(P_DATA));
+            pedido.setHora(jsonPedido.getString(P_HORA));
 //            pedido.setCaixa(caixa);
             jsonItens = jsonPedido.getJSONArray(ITEM_PEDIDOS);
             for(int cont = 0; cont < jsonItens.length();cont++){

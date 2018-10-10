@@ -72,8 +72,8 @@ public class DaoPedido {
             pedidoAux.setEstado(cursor.getInt(cursor.getColumnIndexOrThrow(Esquema.Pedido.ESTADO)));
             pedidoAux.setValor(cursor.getDouble(cursor.getColumnIndexOrThrow(Esquema.Pedido.VALOR)));
             pedidoAux.setFormaPagamento(cursor.getInt(cursor.getColumnIndexOrThrow(Esquema.Pedido.FORMA_PAGAMENTO)));
-            pedidoAux.setData(cursor.getInt(cursor.getColumnIndexOrThrow(Esquema.Pedido.DATA)));
-            pedidoAux.setHora(cursor.getInt(cursor.getColumnIndexOrThrow(Esquema.Pedido.HORA)));
+            pedidoAux.setData(cursor.getString(cursor.getColumnIndexOrThrow(Esquema.Pedido.DATA)));
+            pedidoAux.setHora(cursor.getString(cursor.getColumnIndexOrThrow(Esquema.Pedido.HORA)));
             pedidoAux.setCaixa(caixa);
 
             pedidos.add(pedidoAux);
@@ -107,8 +107,8 @@ public class DaoPedido {
             pedidoAux.setEstado(cursor.getInt(cursor.getColumnIndexOrThrow(Esquema.Pedido.ESTADO)));
             pedidoAux.setValor(cursor.getDouble(cursor.getColumnIndexOrThrow(Esquema.Pedido.VALOR)));
             pedidoAux.setFormaPagamento(cursor.getInt(cursor.getColumnIndexOrThrow(Esquema.Pedido.FORMA_PAGAMENTO)));
-            pedidoAux.setData(cursor.getInt(cursor.getColumnIndexOrThrow(Esquema.Pedido.DATA)));
-            pedidoAux.setHora(cursor.getInt(cursor.getColumnIndexOrThrow(Esquema.Pedido.HORA)));
+            pedidoAux.setData(cursor.getString(cursor.getColumnIndexOrThrow(Esquema.Pedido.DATA)));
+            pedidoAux.setHora(cursor.getString(cursor.getColumnIndexOrThrow(Esquema.Pedido.HORA)));
             pedidoAux.setCaixa(caixa);
         }
         cursor.close();

@@ -8,8 +8,8 @@ public class Pedido {
     private int estado;
     private double valor;
     private int formaPagamento;
-    private int data;
-    private int hora;
+    private String data;
+    private String hora;
     private ArrayList<ItemPedido> itemPedidos;
     private Caixa caixa;
 
@@ -17,7 +17,7 @@ public class Pedido {
         itemPedidos = new ArrayList<>();
     }
 
-    public Pedido(long id, int comanda, int estado, double valor, int formaPagamento, int data, int hora, ArrayList<ItemPedido> itens) {
+    public Pedido(long id, int comanda, int estado, double valor, int formaPagamento, String data, String hora, ArrayList<ItemPedido> itens) {
         this.id = id;
         this.comanda = comanda;
         this.estado = estado;
@@ -74,19 +74,19 @@ public class Pedido {
         this.formaPagamento = formaPagamento;
     }
 
-    public int getData() {
+    public String getData() {
         return data;
     }
 
-    public void setData(int data) {
+    public void setData(String data) {
         this.data = data;
     }
 
-    public int getHora() {
+    public String getHora() {
         return hora;
     }
 
-    public void setHora(int hora) {
+    public void setHora(String hora) {
         this.hora = hora;
     }
 

@@ -4,19 +4,25 @@ import java.util.ArrayList;
 
 public class Caixa {
     private long numero;
-    private int dataAbertura;
-    private int horaAbertura;
-    private int dataFechamento;
-    private int horaFechamento;
+    private String dataAbertura;
+    private String horaAbertura;
+    private String dataFechamento;
+    private String horaFechamento;
     private ArrayList<Pedido> pedidos;
 
     public Caixa(){
         pedidos = new ArrayList<>();
+        dataFechamento = "";
+        horaFechamento = "";
     }
 
     public void addPedido(Pedido pedido){
         pedidos.add(pedido);
         pedido.setCaixa(this);
+    }
+
+    public boolean isAberto(){
+        return dataFechamento.equals("");
     }
 
     public long getNumero() {
@@ -27,35 +33,35 @@ public class Caixa {
         this.numero = numero;
     }
 
-    public int getDataAbertura() {
+    public String getDataAbertura() {
         return dataAbertura;
     }
 
-    public void setDataAbertura(int dataAbertura) {
+    public void setDataAbertura(String dataAbertura) {
         this.dataAbertura = dataAbertura;
     }
 
-    public int getHoraAbertura() {
+    public String getHoraAbertura() {
         return horaAbertura;
     }
 
-    public void setHoraAbertura(int horaAbertura) {
+    public void setHoraAbertura(String horaAbertura) {
         this.horaAbertura = horaAbertura;
     }
 
-    public int getDataFechamento() {
+    public String getDataFechamento() {
         return dataFechamento;
     }
 
-    public void setDataFechamento(int dataFechamento) {
+    public void setDataFechamento(String dataFechamento) {
         this.dataFechamento = dataFechamento;
     }
 
-    public int getHoraFechamento() {
+    public String getHoraFechamento() {
         return horaFechamento;
     }
 
-    public void setHoraFechamento(int horaFechamento) {
+    public void setHoraFechamento(String horaFechamento) {
         this.horaFechamento = horaFechamento;
     }
 

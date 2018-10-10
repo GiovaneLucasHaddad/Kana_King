@@ -17,6 +17,11 @@
         app:showAsAction="ifRoom" />
 
     <item
+        android:id="@+id/reabrirCaixa"
+        android:title="@string/reabrir_caixa"
+        app:showAsAction="ifRoom" />
+
+    <item
         android:id="@+id/relAgora"
         android:title="@string/relAgora"
         app:showAsAction="ifRoom" />

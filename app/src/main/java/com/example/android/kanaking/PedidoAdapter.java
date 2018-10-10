@@ -20,6 +20,7 @@ import android.widget.Toast;
 import com.example.android.kanaking.model.ItemPedido;
 import com.example.android.kanaking.model.Pedido;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -90,7 +91,8 @@ public class PedidoAdapter extends BaseAdapter {
         });
 
         TextView valor = (TextView)listItem.findViewById(R.id.valor);
-        valor.setText(String.valueOf(pedidoAtual.getValor()));
+        DecimalFormat df = new DecimalFormat(",##0.00");
+        valor.setText(df.format(pedidoAtual.getValor()));
 
         ImageView tipoPagamento = (ImageView)listItem.findViewById(R.id.tipo_pagamento);
         switch(pedidoAtual.getFormaPagamento()){
