@@ -18,6 +18,7 @@ import static com.example.android.kanaking.Constantes.TAITI;
 
 public class ItemPedido {
     private long id;
+    private long idComum;
     private int sabor;
     private int recipiente;
     private int quantidade;
@@ -189,6 +190,14 @@ public class ItemPedido {
 
     public void setId(long id) {
         this.id = id;
+    }
+
+    public long getIdComum() {
+        return idComum;
+    }
+
+    public void setIdComum(long idComum) {
+        this.idComum = idComum;
     }
 
     public int getSabor() {

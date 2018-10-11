@@ -11,6 +11,7 @@ public class BD extends SQLiteOpenHelper {
     public static final String CRIAR_TABELA_ITEM_PEDIDO =
             "CREATE TABLE " + Esquema.ItemPedido.TABELA + " ("
                     + Esquema.ItemPedido._ID + " INTEGER PRIMARY KEY,"
+                    + Esquema.ItemPedido.ID_COMUM + " INTEGER,"
                     + Esquema.ItemPedido.ID_PEDIDO + " INTEGER,"
                     + Esquema.ItemPedido.SABOR + " INTEGER,"
                     + Esquema.ItemPedido.RECIPIENTE + " INTEGER,"
@@ -21,6 +22,7 @@ public class BD extends SQLiteOpenHelper {
     public static final String CRIAR_TABELA_PEDIDO =
             "CREATE TABLE " + Esquema.Pedido.TABELA + " ("
                     + Esquema.Pedido._ID + " INTEGER PRIMARY KEY,"
+                    + Esquema.Pedido.ID_COMUM + " INTEGER,"
                     + Esquema.Pedido.ID_CAIXA + " INTEGER,"
                     + Esquema.Pedido.COMANDA + " INTEGER,"
                     + Esquema.Pedido.ESTADO + " INTEGER,"
@@ -32,6 +34,7 @@ public class BD extends SQLiteOpenHelper {
     public static final String CRIAR_TABELA_CAIXA =
             "CREATE TABLE " + Esquema.Caixa.TABELA + " ("
                     + Esquema.Caixa._ID + " INTEGER PRIMARY KEY,"
+                    + Esquema.Caixa.NUM_COMUM + " INTEGER,"
                     + Esquema.Caixa.DATA_ABERTURA + " INTEGER,"
                     + Esquema.Caixa.HORA_ABERTURA + " INTEGER,"
                     + Esquema.Caixa.DATA_FECHAMENTO + " INTEGER,"

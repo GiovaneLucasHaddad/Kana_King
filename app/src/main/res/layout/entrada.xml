@@ -9,18 +9,22 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
+        android:background="@drawable/caixa"
         android:onClick="entrarCaixa"
+        android:text="@string/caixa"
         android:textAllCaps="false"
         android:textSize="50sp"
-        android:text="@string/caixa" />
+        android:textStyle="bold" />
 
     <Button
         android:id="@+id/moenda"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
+        android:background="@drawable/moenda"
         android:onClick="entrarMoenda"
+        android:text="@string/moenda"
         android:textAllCaps="false"
         android:textSize="50sp"
-        android:text="@string/moenda" />
+        android:textStyle="bold" />
 </LinearLayout>

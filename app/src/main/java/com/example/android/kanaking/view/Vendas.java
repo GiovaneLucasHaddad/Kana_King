@@ -128,6 +128,8 @@ public class Vendas extends AppCompatActivity{
         MODO = intent.getStringExtra("MODO");
 
         if(MODO.equals(CAIXA)) {
+            LinearLayout barraContagem = findViewById(R.id.barra_contagem);
+            barraContagem.setVisibility(View.GONE);
 
             //Configurando NumberPicker
             comanda = (NumberPicker) findViewById(R.id.add_comanda);
@@ -267,7 +269,7 @@ public class Vendas extends AppCompatActivity{
         if (caixa.isAberto()){
             Double valor = Double.valueOf(textValor.getText().toString().replace(",","."));
             if(valor > 0.0) {
-                Pedido pedido = new Pedido(comanda.getValue(), comanda.getValue(), LANCADO, valor, pagamento.getSelectedItemPosition(), "", "", itensList);
+                Pedido pedido = new Pedido(comanda.getValue(), comanda.getValue(), comanda.getValue(), LANCADO, valor, pagamento.getSelectedItemPosition(), "", "", itensList);
                 enviar(PedidoToStringJSON(pedido));
             }else{
                 Toast.makeText(this,"Pedido sem preço", Toast.LENGTH_SHORT).show();
@@ -910,7 +912,7 @@ public class Vendas extends AppCompatActivity{
         JSONArray jsonItens = new JSONArray();
         JSONObject jsonItem;
         try {
-            jsonPedido.put(P_ID,pedido.getId());//TODO - Ver se será necessário por o ID ou colocar outro identificador comum
+            jsonPedido.put(P_ID,pedido.getIdComum());
             jsonPedido.put(P_COMANDA,pedido.getComanda());
             jsonPedido.put(P_ESTADO,pedido.getEstado());
             jsonPedido.put(P_VALOR,pedido.getValor());
@@ -947,7 +949,7 @@ public class Vendas extends AppCompatActivity{
         ItemPedido itemPedido;
         try{
             jsonPedido = new JSONObject(stringJSON);
-            pedido.setId(jsonPedido.getLong(P_ID));
+            pedido.setIdComum(jsonPedido.getLong(P_ID));
             pedido.setComanda(jsonPedido.getInt(P_COMANDA));
             pedido.setEstado(jsonPedido.getInt(P_ESTADO));
             pedido.setValor(jsonPedido.getInt(P_VALOR));

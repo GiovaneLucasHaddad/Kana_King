@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 public class Caixa {
     private long numero;
+    private long numComum;
     private String dataAbertura;
     private String horaAbertura;
     private String dataFechamento;
@@ -11,9 +12,10 @@ public class Caixa {
     private ArrayList<Pedido> pedidos;
 
     public Caixa(){
-        pedidos = new ArrayList<>();
+        numComum = 0;
         dataFechamento = "";
         horaFechamento = "";
+        pedidos = new ArrayList<>();
     }
 
     public void addPedido(Pedido pedido){
@@ -23,6 +25,14 @@ public class Caixa {
 
     public boolean isAberto(){
         return dataFechamento.equals("");
+    }
+
+    public long getNumComum() {
+        return numComum;
+    }
+
+    public void setNumComum(long numComum) {
+        this.numComum = numComum;
     }
 
     public long getNumero() {
