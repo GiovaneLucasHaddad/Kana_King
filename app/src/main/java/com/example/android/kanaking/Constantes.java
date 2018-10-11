@@ -24,6 +24,7 @@ public interface Constantes {
     public static final int PRONTO = 5;
     public static final int CANCELADO = 6;
     public static final int TERMINADO = 7;
+    public static final int APAGANDO = 8;
 
     // Campos titulo para o JSON
     //Pedido

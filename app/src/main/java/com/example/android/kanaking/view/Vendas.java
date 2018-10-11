@@ -3,12 +3,16 @@ package com.example.android.kanaking.view;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -42,6 +46,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 import static com.example.android.kanaking.Constantes.ABACAXI;
+import static com.example.android.kanaking.Constantes.ABRINDO_CAIXA;
 import static com.example.android.kanaking.Constantes.CAIXA;
 import static com.example.android.kanaking.Constantes.COCO;
 import static com.example.android.kanaking.Constantes.COCO_FRUTA;
@@ -50,6 +55,7 @@ import static com.example.android.kanaking.Constantes.COPO_300;
 import static com.example.android.kanaking.Constantes.COPO_400;
 import static com.example.android.kanaking.Constantes.COPO_500;
 import static com.example.android.kanaking.Constantes.DEVICE_NAME;
+import static com.example.android.kanaking.Constantes.FECHANDO_CAIXA;
 import static com.example.android.kanaking.Constantes.GARRAFA_1000;
 import static com.example.android.kanaking.Constantes.GARRAFA_500;
 import static com.example.android.kanaking.Constantes.GENGIBRE;
@@ -112,11 +118,15 @@ public class Vendas extends AppCompatActivity{
     private TextView estado;
 
     //Controle de objetos
+    boolean abrirCaixa = false;//true quando o caixa está fechado
     private Caixa caixa;
     private Pedido pedidoAux;
     private ItemPedido itemAux;
     private int etapa = 0;
     private Double soma = 0.0;
+    private int numCaixa = 1;
+    private int numPedido = 1;
+    private int numItemPedido = 1;
 
 
     @Override
@@ -202,12 +212,20 @@ public class Vendas extends AppCompatActivity{
         barraEstado = (LinearLayout)findViewById(R.id.fundo_estado);
         estado = (TextView)findViewById(R.id.estado);
 
-        caixa = new Caixa();
-        if (caixa.isAberto()) {
-            Toast.makeText(this,"Caixa aberto", Toast.LENGTH_SHORT).show();
+//        caixa = new Caixa();
+        //TODO - ler o último caixa aqui, por enquanto sempre será primeiro caixa
+        caixa = null;
+        if(caixa == null){//Primeiro Caixa
+            abrirCaixa = true;
+        }else if(!caixa.isAberto()) {//Último caixa fechado
+            abrirCaixa = true;
+        }
+        if (abrirCaixa){
+            Toast.makeText(this,"Caixa fechado/Primeiro Caixa", Toast.LENGTH_SHORT).show();
+            listaPedidos.setEnabled(false);
         }else{
-            Toast.makeText(this,"Caixa fechado", Toast.LENGTH_SHORT).show();
-//            listaPedidos.setEnabled(false);
+            Toast.makeText(this,"Caixa aberto", Toast.LENGTH_SHORT).show();
+            Toast.makeText(Vendas.this, "Caixa: DataAbertura: " + caixa.getDataAbertura() + " HoraAbertura: " + caixa.getHoraAbertura() + " DataFechamento: " + caixa.getDataFechamento() + " HoraFechamento: " + caixa.getHoraFechamento() + " Fundo: " + caixa.getFundo(), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -266,7 +284,7 @@ public class Vendas extends AppCompatActivity{
     }
 
     public void adicionar(View view){
-        if (caixa.isAberto()){
+        if (!abrirCaixa){//caixa aberto
             Double valor = Double.valueOf(textValor.getText().toString().replace(",","."));
             if(valor > 0.0) {
                 Pedido pedido = new Pedido(comanda.getValue(), comanda.getValue(), comanda.getValue(), LANCADO, valor, pagamento.getSelectedItemPosition(), "", "", itensList);
@@ -340,7 +358,7 @@ public class Vendas extends AppCompatActivity{
         public void handleMessage(Message msg) {
             Activity activity = Vendas.this;
             switch (msg.what) {
-                case MENSAGEM_MUDANCA_ESTADO:
+                case MENSAGEM_MUDANCA_ESTADO: {
                     switch (msg.arg1) {
                         case BluetoothService.ESTADO_CONECTADO:
                             setStatus(getString(R.string.title_connected_to, nomeDispositivoConectado));
@@ -357,44 +375,62 @@ public class Vendas extends AppCompatActivity{
                             break;
                     }
                     break;
-                case MENSAGEM_ESCREVER:
+                }
+                case MENSAGEM_ESCREVER: {
                     byte[] writeBuf = (byte[]) msg.obj;
                     // Construir uma string com o buffer
                     String writeMessage = new String(writeBuf);
 
-                    Toast.makeText(activity,"Escrever: " + writeMessage,Toast.LENGTH_LONG);
+                    Toast.makeText(activity, "Escrever: " + writeMessage, Toast.LENGTH_LONG);
 
                     pedidoAux = JSONStringToPedido(writeMessage);
-                    pedidosList.add(0,pedidoAux);
-                    caixa.addPedido(pedidoAux);
-                    zerar();
-                    pedidoAdapter.notifyDataSetChanged();
-                    break;
+                    int estado = pedidoAux.getEstado();
+                    if (estado > FECHANDO_CAIXA) {
+                        pedidosList.add(0, pedidoAux);
+                        caixa.addPedido(pedidoAux);
+                        zerar();
+                        pedidoAdapter.notifyDataSetChanged();
+                    } else if (estado == ABRINDO_CAIXA) {
 
-                case MENSAGEM_LER:
+                    } else {//FECHANDO_CAIXA
+
+                    }
+                    break;
+                }
+                case MENSAGEM_LER: {
                     byte[] readBuf = (byte[]) msg.obj;
                     // Construir um string com os bytes validos do buffer
                     String readMessage = new String(readBuf, 0, msg.arg1);
 
-                    Toast.makeText(activity,"Ler: " + readMessage,Toast.LENGTH_LONG);
+                    Toast.makeText(activity, "Ler: " + readMessage, Toast.LENGTH_LONG);
 
                     pedidoAux = JSONStringToPedido(readMessage);
-                    pedidosList.add(0,pedidoAux);
-                    caixa.addPedido(pedidoAux);
-                    pedidoAdapter.notifyDataSetChanged();
+                    int estado = pedidoAux.getEstado();
+                    if (estado > FECHANDO_CAIXA) {
+                        pedidosList.add(0, pedidoAux);
+                        caixa.addPedido(pedidoAux);
+                        pedidoAdapter.notifyDataSetChanged();
+                    } else if (estado == ABRINDO_CAIXA) {
+
+                    } else {//FECHANDO_CAIXA
+
+                    }
                     break;
-                case MENSAGEM_NOME_DISPOSITIVO:
+                }
+                case MENSAGEM_NOME_DISPOSITIVO: {
                     // save the connected device's name
                     nomeDispositivoConectado = msg.getData().getString(DEVICE_NAME);
                     if (null != activity) {
                         Toast.makeText(activity, "Conectado com " + nomeDispositivoConectado, Toast.LENGTH_SHORT).show();
                     }
                     break;
-                case MENSAGEM_TOAST:
+                }
+                case MENSAGEM_TOAST: {
                     if (null != activity) {
-                        Toast.makeText(activity, msg.getData().getString(TOAST),Toast.LENGTH_SHORT).show();
+                        Toast.makeText(activity, msg.getData().getString(TOAST), Toast.LENGTH_SHORT).show();
                     }
                     break;
+                }
             }
         }
     };
@@ -476,8 +512,6 @@ public class Vendas extends AppCompatActivity{
                                 return true;
                         }
                         itemAux.setSabor(escolha);
-                        //CONTROLE DE TESTES
-                        Toast.makeText(Vendas.this,"Item: Sabor:"+itemAux.getSabor()+ " Recip:"+ itemAux.getRecipiente() + " Qtd:" + itemAux.getQuantidade() + " Obs:"+ itemAux.getObservacao(),Toast.LENGTH_SHORT).show();
                         etapa = RECIPIENTE;
                         adicionarItem(v);
                         return true;
@@ -517,8 +551,6 @@ public class Vendas extends AppCompatActivity{
                                     return true;
                             }
                             itemAux.setRecipiente(escolha);
-                            //CONTROLE DE TESTES
-                            Toast.makeText(Vendas.this,"Item: Sabor:"+itemAux.getSabor()+ " Recip:"+ itemAux.getRecipiente() + " Qtd:" + itemAux.getQuantidade() + " Obs:"+ itemAux.getObservacao(),Toast.LENGTH_SHORT).show();
                             etapa = CONCLUIR;
                             adicionarItem(v);
                             return true;
@@ -553,8 +585,6 @@ public class Vendas extends AppCompatActivity{
                                     return true;
                             }
                             itemAux.setRecipiente(escolha);
-                            //CONTROLE DE TESTES
-                            Toast.makeText(Vendas.this,"Item: Sabor:"+itemAux.getSabor()+ " Recip:"+ itemAux.getRecipiente() + " Qtd:" + itemAux.getQuantidade() + " Obs:"+ itemAux.getObservacao(),Toast.LENGTH_SHORT).show();
                             etapa = CONCLUIR;
                             adicionarItem(v);
                             return true;
@@ -683,8 +713,6 @@ public class Vendas extends AppCompatActivity{
                                 etapa = SABOR;//Retorna à 1a etapa
                                 return true;
                         }
-                        //CONTROLE DE TESTES
-                        Toast.makeText(Vendas.this,"Item: Sabor:"+itemAux.getSabor()+ " Recip:"+ itemAux.getRecipiente() + " Qtd:" + itemAux.getQuantidade() + " Obs:"+ itemAux.getObservacao(),Toast.LENGTH_SHORT).show();
                         return true;
                     }
                 });
@@ -749,8 +777,6 @@ public class Vendas extends AppCompatActivity{
                                 break;
                         }
                         itemAux.setQuantidade(escolha);
-                        //CONTROLE DE TESTES
-                        Toast.makeText(Vendas.this,"Item: Sabor:"+itemAux.getSabor()+ " Recip:"+ itemAux.getRecipiente() + " Qtd:" + itemAux.getQuantidade() + " Obs:"+ itemAux.getObservacao(),Toast.LENGTH_SHORT).show();
                         etapa = CONCLUIR;
                         adicionarItem(v);
                         return true;
@@ -838,10 +864,19 @@ public class Vendas extends AppCompatActivity{
                 getMenuInflater().inflate(R.menu.menu_caixa, menu);
                 MenuItem menuItem;
                 menuItem = (MenuItem) menu.findItem(R.id.abrirCaixa);
-                if (caixa.isAberto()){
-                    menuItem.setTitle(R.string.fechar_caixa);
-                }else{
+                if(caixa == null){//Primeiro caixa
                     menuItem.setTitle(R.string.abrir_caixa);
+                    menuItem = (MenuItem) menu.findItem(R.id.reabrirCaixa);
+                    menuItem.setEnabled(false);
+
+                }else if (!caixa.isAberto()){//Último caixa fechado
+                    menuItem.setTitle(R.string.abrir_caixa);
+                    menuItem = (MenuItem) menu.findItem(R.id.reabrirCaixa);
+                    menuItem.setEnabled(true);
+                }else{//Último caixa aberto
+                    menuItem.setTitle(R.string.fechar_caixa);
+                    menuItem = (MenuItem) menu.findItem(R.id.reabrirCaixa);
+                    menuItem.setEnabled(false);
                 }
                 return true;
             case MOENDA:
@@ -873,18 +908,73 @@ public class Vendas extends AppCompatActivity{
             }
             case R.id.abrirCaixa: {
                 Toast.makeText(this, "" + item.getTitle(), Toast.LENGTH_SHORT).show();
-                if(caixa.isAberto()) {
+                if(abrirCaixa){//Fechado -> Operação Abrir
+                    caixa = new Caixa();
+                    abrirCaixa = false;
+
+                    //Sobre o AlertDialog
+                    LayoutInflater layoutInflater = getLayoutInflater();
+                    View view = layoutInflater.inflate(R.layout.fundo_caixa, null);
+                    final EditText valor_fundo = view.findViewById(R.id.valor_fundo);
+
+                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                    builder.setTitle("Digite o valor inicial do caixa");
+                    builder.setView(view);
+                    builder.setPositiveButton("Confirmar",new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            //TODO - banco será chamado aqui para inserir o caixa
+                            caixa.setFundo(Double.parseDouble(valor_fundo.getText().toString().replace(",",".")));
+                            caixa.setDataAbertura("1");
+                            caixa.setHoraAbertura("1");
+                            Toast.makeText(Vendas.this, "Caixa: DataAbertura: " + caixa.getDataAbertura() + " HoraAbertura: " + caixa.getHoraAbertura() + " DataFechamento: " + caixa.getDataFechamento() + " HoraFechamento: " + caixa.getHoraFechamento() + " Fundo: " + caixa.getFundo(), Toast.LENGTH_SHORT).show();
+
+                            Pedido pedido = new Pedido();
+                            pedido.setEstado(FECHANDO_CAIXA);
+                            pedido.setValor(caixa.getFundo());
+                            enviar(PedidoToStringJSON(pedido));
+                        }
+                    });
+                    builder.setNegativeButton("Cancelar",null);
+                    builder.show();
+                    //Sobre o AlertDialog
+
+
+                    //TODO - colocar no Handler, quando receber solicitação de abertura
                     item.setTitle(R.string.fechar_caixa);
                     listaPedidos.setEnabled(true);
+
+                    //TODO - Rever o Reabrir Caixa
+//                    invalidateOptionsMenu();//Fará o menu ser reconstruído
+                    //TODO - Chamar tela com o relatório do caixa
                     return true;
-                }else{//Fechado
+
+                }else{//Aberto -> Operação Fechar
+                    abrirCaixa = true;
+
+                    //Sobre o AlertDialog
+                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                    builder.setTitle("Confirma fechamento do caixa?");
+                    builder.setPositiveButton("Confirmar",new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            //TODO - banco será chamado aqui ou no Handler para atualizar o caixa
+                            caixa.setDataFechamento("2");
+                            caixa.setHoraFechamento("2");
+                            Toast.makeText(Vendas.this, "Caixa: DataAbertura: " + caixa.getDataAbertura() + " HoraAbertura: " + caixa.getHoraAbertura() + " DataFechamento: " + caixa.getDataFechamento() + " HoraFechamento: " + caixa.getHoraFechamento() + " Fundo: " + caixa.getFundo(), Toast.LENGTH_SHORT).show();
+
+                            Pedido pedido = new Pedido();
+                            pedido.setEstado(FECHANDO_CAIXA);
+                            enviar(PedidoToStringJSON(pedido));
+                        }
+                    });
+                    builder.setNegativeButton("Cancelar",null);
+                    builder.show();
+                    //Sobre o AlertDialog
+
+                    //TODO - colocar no Handler, quando receber solicitação de abertura
                     item.setTitle(R.string.abrir_caixa);
                     listaPedidos.setEnabled(false);
-
-                    //Habilitar reabrir caixa - TODO ou ver outra forma de fazê-lo
-//                    MenuItem menuItem;
-//                    menuItem = (MenuItem) R.menu.menu_caixa.fin
-                    //TODO - Chamar tela com o relatório do caixa
                     return true;
                 }
             }

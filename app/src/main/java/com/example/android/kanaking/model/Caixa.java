@@ -5,6 +5,7 @@ import java.util.ArrayList;
 public class Caixa {
     private long numero;
     private long numComum;
+    private Double fundo;
     private String dataAbertura;
     private String horaAbertura;
     private String dataFechamento;
@@ -12,7 +13,11 @@ public class Caixa {
     private ArrayList<Pedido> pedidos;
 
     public Caixa(){
+        numero = 0;
         numComum = 0;
+        fundo = -1.0;
+        dataAbertura = "";
+        horaAbertura = "";
         dataFechamento = "";
         horaFechamento = "";
         pedidos = new ArrayList<>();
@@ -33,6 +38,14 @@ public class Caixa {
 
     public void setNumComum(long numComum) {
         this.numComum = numComum;
+    }
+
+    public Double getFundo() {
+        return fundo;
+    }
+
+    public void setFundo(Double fundo) {
+        this.fundo = fundo;
     }
 
     public long getNumero() {

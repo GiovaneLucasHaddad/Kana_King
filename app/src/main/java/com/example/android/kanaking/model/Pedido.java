@@ -15,8 +15,16 @@ public class Pedido {
     private Caixa caixa;
 
     public Pedido() {
+        id = 0;
         idComum = 0;
+        comanda = 0;
+        estado = 0;
+        valor = 0.0;
+        formaPagamento = 0;
+        data = "";
+        hora = "";
         itemPedidos = new ArrayList<>();
+        caixa = null;
     }
 
     public Pedido(long id, long idComum, int comanda, int estado, double valor, int formaPagamento, String data, String hora, ArrayList<ItemPedido> itens) {
