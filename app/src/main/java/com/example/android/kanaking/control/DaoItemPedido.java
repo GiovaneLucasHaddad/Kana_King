@@ -22,41 +22,22 @@ public class DaoItemPedido {
 
     public long inserir(ItemPedido itemPedido){
         ContentValues valores = new ContentValues();
-        if(itemPedido.getIdComum() == 0) {//se for o que está lançando o ItemPedido
-            valores.put(Esquema.ItemPedido.ID_PEDIDO, itemPedido.getPedido().getIdComum());
-            valores.put(Esquema.ItemPedido.SABOR, itemPedido.getSabor());
-            valores.put(Esquema.ItemPedido.RECIPIENTE, itemPedido.getRecipiente());
-            valores.put(Esquema.ItemPedido.QUANTIDADE, itemPedido.getQuantidade());
-            valores.put(Esquema.ItemPedido.ENTREGUE, itemPedido.getEntregue());
-            valores.put(Esquema.ItemPedido.OBSERVACAO, itemPedido.getObservacao());
 
-            long id = db.insert(Esquema.ItemPedido.TABELA, null, valores);
+        valores.put(Esquema.ItemPedido.SEQUENCIA, itemPedido.getSequencia());
+        valores.put(Esquema.ItemPedido.VENDA_PEDIDO, itemPedido.getPedido().getVenda());
+        valores.put(Esquema.ItemPedido.NUM_CAIXA, itemPedido.getPedido().getCaixa().getNumero());
+        valores.put(Esquema.ItemPedido.SABOR, itemPedido.getSabor());
+        valores.put(Esquema.ItemPedido.RECIPIENTE, itemPedido.getRecipiente());
+        valores.put(Esquema.ItemPedido.QUANTIDADE, itemPedido.getQuantidade());
+        valores.put(Esquema.ItemPedido.ENTREGUE, itemPedido.getEntregue());
+        valores.put(Esquema.ItemPedido.OBSERVACAO, itemPedido.getObservacao());
 
-            valores = new ContentValues();
-            valores.put(Esquema.ItemPedido.ID_COMUM,id);
-
-            String selecao = Esquema.ItemPedido._ID + " = ?";
-            String[] args = {"" + id};
-
-            db.update(Esquema.ItemPedido.TABELA,valores,selecao,args);
-
-            return id;
-        }else{//se for quem está replicando o ItemPedido
-            valores.put(Esquema.ItemPedido.ID_PEDIDO, itemPedido.getPedido().getIdComum());
-            valores.put(Esquema.ItemPedido.ID_COMUM, itemPedido.getIdComum());
-            valores.put(Esquema.ItemPedido.SABOR, itemPedido.getSabor());
-            valores.put(Esquema.ItemPedido.RECIPIENTE, itemPedido.getRecipiente());
-            valores.put(Esquema.ItemPedido.QUANTIDADE, itemPedido.getQuantidade());
-            valores.put(Esquema.ItemPedido.ENTREGUE, itemPedido.getEntregue());
-            valores.put(Esquema.ItemPedido.OBSERVACAO, itemPedido.getObservacao());
-
-            return db.insert(Esquema.ItemPedido.TABELA, null, valores);
-        }
+        return db.insert(Esquema.ItemPedido.TABELA, null, valores);
     }
 
     public int remover(ItemPedido itemPedido){
-        String selecao = Esquema.ItemPedido.ID_COMUM + " LIKE ?";
-        String[] args = { ""+itemPedido.getIdComum() };
+        String selecao = Esquema.ItemPedido.SEQUENCIA + " LIKE ?";
+        String[] args = { ""+itemPedido.getSequencia() };
 
         return db.delete(Esquema.ItemPedido.TABELA, selecao, args);
     }
@@ -64,9 +45,9 @@ public class DaoItemPedido {
     public int atualizarEstado(ItemPedido itemPedido){
         ContentValues valores = new ContentValues();
         valores.put(Esquema.ItemPedido.ENTREGUE,itemPedido.getEntregue());
-
-        String selecao = Esquema.ItemPedido.ID_COMUM + " = ?";
-        String[] args = {"" + itemPedido.getIdComum()};
+//TODO - ao executar a atualização, verificar se todos os itens já estão terminados para mudar o estado do Pedido
+        String selecao = Esquema.ItemPedido.SEQUENCIA + " = ?";
+        String[] args = {"" + itemPedido.getSequencia()};
 
         return db.update(Esquema.ItemPedido.TABELA,valores,selecao,args);
     }
@@ -74,15 +55,15 @@ public class DaoItemPedido {
     public ArrayList<ItemPedido> buscarItemPedidos(Pedido pedido){
         String[] projecao = {
                 Esquema.ItemPedido._ID,
-                Esquema.ItemPedido.ID_COMUM,
+                Esquema.ItemPedido.SEQUENCIA,
                 Esquema.ItemPedido.SABOR,
                 Esquema.ItemPedido.RECIPIENTE,
                 Esquema.ItemPedido.QUANTIDADE,
                 Esquema.ItemPedido.ENTREGUE,
                 Esquema.ItemPedido.OBSERVACAO};
-        String selecao = Esquema.ItemPedido.ID_PEDIDO + " = ?";
-        String[] args = {"" + pedido.getIdComum()};
-        String ordem = Esquema.ItemPedido.ID_COMUM + " ASC";
+        String selecao = Esquema.ItemPedido.NUM_CAIXA + " = ? AND " + Esquema.ItemPedido.VENDA_PEDIDO + " = ?";
+        String[] args = {"" + pedido.getCaixa().getNumero(), "" + pedido.getVenda()};
+        String ordem = Esquema.ItemPedido.SEQUENCIA + " ASC";
 
         Cursor cursor = db.query(Esquema.ItemPedido.TABELA,projecao,selecao,args,null,null,ordem);
         ItemPedido itemAux = null;
@@ -90,7 +71,7 @@ public class DaoItemPedido {
         while(cursor.moveToNext()){
             itemAux = new ItemPedido();
             itemAux.setId(cursor.getLong(cursor.getColumnIndexOrThrow(Esquema.ItemPedido._ID)));
-            itemAux.setIdComum(cursor.getLong(cursor.getColumnIndexOrThrow(Esquema.ItemPedido.ID_COMUM)));
+            itemAux.setSequencia(cursor.getInt(cursor.getColumnIndexOrThrow(Esquema.ItemPedido.SEQUENCIA)));
             itemAux.setSabor(cursor.getInt(cursor.getColumnIndexOrThrow(Esquema.ItemPedido.SABOR)));
             itemAux.setRecipiente(cursor.getInt(cursor.getColumnIndexOrThrow(Esquema.ItemPedido.RECIPIENTE)));
             itemAux.setQuantidade(cursor.getInt(cursor.getColumnIndexOrThrow(Esquema.ItemPedido.QUANTIDADE)));

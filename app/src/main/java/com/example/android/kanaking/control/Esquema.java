@@ -7,7 +7,7 @@ public final class Esquema {
 
     public static class Caixa implements BaseColumns {
         public static final String TABELA = "CAIXA";
-        public static final String NUM_COMUM = "NUM_COMUM";
+        public static final String NUMERO = "NUMERO";
         public static final String DATA_ABERTURA = "DATA_ABERTURA";
         public static final String HORA_ABERTURA = "HORA_ABERTURA";
         public static final String DATA_FECHAMENTO = "DATA_FECHAMENTO";
@@ -16,8 +16,8 @@ public final class Esquema {
 
     public static class Pedido implements BaseColumns {
         public static final String TABELA = "PEDIDO";
-        public static final String ID_COMUM = "ID_COMUM";
-        public static final String ID_CAIXA = "ID_CAIXA";
+        public static final String VENDA = "VENDA";
+        public static final String NUM_CAIXA = "NUM_CAIXA";
         public static final String COMANDA = "COMANDA";
         public static final String ESTADO = "ESTADO";
         public static final String VALOR = "VALOR";
@@ -28,8 +28,9 @@ public final class Esquema {
 
     public static class ItemPedido implements BaseColumns {
         public static final String TABELA = "ITEM_PEDIDO";
-        public static final String ID_COMUM = "ID_COMUM";
-        public static final String ID_PEDIDO = "ID_PEDIDO";
+        public static final String SEQUENCIA = "SEQUENCIA";
+        public static final String VENDA_PEDIDO = "VENDA_PEDIDO";
+        public static final String NUM_CAIXA = "NUM_CAIXA";
         public static final String SABOR = "SABOR";
         public static final String RECIPIENTE = "RECIPIENTE";
         public static final String QUANTIDADE = "QUANTIDADE";

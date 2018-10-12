@@ -3,8 +3,8 @@ package com.example.android.kanaking.model;
 import java.util.ArrayList;
 
 public class Caixa {
+    private long id;
     private long numero;
-    private long numComum;
     private Double fundo;
     private String dataAbertura;
     private String horaAbertura;
@@ -13,8 +13,8 @@ public class Caixa {
     private ArrayList<Pedido> pedidos;
 
     public Caixa(){
+        id = 0;
         numero = 0;
-        numComum = 0;
         fundo = -1.0;
         dataAbertura = "";
         horaAbertura = "";
@@ -32,12 +32,12 @@ public class Caixa {
         return dataFechamento.equals("");
     }
 
-    public long getNumComum() {
-        return numComum;
+    public long getId() {
+        return id;
     }
 
-    public void setNumComum(long numComum) {
-        this.numComum = numComum;
+    public void setId(long id) {
+        this.id = id;
     }
 
     public Double getFundo() {

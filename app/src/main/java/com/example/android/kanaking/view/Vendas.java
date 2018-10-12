@@ -288,7 +288,9 @@ public class Vendas extends AppCompatActivity{
         if (!abrirCaixa){//caixa aberto
             Double valor = Double.valueOf(textValor.getText().toString().replace(",","."));
             if(valor > 0.0) {
-                Pedido pedido = new Pedido(comanda.getValue(), comanda.getValue(), comanda.getValue(), LANCADO, valor, pagamento.getSelectedItemPosition(), "", "", itensList);
+                numItemPedido = 1;
+                Pedido pedido = new Pedido(comanda.getValue(), numPedido, comanda.getValue(), LANCADO, valor, pagamento.getSelectedItemPosition(), "", "", itensList);
+                numPedido++;
                 enviar(PedidoToStringJSON(pedido));
             }else{
                 Toast.makeText(this,"Pedido sem preço", Toast.LENGTH_SHORT).show();
@@ -391,17 +393,22 @@ public class Vendas extends AppCompatActivity{
 
                     pedidoAux = JSONStringToPedido(writeMessage);
                     int estado = pedidoAux.getEstado();
-                    if (estado > FECHANDO_CAIXA) {
+                    if (estado > FECHANDO_CAIXA) {//Operação com Pedido
+                        //TODO - aqui será chamado o banco para inserir o Pedido, definindo o id para o Pedido e ItemPedidos
+
                         pedidosList.add(0, pedidoAux);
                         caixa.addPedido(pedidoAux);
                         zerar();
                         pedidoAdapter.notifyDataSetChanged();
                     } else if (estado == ABRINDO_CAIXA) {
+                        Toast.makeText(activity, "Escrever: Abrir Caixa", Toast.LENGTH_SHORT).show();
                         abrirCaixa = false;
                         listaPedidos.setEnabled(true);
                         invalidateOptionsMenu();
 
                     } else {//FECHANDO_CAIXA
+                        Toast.makeText(activity, "Escrever: Fechar Caixa", Toast.LENGTH_SHORT).show();
+
                         abrirCaixa = true;
                         listaPedidos.setEnabled(false);
                         invalidateOptionsMenu();
@@ -418,11 +425,15 @@ public class Vendas extends AppCompatActivity{
 
                     pedidoAux = JSONStringToPedido(readMessage);
                     int estado = pedidoAux.getEstado();
-                    if (estado > FECHANDO_CAIXA) {
+                    if (estado > FECHANDO_CAIXA) {//Operação com Pedido
+                        //TODO - aqui será chamado o banco para inserir o Pedido, definindo o id para o Pedido e ItemPedidos
                         pedidosList.add(0, pedidoAux);
                         caixa.addPedido(pedidoAux);
                         pedidoAdapter.notifyDataSetChanged();
+
                     } else if (estado == ABRINDO_CAIXA) {
+                        Toast.makeText(activity, "Ler: Abrir Caixa", Toast.LENGTH_SHORT).show();
+
                         caixa = new Caixa();
                         caixa.setFundo(pedidoAux.getValor());
                         caixa.setDataAbertura(pedidoAux.getData());
@@ -432,6 +443,8 @@ public class Vendas extends AppCompatActivity{
                         invalidateOptionsMenu();
 
                     } else {//FECHANDO_CAIXA
+                        Toast.makeText(activity, "Ler: Fechar Caixa", Toast.LENGTH_SHORT).show();
+
                         caixa.setDataFechamento(pedidoAux.getData());
                         caixa.setHoraFechamento(pedidoAux.getHora());
                         abrirCaixa = true;
@@ -589,6 +602,8 @@ public class Vendas extends AppCompatActivity{
                                 DecimalFormat df = new DecimalFormat(",##0.00");
                                 textValor.setText(df.format(soma));
 
+                                itemAux.setSequencia(numItemPedido);
+                                numItemPedido++;
                                 itensList.add(0,itemAux);
                                 itemAdapter.notifyDataSetChanged();
 
@@ -712,7 +727,6 @@ public class Vendas extends AppCompatActivity{
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        Toast.makeText(this, "OnPrepare", Toast.LENGTH_SHORT).show();
         switch(MODO){
             case CAIXA:
                 MenuItem menuItem;
@@ -781,7 +795,7 @@ public class Vendas extends AppCompatActivity{
                                 Toast.makeText(Vendas.this, "Caixa: DataAbertura: " + caixa.getDataAbertura() + " HoraAbertura: " + caixa.getHoraAbertura() + " DataFechamento: " + caixa.getDataFechamento() + " HoraFechamento: " + caixa.getHoraFechamento() + " Fundo: " + caixa.getFundo(), Toast.LENGTH_SHORT).show();
 
                                 Pedido pedido = new Pedido();
-                                pedido.setEstado(FECHANDO_CAIXA);
+                                pedido.setEstado(ABRINDO_CAIXA);
                                 pedido.setValor(caixa.getFundo());
                                 pedido.setData(caixa.getDataAbertura());
                                 pedido.setHora(caixa.getHoraAbertura());
@@ -791,7 +805,6 @@ public class Vendas extends AppCompatActivity{
                         builder.setNegativeButton("Cancelar", null);
                         builder.show();
                         //Sobre o AlertDialog
-
 
                         //TODO - Rever o Reabrir Caixa
                         //TODO - Chamar tela com o relatório do caixa
@@ -847,7 +860,7 @@ public class Vendas extends AppCompatActivity{
         JSONArray jsonItens = new JSONArray();
         JSONObject jsonItem;
         try {
-            jsonPedido.put(P_ID,pedido.getIdComum());
+            jsonPedido.put(P_ID,pedido.getVenda());
             jsonPedido.put(P_COMANDA,pedido.getComanda());
             jsonPedido.put(P_ESTADO,pedido.getEstado());
             jsonPedido.put(P_VALOR,pedido.getValor());
@@ -858,7 +871,7 @@ public class Vendas extends AppCompatActivity{
             for(int cont = 0; cont < itensList.size(); cont++){
                 itemAux = itensList.get(cont);
                 jsonItem = new JSONObject();
-                jsonItem.put(IP_ID,itemAux.getId());
+                jsonItem.put(IP_ID,itemAux.getSequencia());
                 jsonItem.put(IP_SABOR,itemAux.getSabor());
                 jsonItem.put(IP_RECIP,itemAux.getRecipiente());
                 jsonItem.put(IP_QTD,itemAux.getQuantidade());
@@ -884,7 +897,7 @@ public class Vendas extends AppCompatActivity{
         ItemPedido itemPedido;
         try{
             jsonPedido = new JSONObject(stringJSON);
-            pedido.setIdComum(jsonPedido.getLong(P_ID));
+            pedido.setVenda(jsonPedido.getLong(P_ID));
             pedido.setComanda(jsonPedido.getInt(P_COMANDA));
             pedido.setEstado(jsonPedido.getInt(P_ESTADO));
             pedido.setValor(jsonPedido.getInt(P_VALOR));
@@ -896,7 +909,7 @@ public class Vendas extends AppCompatActivity{
             for(int cont = 0; cont < jsonItens.length();cont++){
                 jsonItem = jsonItens.getJSONObject(cont);
                 itemPedido = new ItemPedido();
-                itemPedido.setId(jsonItem.getLong(IP_ID));
+                itemPedido.setSequencia(jsonItem.getInt(IP_ID));
                 itemPedido.setSabor(jsonItem.getInt(IP_SABOR));
                 itemPedido.setRecipiente(jsonItem.getInt(IP_RECIP));
                 itemPedido.setQuantidade(jsonItem.getInt(IP_QTD));

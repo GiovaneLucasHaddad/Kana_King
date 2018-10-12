@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public class Pedido {
     private long id;
-    private long idComum;
+    private long venda;
     private int comanda;
     private int estado;
     private double valor;
@@ -16,7 +16,7 @@ public class Pedido {
 
     public Pedido() {
         id = 0;
-        idComum = 0;
+        venda = 0;
         comanda = 0;
         estado = 0;
         valor = 0.0;
@@ -27,9 +27,9 @@ public class Pedido {
         caixa = null;
     }
 
-    public Pedido(long id, long idComum, int comanda, int estado, double valor, int formaPagamento, String data, String hora, ArrayList<ItemPedido> itens) {
+    public Pedido(long id, long venda, int comanda, int estado, double valor, int formaPagamento, String data, String hora, ArrayList<ItemPedido> itens) {
         this.id = id;
-        this.idComum = idComum;
+        this.venda = venda;
         this.comanda = comanda;
         this.estado = estado;
         this.valor = valor;
@@ -53,12 +53,12 @@ public class Pedido {
         this.id = id;
     }
 
-    public long getIdComum() {
-        return idComum;
+    public long getVenda() {
+        return venda;
     }
 
-    public void setIdComum(long idComum) {
-        this.idComum = idComum;
+    public void setVenda(long venda) {
+        this.venda = venda;
     }
 
     public int getComanda() {
