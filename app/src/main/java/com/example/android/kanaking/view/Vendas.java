@@ -48,6 +48,7 @@ import java.util.ArrayList;
 import static com.example.android.kanaking.Constantes.ABACAXI;
 import static com.example.android.kanaking.Constantes.ABRINDO_CAIXA;
 import static com.example.android.kanaking.Constantes.CAIXA;
+import static com.example.android.kanaking.Constantes.CANCELAR;
 import static com.example.android.kanaking.Constantes.COCO;
 import static com.example.android.kanaking.Constantes.COCO_FRUTA;
 import static com.example.android.kanaking.Constantes.CONCLUIR;
@@ -314,20 +315,25 @@ public class Vendas extends AppCompatActivity{
     }
 
     private void enviar(String conteudo){
+        if(isConectado()) {
+            // Verificando se tem algo para enviar
+            if (conteudo.length() > 0) {
+                // Obter os bytes do conteudo e enviar pelo BluetoothService
+                byte[] enviar = conteudo.getBytes();
+                servicoBluetooth.write(enviar);
+
+                // Zerar buffer de saída
+                bufferSaida.setLength(0);
+            }
+        }
+    }
+    private boolean isConectado(){
         //Verificar se estamos conectados antes de tentar algo
         if (servicoBluetooth.getState() != BluetoothService.ESTADO_CONECTADO) {
             Toast.makeText(this, R.string.nao_conectado, Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        // Verificando se tem algo para enviar
-        if (conteudo.length() > 0) {
-            // Obter os bytes do conteudo e enviar pelo BluetoothService
-            byte[] enviar = conteudo.getBytes();
-            servicoBluetooth.write(enviar);
-
-            // Zerar buffer de saída
-            bufferSaida.setLength(0);
+            return false;
+        }else{
+            return true;
         }
     }
 
@@ -376,12 +382,12 @@ public class Vendas extends AppCompatActivity{
                     }
                     break;
                 }
-                case MENSAGEM_ESCREVER: {
+                case MENSAGEM_ESCREVER: {//Quem envia a mensagem
                     byte[] writeBuf = (byte[]) msg.obj;
                     // Construir uma string com o buffer
                     String writeMessage = new String(writeBuf);
 
-                    Toast.makeText(activity, "Escrever: " + writeMessage, Toast.LENGTH_LONG);
+                    Toast.makeText(activity, "Escrever: " + writeMessage, Toast.LENGTH_LONG).show();
 
                     pedidoAux = JSONStringToPedido(writeMessage);
                     int estado = pedidoAux.getEstado();
@@ -391,18 +397,24 @@ public class Vendas extends AppCompatActivity{
                         zerar();
                         pedidoAdapter.notifyDataSetChanged();
                     } else if (estado == ABRINDO_CAIXA) {
+                        abrirCaixa = false;
+                        listaPedidos.setEnabled(true);
+                        invalidateOptionsMenu();
 
                     } else {//FECHANDO_CAIXA
+                        abrirCaixa = true;
+                        listaPedidos.setEnabled(false);
+                        invalidateOptionsMenu();
 
                     }
                     break;
                 }
-                case MENSAGEM_LER: {
+                case MENSAGEM_LER: {//Quem recebe a mensagem
                     byte[] readBuf = (byte[]) msg.obj;
                     // Construir um string com os bytes validos do buffer
                     String readMessage = new String(readBuf, 0, msg.arg1);
 
-                    Toast.makeText(activity, "Ler: " + readMessage, Toast.LENGTH_LONG);
+                    Toast.makeText(activity, "Ler: " + readMessage, Toast.LENGTH_LONG).show();
 
                     pedidoAux = JSONStringToPedido(readMessage);
                     int estado = pedidoAux.getEstado();
@@ -411,8 +423,20 @@ public class Vendas extends AppCompatActivity{
                         caixa.addPedido(pedidoAux);
                         pedidoAdapter.notifyDataSetChanged();
                     } else if (estado == ABRINDO_CAIXA) {
+                        caixa = new Caixa();
+                        caixa.setFundo(pedidoAux.getValor());
+                        caixa.setDataAbertura(pedidoAux.getData());
+                        caixa.setHoraAbertura(pedidoAux.getHora());
+                        abrirCaixa = false;
+                        listaPedidos.setEnabled(true);
+                        invalidateOptionsMenu();
 
                     } else {//FECHANDO_CAIXA
+                        caixa.setDataFechamento(pedidoAux.getData());
+                        caixa.setHoraFechamento(pedidoAux.getHora());
+                        abrirCaixa = true;
+                        listaPedidos.setEnabled(false);
+                        invalidateOptionsMenu();
 
                     }
                     break;
@@ -459,7 +483,7 @@ public class Vendas extends AppCompatActivity{
         popup.show();
     }
 
-    public void adicionarItem(final View v){
+    public void adicionarItem(final View v){//Disparado pelo botão "+" de ItemPedidos
         //Para adicionar itens de pedido
         PopupMenu popup = new PopupMenu(this, v);
 
@@ -488,32 +512,12 @@ public class Vendas extends AppCompatActivity{
                 popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
-                        int escolha = -1;
-                        switch (item.getItemId()){
-                            case R.id.siciliano:
-                                escolha = SICILIANO;
-                                break;
-                            case R.id.taiti:
-                                escolha = TAITI;
-                                break;
-                            case R.id.abacaxi:
-                                escolha = ABACAXI;
-                                break;
-                            case R.id.puro:
-                                escolha = PURO;
-                                break;
-                            case R.id.gengibre:
-                                escolha = GENGIBRE;
-                                break;
-                            case R.id.coco:
-                                escolha = COCO;
-                                break;
-                            case R.id.cancelar:
-                                return true;
+                        int escolha = itemAux.getConstSabor(item.getItemId());
+                        if(escolha != CANCELAR) {
+                            itemAux.setSabor(escolha);
+                            etapa = RECIPIENTE;
+                            adicionarItem(v);
                         }
-                        itemAux.setSabor(escolha);
-                        etapa = RECIPIENTE;
-                        adicionarItem(v);
                         return true;
                     }
                 });
@@ -522,169 +526,49 @@ public class Vendas extends AppCompatActivity{
                 break;
 
             case RECIPIENTE:
+                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        int escolha = itemAux.getConstRecipiente(item.getItemId());
+                        if(escolha != CANCELAR) {
+                            itemAux.setRecipiente(escolha);
+                            etapa = CONCLUIR;
+                            adicionarItem(v);
+                        }else{
+                            etapa = SABOR;
+                        }
+                        return true;
+                    }
+                });
 
-                if (itemAux == null){
-                    Toast.makeText(Vendas.this,"Desculpe, tente novamente.",Toast.LENGTH_SHORT).show();
-                    break;
-                }
                 if(itemAux.getSabor() == COCO){
-                    //Se o sabor for COCO
-                    popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                        @Override
-                        public boolean onMenuItemClick(MenuItem item) {
-                            int escolha = -1;
-                            switch (item.getItemId()){
-                                case R.id.c_fruta:
-                                    escolha = COCO_FRUTA;
-                                    break;
-                                case R.id.c_c_500:
-                                    escolha = COPO_500;
-                                    break;
-                                case R.id.c_g_500:
-                                    escolha = GARRAFA_500;
-                                    break;
-                                case R.id.c_g_1000:
-                                    escolha = GARRAFA_1000;
-                                    break;
-                                case R.id.cancelar:
-                                    etapa = SABOR;//Retorna à 1a etapa
-                                    return true;
-                            }
-                            itemAux.setRecipiente(escolha);
-                            etapa = CONCLUIR;
-                            adicionarItem(v);
-                            return true;
-                        }
-                    });
-
                     popup.inflate(R.menu.menu_recipiente_coco_item);
-                }else{
-                    //Se for caldo de cana mesmo
-                    popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                        @Override
-                        public boolean onMenuItemClick(MenuItem item) {
-                            int escolha = -1;
-                            switch (item.getItemId()){
-                                case R.id.c_300:
-                                    escolha = COPO_300;
-                                    break;
-                                case R.id.c_400:
-                                    escolha = COPO_400;
-                                    break;
-                                case R.id.c_500:
-                                    escolha = COPO_500;
-                                    break;
-                                case R.id.g_500:
-                                    escolha = GARRAFA_500;
-                                    break;
-                                case R.id.g_1000:
-                                    escolha = GARRAFA_1000;
-                                    break;
-                                case R.id.cancelar:
-                                    etapa = SABOR;//Retorna à 1a etapa
-                                    return true;
-                            }
-                            itemAux.setRecipiente(escolha);
-                            etapa = CONCLUIR;
-                            adicionarItem(v);
-                            return true;
-                        }
-                    });
 
+                }else{//Sabores de caldo de cana
                     popup.inflate(R.menu.menu_recipiente_sabor_item);
                     Menu menu = popup.getMenu();
                     MenuItem menuItem;
-                    switch(itemAux.getSabor()){
-                        case SICILIANO:
-                            menuItem = (MenuItem)menu.findItem(R.id.c_300);
-                            menuItem.setIcon(R.drawable.s_c);
 
-                            menuItem = (MenuItem)menu.findItem(R.id.c_400);
-                            menuItem.setIcon(R.drawable.s_c);
+                    menuItem = (MenuItem)menu.findItem(R.id.c_300);
+                    menuItem.setIcon(itemAux.getIconeSabor(COPO_300));
 
-                            menuItem = (MenuItem)menu.findItem(R.id.c_500);
-                            menuItem.setIcon(R.drawable.s_c);
+                    menuItem = (MenuItem)menu.findItem(R.id.c_400);
+                    menuItem.setIcon(itemAux.getIconeSabor(COPO_400));
 
-                            menuItem = (MenuItem)menu.findItem(R.id.g_500);
-                            menuItem.setIcon(R.drawable.s_g);
+                    menuItem = (MenuItem)menu.findItem(R.id.c_500);
+                    menuItem.setIcon(itemAux.getIconeSabor(COPO_500));
 
-                            menuItem = (MenuItem)menu.findItem(R.id.g_1000);
-                            menuItem.setIcon(R.drawable.s_g);
-                            break;
+                    menuItem = (MenuItem)menu.findItem(R.id.g_500);
+                    menuItem.setIcon(itemAux.getIconeSabor(GARRAFA_500));
 
-                        case TAITI:
-                            menuItem = (MenuItem)menu.findItem(R.id.c_300);
-                            menuItem.setIcon(R.drawable.t_c);
+                    menuItem = (MenuItem)menu.findItem(R.id.g_1000);
+                    menuItem.setIcon(itemAux.getIconeSabor(GARRAFA_1000));
 
-                            menuItem = (MenuItem)menu.findItem(R.id.c_400);
-                            menuItem.setIcon(R.drawable.t_c);
-
-                            menuItem = (MenuItem)menu.findItem(R.id.c_500);
-                            menuItem.setIcon(R.drawable.t_c);
-
-                            menuItem = (MenuItem)menu.findItem(R.id.g_500);
-                            menuItem.setIcon(R.drawable.t_g);
-
-                            menuItem = (MenuItem)menu.findItem(R.id.g_1000);
-                            menuItem.setIcon(R.drawable.t_g);
-                            break;
-
-                        case ABACAXI:
-                            menuItem = (MenuItem)menu.findItem(R.id.c_300);
-                            menuItem.setIcon(R.drawable.a_c);
-
-                            menuItem = (MenuItem)menu.findItem(R.id.c_400);
-                            menuItem.setIcon(R.drawable.a_c);
-
-                            menuItem = (MenuItem)menu.findItem(R.id.c_500);
-                            menuItem.setIcon(R.drawable.a_c);
-
-                            menuItem = (MenuItem)menu.findItem(R.id.g_500);
-                            menuItem.setIcon(R.drawable.a_g);
-
-                            menuItem = (MenuItem)menu.findItem(R.id.g_1000);
-                            menuItem.setIcon(R.drawable.a_g);
-                            break;
-
-                        case PURO:
-                            menuItem = (MenuItem)menu.findItem(R.id.c_300);
-                            menuItem.setIcon(R.drawable.p_c);
-
-                            menuItem = (MenuItem)menu.findItem(R.id.c_400);
-                            menuItem.setIcon(R.drawable.p_c);
-
-                            menuItem = (MenuItem)menu.findItem(R.id.c_500);
-                            menuItem.setIcon(R.drawable.p_c);
-
-                            menuItem = (MenuItem)menu.findItem(R.id.g_500);
-                            menuItem.setIcon(R.drawable.p_g);
-
-                            menuItem = (MenuItem)menu.findItem(R.id.g_1000);
-                            menuItem.setIcon(R.drawable.p_g);
-                            break;
-
-                        case GENGIBRE:
-                            menuItem = (MenuItem)menu.findItem(R.id.c_300);
-                            menuItem.setIcon(R.drawable.g_c);
-
-                            menuItem = (MenuItem)menu.findItem(R.id.c_400);
-                            menuItem.setIcon(R.drawable.g_c);
-
-                            menuItem = (MenuItem)menu.findItem(R.id.c_500);
-                            menuItem.setIcon(R.drawable.g_c);
-
-                            menuItem = (MenuItem)menu.findItem(R.id.g_500);
-                            menuItem.setIcon(R.drawable.g_g);
-
-                            menuItem = (MenuItem)menu.findItem(R.id.g_1000);
-                            menuItem.setIcon(R.drawable.g_g);
-                            break;
-                    }
                 }
                 popup.show();
                 break;
-            case CONCLUIR:
 
+            case CONCLUIR:
                 popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
@@ -717,22 +601,15 @@ public class Vendas extends AppCompatActivity{
                     }
                 });
                 popup.inflate(R.menu.menu_finalizar_item);
-                Menu menu_fin = popup.getMenu();
-                MenuItem menuItem_fin;
+                Menu menu = popup.getMenu();
+                MenuItem menuItem;
 
-                menuItem_fin = (MenuItem) menu_fin.findItem(R.id.qtde);
-                menuItem_fin.setTitle("Quantidade: " + itemAux.getQuantidade());
+                menuItem = (MenuItem) menu.findItem(R.id.qtde);
+                menuItem.setTitle("Quantidade: " + itemAux.getQuantidade());
 
-                menuItem_fin = (MenuItem) menu_fin.findItem(R.id.obs);
-                switch(itemAux.getObservacao()){
-                    case SEM_GELO:
-                        menuItem_fin.setTitle("Obs: Sem Gelo");
-                        break;
+                menuItem = (MenuItem) menu.findItem(R.id.obs);
+                menuItem.setTitle("Obs: " + itemAux.getObservacaoDescricao());
 
-                    case POUCO_GELO:
-                        menuItem_fin.setTitle("Obs: Pouco Gelo");
-                        break;
-                }
                 popup.show();
                 break;
 
@@ -740,43 +617,7 @@ public class Vendas extends AppCompatActivity{
                 popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
-                        int escolha = -1;
-                        switch (item.getItemId()){
-                            case R.id.qtd_1:
-                                escolha = 1;
-                                break;
-                            case R.id.qtd_2:
-                                escolha = 2;
-                                break;
-                            case R.id.qtd_3:
-                                escolha = 3;
-                                break;
-                            case R.id.qtd_4:
-                                escolha = 4;
-                                break;
-                            case R.id.qtd_5:
-                                escolha = 5;
-                                break;
-                            case R.id.qtd_6:
-                                escolha = 6;
-                                break;
-                            case R.id.qtd_7:
-                                escolha = 7;
-                                break;
-                            case R.id.qtd_8:
-                                escolha = 8;
-                                break;
-                            case R.id.qtd_9:
-                                escolha = 9;
-                                break;
-                            case R.id.qtd_10:
-                                escolha = 10;
-                                break;
-                            case R.id.cancelar:
-                                escolha = itemAux.getQuantidade();
-                                break;
-                        }
-                        itemAux.setQuantidade(escolha);
+                        itemAux.setQuantidade(itemAux.getQtdQuantidadeId(item.getItemId()));
                         etapa = CONCLUIR;
                         adicionarItem(v);
                         return true;
@@ -791,24 +632,7 @@ public class Vendas extends AppCompatActivity{
                 popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
-                        int escolha = -1;
-                        switch (item.getItemId()){
-                            case R.id.sem_gelo:
-                                escolha = SEM_GELO;
-                                break;
-                            case R.id.pouco_gelo:
-                                escolha = POUCO_GELO;
-                                break;
-                            case R.id.nenhuma:
-                                escolha = NENHUMA;
-                                break;
-                            case R.id.cancelar:
-                                escolha = itemAux.getObservacao();
-                                break;
-                        }
-                        itemAux.setObservacao(escolha);
-                        //CONTROLE DE TESTES
-                        Toast.makeText(Vendas.this,"Item: Sabor:"+itemAux.getSabor()+ " Recip:"+ itemAux.getRecipiente() + " Qtd:" + itemAux.getQuantidade() + " Obs:"+ itemAux.getObservacao(),Toast.LENGTH_SHORT).show();
+                        itemAux.setObservacao(itemAux.getObsObservacaoId(item.getItemId()));
                         etapa = CONCLUIR;
                         adicionarItem(v);
                         return true;
@@ -887,6 +711,34 @@ public class Vendas extends AppCompatActivity{
     }
 
     @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        Toast.makeText(this, "OnPrepare", Toast.LENGTH_SHORT).show();
+        switch(MODO){
+            case CAIXA:
+                MenuItem menuItem;
+                menuItem = (MenuItem) menu.findItem(R.id.abrirCaixa);
+                if(caixa == null){//Primeiro caixa
+                    menuItem.setTitle(R.string.abrir_caixa);
+                    menuItem = (MenuItem) menu.findItem(R.id.reabrirCaixa);
+                    menuItem.setEnabled(false);
+
+                }else if (!caixa.isAberto()){//Último caixa está fechado
+                    menuItem.setTitle(R.string.abrir_caixa);
+                    menuItem = (MenuItem) menu.findItem(R.id.reabrirCaixa);
+                    menuItem.setEnabled(true);
+                }else{//Último caixa aberto
+                    menuItem.setTitle(R.string.fechar_caixa);
+                    menuItem = (MenuItem) menu.findItem(R.id.reabrirCaixa);
+                    menuItem.setEnabled(false);
+                }
+                return true;
+            case MOENDA:
+                return true;
+        }
+        return false;
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case R.id.conectar_seguro: {
@@ -907,83 +759,76 @@ public class Vendas extends AppCompatActivity{
                 return true;
             }
             case R.id.abrirCaixa: {
-                Toast.makeText(this, "" + item.getTitle(), Toast.LENGTH_SHORT).show();
-                if(abrirCaixa){//Fechado -> Operação Abrir
-                    caixa = new Caixa();
-                    abrirCaixa = false;
+                if(isConectado()) {
+                    if (abrirCaixa) {//Fechado -> Operação Abrir
+                        caixa = new Caixa();
 
-                    //Sobre o AlertDialog
-                    LayoutInflater layoutInflater = getLayoutInflater();
-                    View view = layoutInflater.inflate(R.layout.fundo_caixa, null);
-                    final EditText valor_fundo = view.findViewById(R.id.valor_fundo);
+                        //Sobre o AlertDialog
+                        LayoutInflater layoutInflater = getLayoutInflater();
+                        View view = layoutInflater.inflate(R.layout.fundo_caixa, null);
+                        final EditText valor_fundo = view.findViewById(R.id.valor_fundo);
 
-                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                    builder.setTitle("Digite o valor inicial do caixa");
-                    builder.setView(view);
-                    builder.setPositiveButton("Confirmar",new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            //TODO - banco será chamado aqui para inserir o caixa
-                            caixa.setFundo(Double.parseDouble(valor_fundo.getText().toString().replace(",",".")));
-                            caixa.setDataAbertura("1");
-                            caixa.setHoraAbertura("1");
-                            Toast.makeText(Vendas.this, "Caixa: DataAbertura: " + caixa.getDataAbertura() + " HoraAbertura: " + caixa.getHoraAbertura() + " DataFechamento: " + caixa.getDataFechamento() + " HoraFechamento: " + caixa.getHoraFechamento() + " Fundo: " + caixa.getFundo(), Toast.LENGTH_SHORT).show();
+                        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                        builder.setTitle("Digite o valor inicial do caixa");
+                        builder.setView(view);
+                        builder.setPositiveButton("Confirmar", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                //TODO - banco será chamado aqui para inserir o caixa
+                                caixa.setFundo(Double.parseDouble(valor_fundo.getText().toString().replace(",", ".")));
+                                caixa.setDataAbertura("1");
+                                caixa.setHoraAbertura("1");
+                                Toast.makeText(Vendas.this, "Caixa: DataAbertura: " + caixa.getDataAbertura() + " HoraAbertura: " + caixa.getHoraAbertura() + " DataFechamento: " + caixa.getDataFechamento() + " HoraFechamento: " + caixa.getHoraFechamento() + " Fundo: " + caixa.getFundo(), Toast.LENGTH_SHORT).show();
 
-                            Pedido pedido = new Pedido();
-                            pedido.setEstado(FECHANDO_CAIXA);
-                            pedido.setValor(caixa.getFundo());
-                            enviar(PedidoToStringJSON(pedido));
-                        }
-                    });
-                    builder.setNegativeButton("Cancelar",null);
-                    builder.show();
-                    //Sobre o AlertDialog
+                                Pedido pedido = new Pedido();
+                                pedido.setEstado(FECHANDO_CAIXA);
+                                pedido.setValor(caixa.getFundo());
+                                pedido.setData(caixa.getDataAbertura());
+                                pedido.setHora(caixa.getHoraAbertura());
+                                enviar(PedidoToStringJSON(pedido));
+                            }
+                        });
+                        builder.setNegativeButton("Cancelar", null);
+                        builder.show();
+                        //Sobre o AlertDialog
 
 
-                    //TODO - colocar no Handler, quando receber solicitação de abertura
-                    item.setTitle(R.string.fechar_caixa);
-                    listaPedidos.setEnabled(true);
+                        //TODO - Rever o Reabrir Caixa
+                        //TODO - Chamar tela com o relatório do caixa
+                        return true;
 
-                    //TODO - Rever o Reabrir Caixa
-//                    invalidateOptionsMenu();//Fará o menu ser reconstruído
-                    //TODO - Chamar tela com o relatório do caixa
-                    return true;
+                    } else {//Aberto -> Operação Fechar
+                        //Sobre o AlertDialog
+                        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                        builder.setTitle("Confirma fechamento do caixa?");
+                        builder.setPositiveButton("Confirmar", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                //TODO - banco será chamado aqui ou no Handler para atualizar o caixa
+                                caixa.setDataFechamento("2");
+                                caixa.setHoraFechamento("2");
+                                Toast.makeText(Vendas.this, "Caixa: DataAbertura: " + caixa.getDataAbertura() + " HoraAbertura: " + caixa.getHoraAbertura() + " DataFechamento: " + caixa.getDataFechamento() + " HoraFechamento: " + caixa.getHoraFechamento() + " Fundo: " + caixa.getFundo(), Toast.LENGTH_SHORT).show();
 
-                }else{//Aberto -> Operação Fechar
-                    abrirCaixa = true;
+                                Pedido pedido = new Pedido();
+                                pedido.setEstado(FECHANDO_CAIXA);
+                                pedido.setData(caixa.getDataFechamento());
+                                pedido.setHora(caixa.getHoraFechamento());
+                                enviar(PedidoToStringJSON(pedido));
+                            }
+                        });
+                        builder.setNegativeButton("Cancelar", null);
+                        builder.show();
+                        //Sobre o AlertDialog
 
-                    //Sobre o AlertDialog
-                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                    builder.setTitle("Confirma fechamento do caixa?");
-                    builder.setPositiveButton("Confirmar",new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            //TODO - banco será chamado aqui ou no Handler para atualizar o caixa
-                            caixa.setDataFechamento("2");
-                            caixa.setHoraFechamento("2");
-                            Toast.makeText(Vendas.this, "Caixa: DataAbertura: " + caixa.getDataAbertura() + " HoraAbertura: " + caixa.getHoraAbertura() + " DataFechamento: " + caixa.getDataFechamento() + " HoraFechamento: " + caixa.getHoraFechamento() + " Fundo: " + caixa.getFundo(), Toast.LENGTH_SHORT).show();
-
-                            Pedido pedido = new Pedido();
-                            pedido.setEstado(FECHANDO_CAIXA);
-                            enviar(PedidoToStringJSON(pedido));
-                        }
-                    });
-                    builder.setNegativeButton("Cancelar",null);
-                    builder.show();
-                    //Sobre o AlertDialog
-
-                    //TODO - colocar no Handler, quando receber solicitação de abertura
-                    item.setTitle(R.string.abrir_caixa);
-                    listaPedidos.setEnabled(false);
-                    return true;
+                        //TODO - colocar no Handler, quando receber solicitação de abertura
+                        item.setTitle(R.string.abrir_caixa);
+                        return true;
+                    }
                 }
             }
             case R.id.reabrirCaixa:{
-                Toast.makeText(this, "" + item.getTitle(), Toast.LENGTH_SHORT).show();
-                if (item.isEnabled()){
+                if(isConectado()) {
                     item.setEnabled(false);
-                }else{
-                    item.setEnabled(true);
                 }
             }
             case R.id.relAgora: {

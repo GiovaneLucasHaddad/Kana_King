@@ -8,7 +8,9 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:gravity="center" />
+        android:gravity="center"
+        android:text="(500)"
+        android:textColor="@android:color/black" />
     <ImageView
         android:id="@+id/sabor"
         android:layout_width="match_parent"
@@ -20,5 +22,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:gravity="center" />
+        android:gravity="center"
+        android:text="x10"
+        android:textColor="@android:color/black" />
 </LinearLayout>
