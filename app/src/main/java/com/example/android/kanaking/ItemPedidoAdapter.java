@@ -49,6 +49,11 @@ public class ItemPedidoAdapter extends BaseAdapter {
         ImageView img = view.findViewById(R.id.sabor);
         img.setImageResource(itemAtual.getImgSaborRec());
 
+        if (itemAtual.getEntregue() == 1){
+            img = view.findViewById(R.id.entregue);
+            img.setImageResource(R.drawable.confirmar);
+        }
+
         TextView recipiente = view.findViewById(R.id.recipiente);
         recipiente.setText(itemAtual.getRecipienteDescricao());
 

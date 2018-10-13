@@ -118,15 +118,21 @@ public class Vendas extends AppCompatActivity{
     private LinearLayout barraEstado;
     private TextView estado;
 
+    //Controle de soma dos sabores
+    private TextView somaTaiti;
+    private TextView somaSiciliano;
+    private TextView somaAbacaxi;
+    private TextView somaPuro;
+    private TextView somaGengibre;
+
     //Controle de objetos
     boolean abrirCaixa = false;//true quando o caixa está fechado
     private Caixa caixa;
-    private Pedido pedidoAux;
     private ItemPedido itemAux;
     private int etapa = 0;
     private Double soma = 0.0;
-    private int numCaixa = 1;
-    private int numPedido = 1;
+    private long numCaixa = 1;
+    private long numPedido = 1;
     private int numItemPedido = 1;
 
 
@@ -176,16 +182,14 @@ public class Vendas extends AppCompatActivity{
                     return false;
                 }
             });
-            itemGrid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    Toast.makeText(Vendas.this, "Clique simples", Toast.LENGTH_SHORT).show();
-                }
-
-            });
         }else if(MODO.equals(MOENDA)){
             LinearLayout barraLancamento = findViewById(R.id.barra_lancamento);
             barraLancamento.setVisibility(View.GONE);
+            somaTaiti = findViewById(R.id.soma_taiti);
+            somaSiciliano= findViewById(R.id.soma_siciliano);
+            somaAbacaxi= findViewById(R.id.soma_abacaxi);
+            somaPuro= findViewById(R.id.soma_puro);
+            somaGengibre= findViewById(R.id.soma_gengibre);
         }
 
         //Configurando o ArrayAdapter PedidoAdapter para a ListView listaPedidos
@@ -391,13 +395,13 @@ public class Vendas extends AppCompatActivity{
 
                     Toast.makeText(activity, "Escrever: " + writeMessage, Toast.LENGTH_LONG).show();
 
-                    pedidoAux = JSONStringToPedido(writeMessage);
-                    int estado = pedidoAux.getEstado();
+                    Pedido pedido = JSONStringToPedido(writeMessage);
+                    int estado = pedido.getEstado();
                     if (estado > FECHANDO_CAIXA) {//Operação com Pedido
                         //TODO - aqui será chamado o banco para inserir o Pedido, definindo o id para o Pedido e ItemPedidos
 
-                        pedidosList.add(0, pedidoAux);
-                        caixa.addPedido(pedidoAux);
+                        pedidosList.add(0, pedido);
+                        caixa.addPedido(pedido);
                         zerar();
                         pedidoAdapter.notifyDataSetChanged();
                     } else if (estado == ABRINDO_CAIXA) {
@@ -423,21 +427,25 @@ public class Vendas extends AppCompatActivity{
 
                     Toast.makeText(activity, "Ler: " + readMessage, Toast.LENGTH_LONG).show();
 
-                    pedidoAux = JSONStringToPedido(readMessage);
-                    int estado = pedidoAux.getEstado();
+                    Pedido pedido = JSONStringToPedido(readMessage);
+                    int estado = pedido.getEstado();
                     if (estado > FECHANDO_CAIXA) {//Operação com Pedido
                         //TODO - aqui será chamado o banco para inserir o Pedido, definindo o id para o Pedido e ItemPedidos
-                        pedidosList.add(0, pedidoAux);
-                        caixa.addPedido(pedidoAux);
+                        pedidosList.add(0, pedido);
+                        caixa.addPedido(pedido);
+                        if(MODO.equals(MOENDA)) {
+                            Toast.makeText(activity, "Verificando modo", Toast.LENGTH_SHORT).show();
+                            adicionarSomaItens(pedido);
+                        }
                         pedidoAdapter.notifyDataSetChanged();
 
                     } else if (estado == ABRINDO_CAIXA) {
                         Toast.makeText(activity, "Ler: Abrir Caixa", Toast.LENGTH_SHORT).show();
 
                         caixa = new Caixa();
-                        caixa.setFundo(pedidoAux.getValor());
-                        caixa.setDataAbertura(pedidoAux.getData());
-                        caixa.setHoraAbertura(pedidoAux.getHora());
+                        caixa.setFundo(pedido.getValor());
+                        caixa.setDataAbertura(pedido.getData());
+                        caixa.setHoraAbertura(pedido.getHora());
                         abrirCaixa = false;
                         listaPedidos.setEnabled(true);
                         invalidateOptionsMenu();
@@ -445,8 +453,8 @@ public class Vendas extends AppCompatActivity{
                     } else {//FECHANDO_CAIXA
                         Toast.makeText(activity, "Ler: Fechar Caixa", Toast.LENGTH_SHORT).show();
 
-                        caixa.setDataFechamento(pedidoAux.getData());
-                        caixa.setHoraFechamento(pedidoAux.getHora());
+                        caixa.setDataFechamento(pedido.getData());
+                        caixa.setHoraFechamento(pedido.getHora());
                         abrirCaixa = true;
                         listaPedidos.setEnabled(false);
                         invalidateOptionsMenu();
@@ -789,6 +797,7 @@ public class Vendas extends AppCompatActivity{
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 //TODO - banco será chamado aqui para inserir o caixa
+                                caixa.setNumero(numCaixa);
                                 caixa.setFundo(Double.parseDouble(valor_fundo.getText().toString().replace(",", ".")));
                                 caixa.setDataAbertura("1");
                                 caixa.setHoraAbertura("1");
@@ -923,5 +932,13 @@ public class Vendas extends AppCompatActivity{
         }
 
         return pedido;
+    }
+    public void adicionarSomaItens(Pedido pedido){
+        Toast.makeText(this, "Adicionar soma itens", Toast.LENGTH_SHORT).show();
+        somaTaiti.setText("" + pedido.getQtdTotal(TAITI)+" mL");
+        somaSiciliano.setText("" + pedido.getQtdTotal(SICILIANO)+" mL");
+        somaAbacaxi.setText("" + pedido.getQtdTotal(ABACAXI)+" mL");
+        somaPuro.setText("" + pedido.getQtdTotal(PURO)+" mL");
+        somaGengibre.setText("" + pedido.getQtdTotal(GENGIBRE)+" mL");
     }
 }

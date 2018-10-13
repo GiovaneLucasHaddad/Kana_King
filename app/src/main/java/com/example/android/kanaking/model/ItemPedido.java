@@ -16,6 +16,7 @@ import static com.example.android.kanaking.Constantes.NENHUMA;
 import static com.example.android.kanaking.Constantes.POUCO_GELO;
 import static com.example.android.kanaking.Constantes.PRECOS;
 import static com.example.android.kanaking.Constantes.PURO;
+import static com.example.android.kanaking.Constantes.QTD_RECIPIENTE;
 import static com.example.android.kanaking.Constantes.SEM_GELO;
 import static com.example.android.kanaking.Constantes.SICILIANO;
 import static com.example.android.kanaking.Constantes.TAITI;
@@ -32,10 +33,14 @@ public class ItemPedido {
 
     public ItemPedido() {
         quantidade = 1;
+        entregue = 0;
     }
 
     public Double calcSoma (){
         return (quantidade* PRECOS[recipiente]);
+    }
+    public int calcQtdRecipiente (){
+        return (quantidade* QTD_RECIPIENTE[recipiente]);
     }
 
     public int getImgSaborRec(){

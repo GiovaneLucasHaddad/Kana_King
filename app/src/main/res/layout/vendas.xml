@@ -45,6 +45,7 @@
                 android:textStyle="bold" />
 
             <TextView
+                android:id="@+id/soma_taiti"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="2"
@@ -72,6 +73,7 @@
                 android:textStyle="bold" />
 
             <TextView
+                android:id="@+id/soma_siciliano"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="2"
@@ -99,6 +101,7 @@
                 android:textStyle="bold" />
 
             <TextView
+                android:id="@+id/soma_abacaxi"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="2"
@@ -126,6 +129,7 @@
                 android:textStyle="bold" />
 
             <TextView
+                android:id="@+id/soma_puro"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="2"
@@ -153,6 +157,7 @@
                 android:textStyle="bold" />
 
             <TextView
+                android:id="@+id/soma_gengibre"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="2"

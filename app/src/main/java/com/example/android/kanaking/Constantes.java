@@ -25,6 +25,8 @@ public interface Constantes {
     int CANCELADO = 6;
     int TERMINADO = 7;
     int APAGANDO = 8;
+    int MUDANDO_ESTADO = 9;
+    int ENTREGANDO_ITEM = 10;
 
     // Campos titulo para o JSON
     //Pedido
@@ -83,4 +85,8 @@ public interface Constantes {
     Double PRECOS [] =
         //COCO_FRUTA, COPO_300, COPO_400, COPO_500, GARRAFA_500, GARRAFA_1000
     {0.0, 6.0,        4.0,      5.0,      6.0,      7.0,         12.0};
+    //QUANTIDADE RECIPIENTE
+    int QTD_RECIPIENTE [] =
+        //COCO_FRUTA, COPO_300, COPO_400, COPO_500, GARRAFA_500, GARRAFA_1000
+    {0, 0,            300,      400,      500,      500,         1000};
 }

@@ -60,13 +60,37 @@ public class PedidoAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         View listItem = convertView;
-        Pedido pedidoAtual = listaPedidos.get(position);
+        final Pedido pedidoAtual = listaPedidos.get(position);
 
         if(listItem == null)
             listItem = LayoutInflater.from(mContext).inflate(R.layout.pedido,parent,false);
 
         TextView comanda = (TextView)listItem.findViewById(R.id.comanda);
         comanda.setText(String.valueOf(pedidoAtual.getComanda()));
+
+        comanda.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(mContext, "Clique no número", Toast.LENGTH_SHORT).show();
+                int estado = 0;
+                //TODO - Ver se dá pra acessar ou definir entre CAIXA e MOENDA
+                switch(pedidoAtual.getEstado()){
+                    case LANCADO:
+                        estado = PREPARANDO;
+                        break;
+                    case PREPARANDO:
+                        estado = PRONTO;
+                        break;
+                    case PRONTO:
+                        estado = TERMINADO;
+                        break;
+                }
+                pedidoAtual.setEstado(estado);
+
+                notifyDataSetChanged();
+
+            }
+        });
 
         //Configurando GridView
         GridView itemGrid = listItem.findViewById(R.id.itens);
@@ -86,6 +110,7 @@ public class PedidoAdapter extends BaseAdapter {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Toast.makeText(mContext, "Clique simples",Toast.LENGTH_SHORT).show();
+
             }
 
         });
