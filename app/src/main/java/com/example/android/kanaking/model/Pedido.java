@@ -1,14 +1,6 @@
 package com.example.android.kanaking.model;
 
-import android.widget.Toast;
-
 import java.util.ArrayList;
-
-import static com.example.android.kanaking.Constantes.ABACAXI;
-import static com.example.android.kanaking.Constantes.GENGIBRE;
-import static com.example.android.kanaking.Constantes.PURO;
-import static com.example.android.kanaking.Constantes.SICILIANO;
-import static com.example.android.kanaking.Constantes.TAITI;
 
 public class Pedido {
     private long id;

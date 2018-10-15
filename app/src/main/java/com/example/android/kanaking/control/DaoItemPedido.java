@@ -24,8 +24,8 @@ public class DaoItemPedido {
         ContentValues valores = new ContentValues();
 
         valores.put(Esquema.ItemPedido.SEQUENCIA, itemPedido.getSequencia());
-        valores.put(Esquema.ItemPedido.VENDA_PEDIDO, itemPedido.getPedido().getVenda());
-        valores.put(Esquema.ItemPedido.NUM_CAIXA, itemPedido.getPedido().getCaixa().getNumero());
+        valores.put(Esquema.ItemPedido.VENDA, itemPedido.getPedido().getVenda());
+        valores.put(Esquema.ItemPedido.CAIXA, itemPedido.getPedido().getCaixa().getNumero());
         valores.put(Esquema.ItemPedido.SABOR, itemPedido.getSabor());
         valores.put(Esquema.ItemPedido.RECIPIENTE, itemPedido.getRecipiente());
         valores.put(Esquema.ItemPedido.QUANTIDADE, itemPedido.getQuantidade());
@@ -61,7 +61,7 @@ public class DaoItemPedido {
                 Esquema.ItemPedido.QUANTIDADE,
                 Esquema.ItemPedido.ENTREGUE,
                 Esquema.ItemPedido.OBSERVACAO};
-        String selecao = Esquema.ItemPedido.NUM_CAIXA + " = ? AND " + Esquema.ItemPedido.VENDA_PEDIDO + " = ?";
+        String selecao = Esquema.ItemPedido.CAIXA + " = ? AND " + Esquema.ItemPedido.VENDA + " = ?";
         String[] args = {"" + pedido.getCaixa().getNumero(), "" + pedido.getVenda()};
         String ordem = Esquema.ItemPedido.SEQUENCIA + " ASC";
 

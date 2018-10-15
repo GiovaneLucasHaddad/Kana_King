@@ -12,7 +12,6 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -50,7 +49,6 @@ import static com.example.android.kanaking.Constantes.ABRINDO_CAIXA;
 import static com.example.android.kanaking.Constantes.CAIXA;
 import static com.example.android.kanaking.Constantes.CANCELAR;
 import static com.example.android.kanaking.Constantes.COCO;
-import static com.example.android.kanaking.Constantes.COCO_FRUTA;
 import static com.example.android.kanaking.Constantes.CONCLUIR;
 import static com.example.android.kanaking.Constantes.COPO_300;
 import static com.example.android.kanaking.Constantes.COPO_400;
@@ -63,7 +61,6 @@ import static com.example.android.kanaking.Constantes.GENGIBRE;
 import static com.example.android.kanaking.Constantes.IP_ENTREGUE;
 import static com.example.android.kanaking.Constantes.IP_ID;
 import static com.example.android.kanaking.Constantes.IP_OBS;
-import static com.example.android.kanaking.Constantes.IP_PEDIDO_ID;
 import static com.example.android.kanaking.Constantes.IP_QTD;
 import static com.example.android.kanaking.Constantes.IP_RECIP;
 import static com.example.android.kanaking.Constantes.IP_SABOR;
@@ -75,9 +72,7 @@ import static com.example.android.kanaking.Constantes.MENSAGEM_MUDANCA_ESTADO;
 import static com.example.android.kanaking.Constantes.MENSAGEM_NOME_DISPOSITIVO;
 import static com.example.android.kanaking.Constantes.MENSAGEM_TOAST;
 import static com.example.android.kanaking.Constantes.MOENDA;
-import static com.example.android.kanaking.Constantes.NENHUMA;
 import static com.example.android.kanaking.Constantes.OBSERVACAO;
-import static com.example.android.kanaking.Constantes.POUCO_GELO;
 import static com.example.android.kanaking.Constantes.PURO;
 import static com.example.android.kanaking.Constantes.P_COMANDA;
 import static com.example.android.kanaking.Constantes.P_DATA;
@@ -89,7 +84,6 @@ import static com.example.android.kanaking.Constantes.P_VALOR;
 import static com.example.android.kanaking.Constantes.QUANTIDADE;
 import static com.example.android.kanaking.Constantes.RECIPIENTE;
 import static com.example.android.kanaking.Constantes.SABOR;
-import static com.example.android.kanaking.Constantes.SEM_GELO;
 import static com.example.android.kanaking.Constantes.SICILIANO;
 import static com.example.android.kanaking.Constantes.TAITI;
 import static com.example.android.kanaking.Constantes.TOAST;
@@ -212,6 +206,7 @@ public class Vendas extends AppCompatActivity{
             finish();
         }
 
+
         textValor = (EditText)findViewById(R.id.add_valor);
 
         barraEstado = (LinearLayout)findViewById(R.id.fundo_estado);
@@ -241,6 +236,7 @@ public class Vendas extends AppCompatActivity{
         if(!bluetoothAdapter.isEnabled()){
             Intent solicitaAtivacao = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(solicitaAtivacao,SOLICITACAO_ATIVACAO);
+
         }else if (servicoBluetooth == null){
             configuraTransmissao();
         }
@@ -260,7 +256,7 @@ public class Vendas extends AppCompatActivity{
 
         // Realizando essa verificação abrange-se o caso do Bluetooth estar desabilitado
         // durante o onStart(), então a tela está pausada para habilitá-lo...
-        // onResume() será chamado quando a atividade SOLICITACAO_ATIVACAO retornar.
+        // onResume() será chamado quando a atividade ACTION_REQUEST_ENABLE retornar.
         if (servicoBluetooth != null) {
             // Somente se o estado for ESTADO_NENHUM, sabemos se ainda não iniciamos
             if (servicoBluetooth.getState() == BluetoothService.ESTADO_NENHUM) {
@@ -672,26 +668,32 @@ public class Vendas extends AppCompatActivity{
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Toast.makeText(Vendas.this,"Resultado chegou",Toast.LENGTH_SHORT).show();
         switch (requestCode){
-            case SOLICITACAO_ATIVACAO:
+            case SOLICITACAO_ATIVACAO: {
                 //Quando a solicitação de ativação do Bluetooth retorna
-                if(resultCode == Activity.RESULT_OK){
-                    Toast.makeText(Vendas.this,"Bluetooth Ativado",Toast.LENGTH_SHORT).show();
+                if (resultCode == RESULT_OK) {
+                    Toast.makeText(this, "Bluetooth Ativado", Toast.LENGTH_SHORT).show();
                     configuraTransmissao();
-                }else{
-                    Toast.makeText(Vendas.this,"Bluetooth Não Ativado",Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "Bluetooth Não Ativado", Toast.LENGTH_SHORT).show();
+                    finish();
                 }
-            case SOLICITACAO_CONEXAO_SEGURA:
+                break;
+            }
+            case SOLICITACAO_CONEXAO_SEGURA: {
                 //Quando é retornado um dispositivp escolhido a conectar
-                if(resultCode == Activity.RESULT_OK){
-                    conectarDispositivo(data,true);
+                if (resultCode == RESULT_OK) {
+                    conectarDispositivo(data, true);
                 }
-            case SOLICITACAO_CONEXAO_INSEGURA:
+                break;
+            }
+            case SOLICITACAO_CONEXAO_INSEGURA: {
                 //Quando é retornado um dispositivp escolhido a conectar
-                if(resultCode == Activity.RESULT_OK){
+                if (resultCode == RESULT_OK) {
                     conectarDispositivo(data, false);
                 }
+                break;
+            }
         }
     }
 

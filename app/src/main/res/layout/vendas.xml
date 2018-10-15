@@ -224,7 +224,8 @@
                 android:layout_height="0dp"
                 android:layout_weight="1"
                 android:numeric="decimal"
-                android:text="0,00" />
+                android:text="0,00"
+                android:textSize="24sp" />
 
             <Spinner
                 android:id="@+id/add_pagamento"

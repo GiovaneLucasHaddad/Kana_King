@@ -18,7 +18,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".view.Vendas"/>
+        <activity android:name=".view.Vendas"
+            android:windowSoftInputMode="stateHidden"/>
         <activity
             android:name=".view.ListaDeDispositivos"
             android:configChanges="orientation|keyboardHidden"

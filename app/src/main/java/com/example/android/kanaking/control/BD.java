@@ -12,8 +12,8 @@ public class BD extends SQLiteOpenHelper {
             "CREATE TABLE " + Esquema.ItemPedido.TABELA + " ("
                     + Esquema.ItemPedido._ID + " INTEGER PRIMARY KEY,"
                     + Esquema.ItemPedido.SEQUENCIA + " INTEGER,"
-                    + Esquema.ItemPedido.VENDA_PEDIDO + " INTEGER,"
-                    + Esquema.ItemPedido.NUM_CAIXA + " INTEGER,"
+                    + Esquema.ItemPedido.VENDA + " INTEGER,"
+                    + Esquema.ItemPedido.CAIXA + " INTEGER,"
                     + Esquema.ItemPedido.SABOR + " INTEGER,"
                     + Esquema.ItemPedido.RECIPIENTE + " INTEGER,"
                     + Esquema.ItemPedido.QUANTIDADE + " INTEGER,"
@@ -24,7 +24,7 @@ public class BD extends SQLiteOpenHelper {
             "CREATE TABLE " + Esquema.Pedido.TABELA + " ("
                     + Esquema.Pedido._ID + " INTEGER PRIMARY KEY,"
                     + Esquema.Pedido.VENDA + " INTEGER,"
-                    + Esquema.Pedido.NUM_CAIXA + " INTEGER,"
+                    + Esquema.Pedido.CAIXA + " INTEGER,"
                     + Esquema.Pedido.COMANDA + " INTEGER,"
                     + Esquema.Pedido.ESTADO + " INTEGER,"
                     + Esquema.Pedido.VALOR + " REAL,"
@@ -39,7 +39,8 @@ public class BD extends SQLiteOpenHelper {
                     + Esquema.Caixa.DATA_ABERTURA + " INTEGER,"
                     + Esquema.Caixa.HORA_ABERTURA + " INTEGER,"
                     + Esquema.Caixa.DATA_FECHAMENTO + " INTEGER,"
-                    + Esquema.Caixa.HORA_FECHAMENTO + " INTEGER)";
+                    + Esquema.Caixa.HORA_FECHAMENTO + " INTEGER,"
+                    + Esquema.Caixa.FUNDO + " REAL)";
 
     public static final String DELETAR_TABELA_ITEM_PEDIDO = "DROP TABLE IF EXISTS " + Esquema.ItemPedido.TABELA;
     public static final String DELETAR_TABELA_PEDIDO = "DROP TABLE IF EXISTS " + Esquema.Pedido.TABELA;

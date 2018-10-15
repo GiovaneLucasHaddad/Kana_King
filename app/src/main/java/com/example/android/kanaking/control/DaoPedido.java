@@ -24,7 +24,7 @@ public class DaoPedido {
         ContentValues valores = new ContentValues();
 
         valores.put(Esquema.Pedido.VENDA, pedido.getVenda());
-        valores.put(Esquema.Pedido.NUM_CAIXA, pedido.getCaixa().getNumero());
+        valores.put(Esquema.Pedido.CAIXA, pedido.getCaixa().getNumero());
         valores.put(Esquema.Pedido.COMANDA, pedido.getComanda());
         valores.put(Esquema.Pedido.ESTADO, pedido.getEstado());
         valores.put(Esquema.Pedido.VALOR, pedido.getValor());
@@ -61,7 +61,7 @@ public class DaoPedido {
                 Esquema.Pedido.FORMA_PAGAMENTO,
                 Esquema.Pedido.DATA,
                 Esquema.Pedido.HORA};
-        String selecao = Esquema.Pedido.NUM_CAIXA + " = ?";
+        String selecao = Esquema.Pedido.CAIXA + " = ?";
         String[] args = {"" + caixa.getNumero()};
         String ordem = Esquema.Pedido.VENDA + " ASC";
 

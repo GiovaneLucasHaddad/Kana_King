@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="200dp"
+    android:layout_height="120dp"
     android:orientation="horizontal"
     android:id="@+id/fundo">
     <TextView
@@ -9,7 +9,7 @@
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_gravity="center"
-        android:layout_weight="2"
+        android:layout_weight="1"
         android:gravity="center"
         android:textColor="@android:color/black"
         android:textSize="30sp" />
@@ -20,13 +20,13 @@
         android:layout_height="match_parent"
         android:layout_margin="5dp"
         android:layout_weight="4"
-        android:background="@color/corEspacoItens"
         android:columnWidth="45dp"
         android:gravity="center"
         android:horizontalSpacing="10dp"
         android:numColumns="auto_fit"
         android:stretchMode="columnWidth"
-        android:verticalSpacing="10dp" />
+        android:verticalSpacing="2dp"
+        android:background="@color/corEspacoItens"/>
     <FrameLayout
         android:layout_width="0dp"
         android:layout_height="match_parent"
@@ -43,12 +43,14 @@
             android:id="@+id/tipo_pagamento"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
+
         <TextView
             android:id="@+id/valor"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center"
+            android:text="0,00"
             android:textColor="@android:color/black"
-            android:textSize="24sp" />
+            android:textSize="30sp" />
     </FrameLayout>
 </LinearLayout>

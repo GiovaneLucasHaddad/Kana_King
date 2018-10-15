@@ -23,6 +23,7 @@ public class DaoCaixa {
         valores.put(Esquema.Caixa.NUMERO, caixa.getNumero());
         valores.put(Esquema.Caixa.DATA_ABERTURA, caixa.getDataAbertura());
         valores.put(Esquema.Caixa.HORA_ABERTURA, caixa.getHoraAbertura());
+        valores.put(Esquema.Caixa.FUNDO, caixa.getFundo());
         return db.insert(Esquema.Caixa.TABELA, null, valores);
     }
 
@@ -43,7 +44,8 @@ public class DaoCaixa {
                 Esquema.Caixa.DATA_ABERTURA,
                 Esquema.Caixa.HORA_ABERTURA,
                 Esquema.Caixa.DATA_FECHAMENTO,
-                Esquema.Caixa.HORA_FECHAMENTO};
+                Esquema.Caixa.HORA_FECHAMENTO,
+                Esquema.Caixa.FUNDO};
         String selecao = Esquema.Caixa._ID + " = ?";
         String[] args = {"" + ultimoId()};
 
@@ -58,6 +60,7 @@ public class DaoCaixa {
             caixa.setHoraAbertura(cursor.getString(cursor.getColumnIndexOrThrow(Esquema.Caixa.HORA_ABERTURA)));
             caixa.setDataFechamento(cursor.getString(cursor.getColumnIndexOrThrow(Esquema.Caixa.DATA_FECHAMENTO)));
             caixa.setHoraFechamento(cursor.getString(cursor.getColumnIndexOrThrow(Esquema.Caixa.HORA_FECHAMENTO)));
+            caixa.setFundo(cursor.getDouble(cursor.getColumnIndexOrThrow(Esquema.Caixa.FUNDO)));
         }
         cursor.close();
         return caixa;
