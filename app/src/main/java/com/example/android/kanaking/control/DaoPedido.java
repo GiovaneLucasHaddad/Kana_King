@@ -52,6 +52,9 @@ public class DaoPedido {
     }
 
     public ArrayList<Pedido> buscarPedidos(Caixa caixa){
+        if (caixa == null){
+            return null;
+        }
         String[] projecao = {
                 Esquema.Pedido._ID,
                 Esquema.Pedido.VENDA,

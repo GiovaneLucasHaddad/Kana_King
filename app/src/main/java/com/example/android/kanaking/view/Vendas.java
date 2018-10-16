@@ -30,7 +30,11 @@ import com.example.android.kanaking.Pagamento;
 import com.example.android.kanaking.PagamentoAdapter;
 import com.example.android.kanaking.PedidoAdapter;
 import com.example.android.kanaking.R;
+import com.example.android.kanaking.control.BD;
 import com.example.android.kanaking.control.BluetoothService;
+import com.example.android.kanaking.control.DaoCaixa;
+import com.example.android.kanaking.control.DaoItemPedido;
+import com.example.android.kanaking.control.DaoPedido;
 import com.example.android.kanaking.model.Caixa;
 import com.example.android.kanaking.model.ItemPedido;
 import com.example.android.kanaking.model.Pedido;
@@ -59,11 +63,11 @@ import static com.example.android.kanaking.Constantes.GARRAFA_1000;
 import static com.example.android.kanaking.Constantes.GARRAFA_500;
 import static com.example.android.kanaking.Constantes.GENGIBRE;
 import static com.example.android.kanaking.Constantes.IP_ENTREGUE;
-import static com.example.android.kanaking.Constantes.IP_ID;
 import static com.example.android.kanaking.Constantes.IP_OBS;
 import static com.example.android.kanaking.Constantes.IP_QTD;
 import static com.example.android.kanaking.Constantes.IP_RECIP;
 import static com.example.android.kanaking.Constantes.IP_SABOR;
+import static com.example.android.kanaking.Constantes.IP_SEQUENCIA;
 import static com.example.android.kanaking.Constantes.ITEM_PEDIDOS;
 import static com.example.android.kanaking.Constantes.LANCADO;
 import static com.example.android.kanaking.Constantes.MENSAGEM_ESCREVER;
@@ -78,9 +82,9 @@ import static com.example.android.kanaking.Constantes.P_COMANDA;
 import static com.example.android.kanaking.Constantes.P_DATA;
 import static com.example.android.kanaking.Constantes.P_ESTADO;
 import static com.example.android.kanaking.Constantes.P_HORA;
-import static com.example.android.kanaking.Constantes.P_ID;
 import static com.example.android.kanaking.Constantes.P_PAGTO;
 import static com.example.android.kanaking.Constantes.P_VALOR;
+import static com.example.android.kanaking.Constantes.P_VENDA;
 import static com.example.android.kanaking.Constantes.QUANTIDADE;
 import static com.example.android.kanaking.Constantes.RECIPIENTE;
 import static com.example.android.kanaking.Constantes.SABOR;
@@ -186,19 +190,6 @@ public class Vendas extends AppCompatActivity{
             somaGengibre= findViewById(R.id.soma_gengibre);
         }
 
-        //Configurando o ArrayAdapter PedidoAdapter para a ListView listaPedidos
-        listaPedidos = findViewById(R.id.lista_pedidos);
-
-        if (pedidosList == null) {
-            pedidosList = new ArrayList<>();
-        }
-
-        if (pedidoAdapter == null){
-            pedidoAdapter = new PedidoAdapter(this,pedidosList);
-            listaPedidos.setAdapter(pedidoAdapter);
-        }else {
-            pedidoAdapter.notifyDataSetChanged();
-        }
         //Obtendo o adaptador Bluetooth e verificando se é suportado
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (bluetoothAdapter == null){
@@ -206,20 +197,25 @@ public class Vendas extends AppCompatActivity{
             finish();
         }
 
-
         textValor = (EditText)findViewById(R.id.add_valor);
-
         barraEstado = (LinearLayout)findViewById(R.id.fundo_estado);
         estado = (TextView)findViewById(R.id.estado);
+        listaPedidos = findViewById(R.id.lista_pedidos);
 
-//        caixa = new Caixa();
-        //TODO - ler o último caixa aqui, por enquanto sempre será primeiro caixa
-        caixa = null;
+        //Configurando abertura de caixa
+        DaoCaixa daoCaixa = new DaoCaixa(this);
+        long id = daoCaixa.ultimoId();
+        Toast.makeText(this, "Ultimo ID: " + id, Toast.LENGTH_SHORT).show();
+        caixa = daoCaixa.ultimoCaixa(id);
         if(caixa == null){//Primeiro Caixa
             abrirCaixa = true;
-        }else if(!caixa.isAberto()) {//Último caixa fechado
-            abrirCaixa = true;
+        }else{
+            numCaixa = caixa.getNumero() + 1;
+            if(!caixa.isAberto()) {//Último caixa fechado
+                abrirCaixa = true;
+            }
         }
+
         if (abrirCaixa){
             Toast.makeText(this,"Caixa fechado/Primeiro Caixa", Toast.LENGTH_SHORT).show();
             listaPedidos.setEnabled(false);
@@ -227,6 +223,28 @@ public class Vendas extends AppCompatActivity{
             Toast.makeText(this,"Caixa aberto", Toast.LENGTH_SHORT).show();
             Toast.makeText(Vendas.this, "Caixa: DataAbertura: " + caixa.getDataAbertura() + " HoraAbertura: " + caixa.getHoraAbertura() + " DataFechamento: " + caixa.getDataFechamento() + " HoraFechamento: " + caixa.getHoraFechamento() + " Fundo: " + caixa.getFundo(), Toast.LENGTH_SHORT).show();
         }
+
+        //Configurando o ArrayAdapter PedidoAdapter para a ListView listaPedidos
+        //Preencher com as últimas vendas salvas
+        DaoPedido daoPedido = new DaoPedido(this);
+        pedidosList = daoPedido.buscarPedidos(caixa);
+
+        if (pedidosList == null) {//Nenhum pedido encontrado
+            pedidosList = new ArrayList<>();
+        }else{//Pedidos encontrados
+            DaoItemPedido daoItemPedido = new DaoItemPedido(this);
+            for(int cont = 0; cont < pedidosList.size(); cont++){
+                daoItemPedido.buscarItemPedidos(pedidosList.get(cont));
+            }
+            numPedido = pedidosList.get(pedidosList.size()-1).getVenda() + 1;
+        }
+
+//        if (pedidoAdapter == null){
+        pedidoAdapter = new PedidoAdapter(this,pedidosList);
+        listaPedidos.setAdapter(pedidoAdapter);
+//        }else {
+//            pedidoAdapter.notifyDataSetChanged();
+//        }
     }
 
     @Override
@@ -248,6 +266,9 @@ public class Vendas extends AppCompatActivity{
         if (servicoBluetooth != null){
             servicoBluetooth.stop();
         }
+        BD auxBD = new BD(this);
+        auxBD.close();
+        Toast.makeText(this,"Banco fechado...", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -275,14 +296,14 @@ public class Vendas extends AppCompatActivity{
         bufferSaida = new StringBuffer("");
     }
 
-    private void tornarVisivel(){
-        //Torna visível por 5 minutos
-        if(bluetoothAdapter.getScanMode() != BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE){
-            Intent intentVisivel = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-            intentVisivel.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION,300);
-            startActivity(intentVisivel);
-        }
-    }
+//    private void tornarVisivel(){
+//        //Torna visível por 5 minutos
+//        if(bluetoothAdapter.getScanMode() != BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE){
+//            Intent intentVisivel = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+//            intentVisivel.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION,300);
+//            startActivity(intentVisivel);
+//        }
+//    }
 
     public void adicionar(View view){
         if (!abrirCaixa){//caixa aberto
@@ -298,206 +319,6 @@ public class Vendas extends AppCompatActivity{
         }else{
             Toast.makeText(this,"Caixa fechado", Toast.LENGTH_SHORT).show();
         }
-    }
-
-    public void zerar(View view){
-        zerar();
-    }
-
-    public void zerar(){
-        TextView valor, estado;
-        valor = (EditText)findViewById(R.id.add_valor);
-
-        itensList.clear();
-        soma = 0.0;
-        DecimalFormat df = new DecimalFormat(",##0.00");
-        valor.setText(df.format(0));
-
-        pagamento.setSelection(0);
-    }
-
-    private void enviar(String conteudo){
-        if(isConectado()) {
-            // Verificando se tem algo para enviar
-            if (conteudo.length() > 0) {
-                // Obter os bytes do conteudo e enviar pelo BluetoothService
-                byte[] enviar = conteudo.getBytes();
-                servicoBluetooth.write(enviar);
-
-                // Zerar buffer de saída
-                bufferSaida.setLength(0);
-            }
-        }
-    }
-    private boolean isConectado(){
-        //Verificar se estamos conectados antes de tentar algo
-        if (servicoBluetooth.getState() != BluetoothService.ESTADO_CONECTADO) {
-            Toast.makeText(this, R.string.nao_conectado, Toast.LENGTH_SHORT).show();
-            return false;
-        }else{
-            return true;
-        }
-    }
-
-    private void setStatus(int resId) {
-        estado.setText(resId);
-
-        switch(resId){
-            case R.string.title_connecting:
-                barraEstado.setBackgroundResource(R.color.corConectando);
-                break;
-            case R.string.title_listening:
-                barraEstado.setBackgroundResource(R.color.corOuvindo);
-                break;
-            case R.string.title_not_connected:
-                barraEstado.setBackgroundResource(R.color.corNaoConectado);
-                break;
-        }
-    }
-
-    private void setStatus(CharSequence subTitle) {
-        //Não verificado pois só um estado chama esta função
-        estado.setText(subTitle);
-        barraEstado.setBackgroundResource(R.color.corConectado);
-    }
-
-    private final Handler handler = new Handler(){
-        @Override
-        public void handleMessage(Message msg) {
-            Activity activity = Vendas.this;
-            switch (msg.what) {
-                case MENSAGEM_MUDANCA_ESTADO: {
-                    switch (msg.arg1) {
-                        case BluetoothService.ESTADO_CONECTADO:
-                            setStatus(getString(R.string.title_connected_to, nomeDispositivoConectado));
-                            pedidosList.clear();
-                            break;
-                        case BluetoothService.ESTADO_CONECTANDO:
-                            setStatus(R.string.title_connecting);
-                            break;
-                        case BluetoothService.ESTADO_OUVIR:
-                            setStatus(R.string.title_listening);
-                            break;
-                        case BluetoothService.ESTADO_NENHUM:
-                            setStatus(R.string.title_not_connected);
-                            break;
-                    }
-                    break;
-                }
-                case MENSAGEM_ESCREVER: {//Quem envia a mensagem
-                    byte[] writeBuf = (byte[]) msg.obj;
-                    // Construir uma string com o buffer
-                    String writeMessage = new String(writeBuf);
-
-                    Toast.makeText(activity, "Escrever: " + writeMessage, Toast.LENGTH_LONG).show();
-
-                    Pedido pedido = JSONStringToPedido(writeMessage);
-                    int estado = pedido.getEstado();
-                    if (estado > FECHANDO_CAIXA) {//Operação com Pedido
-                        //TODO - aqui será chamado o banco para inserir o Pedido, definindo o id para o Pedido e ItemPedidos
-
-                        pedidosList.add(0, pedido);
-                        caixa.addPedido(pedido);
-                        zerar();
-                        pedidoAdapter.notifyDataSetChanged();
-                    } else if (estado == ABRINDO_CAIXA) {
-                        Toast.makeText(activity, "Escrever: Abrir Caixa", Toast.LENGTH_SHORT).show();
-                        abrirCaixa = false;
-                        listaPedidos.setEnabled(true);
-                        invalidateOptionsMenu();
-
-                    } else {//FECHANDO_CAIXA
-                        Toast.makeText(activity, "Escrever: Fechar Caixa", Toast.LENGTH_SHORT).show();
-
-                        abrirCaixa = true;
-                        listaPedidos.setEnabled(false);
-                        invalidateOptionsMenu();
-
-                    }
-                    break;
-                }
-                case MENSAGEM_LER: {//Quem recebe a mensagem
-                    byte[] readBuf = (byte[]) msg.obj;
-                    // Construir um string com os bytes validos do buffer
-                    String readMessage = new String(readBuf, 0, msg.arg1);
-
-                    Toast.makeText(activity, "Ler: " + readMessage, Toast.LENGTH_LONG).show();
-
-                    Pedido pedido = JSONStringToPedido(readMessage);
-                    int estado = pedido.getEstado();
-                    if (estado > FECHANDO_CAIXA) {//Operação com Pedido
-                        //TODO - aqui será chamado o banco para inserir o Pedido, definindo o id para o Pedido e ItemPedidos
-                        pedidosList.add(0, pedido);
-                        caixa.addPedido(pedido);
-                        if(MODO.equals(MOENDA)) {
-                            Toast.makeText(activity, "Verificando modo", Toast.LENGTH_SHORT).show();
-                            adicionarSomaItens(pedido);
-                        }
-                        pedidoAdapter.notifyDataSetChanged();
-
-                    } else if (estado == ABRINDO_CAIXA) {
-                        Toast.makeText(activity, "Ler: Abrir Caixa", Toast.LENGTH_SHORT).show();
-
-                        caixa = new Caixa();
-                        caixa.setFundo(pedido.getValor());
-                        caixa.setDataAbertura(pedido.getData());
-                        caixa.setHoraAbertura(pedido.getHora());
-                        abrirCaixa = false;
-                        listaPedidos.setEnabled(true);
-                        invalidateOptionsMenu();
-
-                    } else {//FECHANDO_CAIXA
-                        Toast.makeText(activity, "Ler: Fechar Caixa", Toast.LENGTH_SHORT).show();
-
-                        caixa.setDataFechamento(pedido.getData());
-                        caixa.setHoraFechamento(pedido.getHora());
-                        abrirCaixa = true;
-                        listaPedidos.setEnabled(false);
-                        invalidateOptionsMenu();
-
-                    }
-                    break;
-                }
-                case MENSAGEM_NOME_DISPOSITIVO: {
-                    // save the connected device's name
-                    nomeDispositivoConectado = msg.getData().getString(DEVICE_NAME);
-                    if (null != activity) {
-                        Toast.makeText(activity, "Conectado com " + nomeDispositivoConectado, Toast.LENGTH_SHORT).show();
-                    }
-                    break;
-                }
-                case MENSAGEM_TOAST: {
-                    if (null != activity) {
-                        Toast.makeText(activity, msg.getData().getString(TOAST), Toast.LENGTH_SHORT).show();
-                    }
-                    break;
-                }
-            }
-        }
-    };
-
-
-
-    public void menuPopup(View v){
-        PopupMenu popup = new PopupMenu(this, v);
-        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                switch (item.getItemId()){
-                    case R.id.cancelar:
-                        Toast.makeText(Vendas.this,"Cancelar",Toast.LENGTH_SHORT).show();
-                        return true;
-//                        break;
-                    case R.id.apagar:
-                        Toast.makeText(Vendas.this,"Apagar",Toast.LENGTH_SHORT).show();
-                        return true;
-//                        break;
-                }
-                return false;
-            }
-        });
-        popup.inflate(R.menu.menu_pedido);
-        popup.show();
     }
 
     public void adicionarItem(final View v){//Disparado pelo botão "+" de ItemPedidos
@@ -665,6 +486,272 @@ public class Vendas extends AppCompatActivity{
 
     }
 
+    public void zerar(View view){
+        zerar();
+    }
+
+    public void zerar(){
+        TextView valor, estado;
+        valor = (EditText)findViewById(R.id.add_valor);
+
+        itensList.clear();
+        soma = 0.0;
+        DecimalFormat df = new DecimalFormat(",##0.00");
+        valor.setText(df.format(0));
+
+        pagamento.setSelection(0);
+    }
+
+    private void enviar(String conteudo){
+        if(isConectado()) {
+            // Verificando se tem algo para enviar
+            if (conteudo.length() > 0) {
+                // Obter os bytes do conteudo e enviar pelo BluetoothService
+                byte[] enviar = conteudo.getBytes();
+                servicoBluetooth.write(enviar);
+
+                // Zerar buffer de saída
+                bufferSaida.setLength(0);
+            }
+        }
+    }
+    private boolean isConectado(){
+        //Verificar se estamos conectados antes de tentar algo
+        if (servicoBluetooth.getState() != BluetoothService.ESTADO_CONECTADO) {
+            Toast.makeText(this, R.string.nao_conectado, Toast.LENGTH_SHORT).show();
+            return false;
+        }else{
+            return true;
+        }
+    }
+
+    private void setStatus(int resId) {
+        estado.setText(resId);
+
+        switch(resId){
+            case R.string.title_connecting:
+                barraEstado.setBackgroundResource(R.color.corConectando);
+                break;
+            case R.string.title_listening:
+                barraEstado.setBackgroundResource(R.color.corOuvindo);
+                break;
+            case R.string.title_not_connected:
+                barraEstado.setBackgroundResource(R.color.corNaoConectado);
+                break;
+        }
+    }
+
+    private void setStatus(CharSequence subTitle) {
+        //Não verificado pois só um estado chama esta função
+        estado.setText(subTitle);
+        barraEstado.setBackgroundResource(R.color.corConectado);
+    }
+
+    private final Handler handler = new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            Activity activity = Vendas.this;
+            switch (msg.what) {
+                case MENSAGEM_MUDANCA_ESTADO: {
+                    switch (msg.arg1) {
+                        case BluetoothService.ESTADO_CONECTADO:
+                            setStatus(getString(R.string.title_connected_to, nomeDispositivoConectado));
+                            pedidosList.clear();
+                            break;
+                        case BluetoothService.ESTADO_CONECTANDO:
+                            setStatus(R.string.title_connecting);
+                            break;
+                        case BluetoothService.ESTADO_OUVIR:
+                            setStatus(R.string.title_listening);
+                            break;
+                        case BluetoothService.ESTADO_NENHUM:
+                            setStatus(R.string.title_not_connected);
+                            break;
+                    }
+                    break;
+                }
+                case MENSAGEM_ESCREVER: {//Quem envia a mensagem
+                    byte[] writeBuf = (byte[]) msg.obj;
+                    // Construir uma string com o buffer
+                    String writeMessage = new String(writeBuf);
+
+//                    Toast.makeText(activity, "Escrever: " + writeMessage, Toast.LENGTH_LONG).show();
+
+                    Pedido pedido = JSONStringToPedido(writeMessage);
+                    int estado = pedido.getEstado();
+                    if (estado > FECHANDO_CAIXA) {//Operação com Pedido
+                        DaoPedido daoPedido = new DaoPedido(activity);
+                        long id = daoPedido.inserir(pedido);
+                        if (id == -1){
+                            Toast.makeText(activity, "Ocorreu algum erro ao lançar o Pedido", Toast.LENGTH_SHORT).show();
+                            numPedido--;
+                            break;
+                        }
+                        pedido.setId(id);
+
+                        ArrayList<ItemPedido> itemPedidos = pedido.getItemPedidos();
+                        DaoItemPedido daoItemPedido = new DaoItemPedido(activity);
+                        for(int cont = 0; cont < itemPedidos.size(); cont++){
+                            id = daoItemPedido.inserir(itemPedidos.get(cont));
+                            if(id == -1){
+                                Toast.makeText(activity, "Ocorreu algum erro ao lançar Itens do Pedido", Toast.LENGTH_SHORT).show();
+                                break;
+                            }
+                            itemPedidos.get(cont).setId(id);
+                        }
+
+                        if(id == -1){
+                            Toast.makeText(activity, "Desculpe, tente novamente", Toast.LENGTH_SHORT).show();
+                        }
+                        pedidosList.add(0, pedido);
+                        caixa.addPedido(pedido);
+                        zerar();
+                        pedidoAdapter.notifyDataSetChanged();
+                    } else if (estado == ABRINDO_CAIXA) {
+                        DaoCaixa daoCaixa = new DaoCaixa(activity);
+                        if (daoCaixa.abrirCaixa(caixa) == -1){
+                            Toast.makeText(activity, "Ocorreu algum erro ao abrir o caixa", Toast.LENGTH_SHORT).show();
+                            break;
+                        }
+                        numCaixa++;
+                        abrirCaixa = false;
+                        listaPedidos.setEnabled(true);
+                        invalidateOptionsMenu();
+
+                    } else {//FECHANDO_CAIXA
+                        DaoCaixa daoCaixa = new DaoCaixa(activity);
+                        if (daoCaixa.fecharCaixa(caixa) < 1){
+                            Toast.makeText(activity, "Ocorreu algum erro ao fechar o caixa", Toast.LENGTH_SHORT).show();
+                            break;
+                        }
+                        abrirCaixa = true;
+                        listaPedidos.setEnabled(false);
+                        invalidateOptionsMenu();
+
+                    }
+                    break;
+                }
+                case MENSAGEM_LER: {//Quem recebe a mensagem
+                    byte[] readBuf = (byte[]) msg.obj;
+                    // Construir um string com os bytes validos do buffer
+                    String readMessage = new String(readBuf, 0, msg.arg1);
+
+//                    Toast.makeText(activity, "Ler: " + readMessage, Toast.LENGTH_LONG).show();
+
+                    Pedido pedido = JSONStringToPedido(readMessage);
+                    int estado = pedido.getEstado();
+                    if (estado > FECHANDO_CAIXA) {//Operação com Pedido
+                        ////////////////////////////////////
+                        DaoPedido daoPedido = new DaoPedido(activity);
+                        long id = daoPedido.inserir(pedido);
+                        if (id == -1){
+                            Toast.makeText(activity, "Ocorreu algum erro ao lançar o Pedido", Toast.LENGTH_SHORT).show();
+                            numPedido--;
+                            break;
+                        }
+                        pedido.setId(id);
+
+                        ArrayList<ItemPedido> itemPedidos = pedido.getItemPedidos();
+                        DaoItemPedido daoItemPedido = new DaoItemPedido(activity);
+                        for(int cont = 0; cont < itemPedidos.size(); cont++){
+                            id = daoItemPedido.inserir(itemPedidos.get(cont));
+                            if(id == -1){
+                                Toast.makeText(activity, "Ocorreu algum erro ao lançar Itens do Pedido", Toast.LENGTH_SHORT).show();
+                                break;
+                            }
+                            itemPedidos.get(cont).setId(id);
+                        }
+
+                        if(id == -1){
+                            Toast.makeText(activity, "Desculpe, tente novamente", Toast.LENGTH_SHORT).show();
+                        }
+                        ////////////////////////////////////
+                        pedidosList.add(0, pedido);
+                        caixa.addPedido(pedido);
+                        if(MODO.equals(MOENDA)) {
+                            Toast.makeText(activity, "Verificando modo", Toast.LENGTH_SHORT).show();
+                            adicionarSomaItens(pedido);
+                        }
+                        pedidoAdapter.notifyDataSetChanged();
+
+                    } else if (estado == ABRINDO_CAIXA) {
+                        Toast.makeText(activity, "Ler: Abrir Caixa", Toast.LENGTH_SHORT).show();
+
+                        caixa = new Caixa();
+                        caixa.setFundo(pedido.getValor());
+                        caixa.setNumero(pedido.getVenda());
+                        caixa.setDataAbertura(pedido.getData());
+                        caixa.setHoraAbertura(pedido.getHora());
+                        //////////////////////////////
+                        DaoCaixa daoCaixa = new DaoCaixa(activity);
+                        if (daoCaixa.abrirCaixa(caixa) == -1){
+                            Toast.makeText(activity, "Ocorreu algum erro ao abrir o caixa", Toast.LENGTH_SHORT).show();
+                            break;
+                        }
+                        //////////////////////////////
+                        numCaixa++;
+                        abrirCaixa = false;
+                        listaPedidos.setEnabled(true);
+                        invalidateOptionsMenu();
+
+                    } else {//FECHANDO_CAIXA
+                        caixa.setDataFechamento(pedido.getData());
+                        caixa.setHoraFechamento(pedido.getHora());
+                        //////////////////////////////
+                        DaoCaixa daoCaixa = new DaoCaixa(activity);
+                        if (daoCaixa.fecharCaixa(caixa) < 1){
+                            Toast.makeText(activity, "Ocorreu algum erro ao fechar o caixa", Toast.LENGTH_SHORT).show();
+                            break;
+                        }
+                        //////////////////////////////
+                        abrirCaixa = true;
+                        listaPedidos.setEnabled(false);
+                        invalidateOptionsMenu();
+
+                    }
+                    break;
+                }
+                case MENSAGEM_NOME_DISPOSITIVO: {
+                    // save the connected device's name
+                    nomeDispositivoConectado = msg.getData().getString(DEVICE_NAME);
+                    if (null != activity) {
+                        Toast.makeText(activity, "Conectado com " + nomeDispositivoConectado, Toast.LENGTH_SHORT).show();
+                    }
+                    break;
+                }
+                case MENSAGEM_TOAST: {
+                    if (null != activity) {
+                        Toast.makeText(activity, msg.getData().getString(TOAST), Toast.LENGTH_SHORT).show();
+                    }
+                    break;
+                }
+            }
+        }
+    };
+
+
+
+    public void menuPopup(View v){
+        PopupMenu popup = new PopupMenu(this, v);
+        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()){
+                    case R.id.cancelar:
+                        Toast.makeText(Vendas.this,"Cancelar",Toast.LENGTH_SHORT).show();
+                        return true;
+//                        break;
+                    case R.id.apagar:
+                        Toast.makeText(Vendas.this,"Apagar",Toast.LENGTH_SHORT).show();
+                        return true;
+//                        break;
+                }
+                return false;
+            }
+        });
+        popup.inflate(R.menu.menu_pedido);
+        popup.show();
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -688,7 +775,7 @@ public class Vendas extends AppCompatActivity{
                 break;
             }
             case SOLICITACAO_CONEXAO_INSEGURA: {
-                //Quando é retornado um dispositivp escolhido a conectar
+                //Quando é retornado um dispositivo escolhido a conectar
                 if (resultCode == RESULT_OK) {
                     conectarDispositivo(data, false);
                 }
@@ -698,7 +785,7 @@ public class Vendas extends AppCompatActivity{
     }
 
     private void conectarDispositivo(Intent data, boolean seguro){
-        // Obter o endereço MAC
+        // Obter o endereço MAC//TODO - quando o banco estiver salvando configurações, obter endereços dele aqui
         String address = data.getExtras().getString(ListaDeDispositivos.EXTRA_DEVICE_ADDRESS);
         // Obter o objeto BluetoothDevice
         BluetoothDevice device = bluetoothAdapter.getRemoteDevice(address);
@@ -777,11 +864,11 @@ public class Vendas extends AppCompatActivity{
                 startActivityForResult(intentServidor, SOLICITACAO_CONEXAO_INSEGURA);
                 return true;
             }
-            case R.id.visivel: {
-                //Tornar Visível aos outros dispositivos
-                tornarVisivel();
-                return true;
-            }
+//            case R.id.visivel: {
+//                //Tornar Visível aos outros dispositivos
+//                tornarVisivel();
+//                return true;
+//            }
             case R.id.abrirCaixa: {
                 if(isConectado()) {
                     if (abrirCaixa) {//Fechado -> Operação Abrir
@@ -798,15 +885,14 @@ public class Vendas extends AppCompatActivity{
                         builder.setPositiveButton("Confirmar", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
-                                //TODO - banco será chamado aqui para inserir o caixa
                                 caixa.setNumero(numCaixa);
                                 caixa.setFundo(Double.parseDouble(valor_fundo.getText().toString().replace(",", ".")));
                                 caixa.setDataAbertura("1");
                                 caixa.setHoraAbertura("1");
-                                Toast.makeText(Vendas.this, "Caixa: DataAbertura: " + caixa.getDataAbertura() + " HoraAbertura: " + caixa.getHoraAbertura() + " DataFechamento: " + caixa.getDataFechamento() + " HoraFechamento: " + caixa.getHoraFechamento() + " Fundo: " + caixa.getFundo(), Toast.LENGTH_SHORT).show();
 
                                 Pedido pedido = new Pedido();
                                 pedido.setEstado(ABRINDO_CAIXA);
+                                pedido.setVenda(caixa.getNumero());
                                 pedido.setValor(caixa.getFundo());
                                 pedido.setData(caixa.getDataAbertura());
                                 pedido.setHora(caixa.getHoraAbertura());
@@ -828,10 +914,8 @@ public class Vendas extends AppCompatActivity{
                         builder.setPositiveButton("Confirmar", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
-                                //TODO - banco será chamado aqui ou no Handler para atualizar o caixa
                                 caixa.setDataFechamento("2");
                                 caixa.setHoraFechamento("2");
-                                Toast.makeText(Vendas.this, "Caixa: DataAbertura: " + caixa.getDataAbertura() + " HoraAbertura: " + caixa.getHoraAbertura() + " DataFechamento: " + caixa.getDataFechamento() + " HoraFechamento: " + caixa.getHoraFechamento() + " Fundo: " + caixa.getFundo(), Toast.LENGTH_SHORT).show();
 
                                 Pedido pedido = new Pedido();
                                 pedido.setEstado(FECHANDO_CAIXA);
@@ -844,8 +928,6 @@ public class Vendas extends AppCompatActivity{
                         builder.show();
                         //Sobre o AlertDialog
 
-                        //TODO - colocar no Handler, quando receber solicitação de abertura
-                        item.setTitle(R.string.abrir_caixa);
                         return true;
                     }
                 }
@@ -870,25 +952,26 @@ public class Vendas extends AppCompatActivity{
         JSONObject jsonPedido = new JSONObject();
         JSONArray jsonItens = new JSONArray();
         JSONObject jsonItem;
+        ItemPedido itemPedido;
         try {
-            jsonPedido.put(P_ID,pedido.getVenda());
+            jsonPedido.put(P_VENDA,pedido.getVenda());
             jsonPedido.put(P_COMANDA,pedido.getComanda());
             jsonPedido.put(P_ESTADO,pedido.getEstado());
             jsonPedido.put(P_VALOR,pedido.getValor());
             jsonPedido.put(P_PAGTO,pedido.getFormaPagamento());
             jsonPedido.put(P_DATA,pedido.getData());
             jsonPedido.put(P_HORA,pedido.getHora());
-//                    jsonPedido.put(CAIXA_ID,pedidoAux.getCaixa().getNumero());
+//            jsonPedido.put(P_CAIXA_NUM,pedido.getCaixa().getNumero());
             for(int cont = 0; cont < itensList.size(); cont++){
-                itemAux = itensList.get(cont);
+                itemPedido = itensList.get(cont);
                 jsonItem = new JSONObject();
-                jsonItem.put(IP_ID,itemAux.getSequencia());
-                jsonItem.put(IP_SABOR,itemAux.getSabor());
-                jsonItem.put(IP_RECIP,itemAux.getRecipiente());
-                jsonItem.put(IP_QTD,itemAux.getQuantidade());
-                jsonItem.put(IP_ENTREGUE,itemAux.getEntregue());
-                jsonItem.put(IP_OBS,itemAux.getObservacao());
-//                jsonItem.put(IP_PEDIDO_ID,itemAux.getPedido().getId());
+                jsonItem.put(IP_SEQUENCIA,itemPedido.getSequencia());
+                jsonItem.put(IP_SABOR,itemPedido.getSabor());
+                jsonItem.put(IP_RECIP,itemPedido.getRecipiente());
+                jsonItem.put(IP_QTD,itemPedido.getQuantidade());
+                jsonItem.put(IP_ENTREGUE,itemPedido.getEntregue());
+                jsonItem.put(IP_OBS,itemPedido.getObservacao());
+//                jsonItem.put(IP_PEDIDO_VENDA,itemPedido.getPedido().getId());
                 jsonItens.put(jsonItem);
             }
             jsonPedido.put(ITEM_PEDIDOS,jsonItens);
@@ -908,19 +991,19 @@ public class Vendas extends AppCompatActivity{
         ItemPedido itemPedido;
         try{
             jsonPedido = new JSONObject(stringJSON);
-            pedido.setVenda(jsonPedido.getLong(P_ID));
+            pedido.setVenda(jsonPedido.getLong(P_VENDA));
             pedido.setComanda(jsonPedido.getInt(P_COMANDA));
             pedido.setEstado(jsonPedido.getInt(P_ESTADO));
             pedido.setValor(jsonPedido.getInt(P_VALOR));
             pedido.setFormaPagamento(jsonPedido.getInt(P_PAGTO));
             pedido.setData(jsonPedido.getString(P_DATA));
             pedido.setHora(jsonPedido.getString(P_HORA));
-//            pedido.setCaixa(caixa);
+            pedido.setCaixa(caixa);
             jsonItens = jsonPedido.getJSONArray(ITEM_PEDIDOS);
             for(int cont = 0; cont < jsonItens.length();cont++){
                 jsonItem = jsonItens.getJSONObject(cont);
                 itemPedido = new ItemPedido();
-                itemPedido.setSequencia(jsonItem.getInt(IP_ID));
+                itemPedido.setSequencia(jsonItem.getInt(IP_SEQUENCIA));
                 itemPedido.setSabor(jsonItem.getInt(IP_SABOR));
                 itemPedido.setRecipiente(jsonItem.getInt(IP_RECIP));
                 itemPedido.setQuantidade(jsonItem.getInt(IP_QTD));
@@ -937,10 +1020,10 @@ public class Vendas extends AppCompatActivity{
     }
     public void adicionarSomaItens(Pedido pedido){
         Toast.makeText(this, "Adicionar soma itens", Toast.LENGTH_SHORT).show();
-        somaTaiti.setText("" + pedido.getQtdTotal(TAITI)+" mL");
-        somaSiciliano.setText("" + pedido.getQtdTotal(SICILIANO)+" mL");
-        somaAbacaxi.setText("" + pedido.getQtdTotal(ABACAXI)+" mL");
-        somaPuro.setText("" + pedido.getQtdTotal(PURO)+" mL");
-        somaGengibre.setText("" + pedido.getQtdTotal(GENGIBRE)+" mL");
+        somaTaiti.setText(pedido.getQtdTotal(TAITI)+" mL");
+        somaSiciliano.setText(pedido.getQtdTotal(SICILIANO)+" mL");
+        somaAbacaxi.setText(pedido.getQtdTotal(ABACAXI)+" mL");
+        somaPuro.setText(pedido.getQtdTotal(PURO)+" mL");
+        somaGengibre.setText(pedido.getQtdTotal(GENGIBRE)+" mL");
     }
 }

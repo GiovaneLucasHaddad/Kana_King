@@ -3,6 +3,7 @@ package com.example.android.kanaking.control;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.widget.Toast;
 
 public class BD extends SQLiteOpenHelper {
     public static final String NOME_BD = "KanaKing.db";

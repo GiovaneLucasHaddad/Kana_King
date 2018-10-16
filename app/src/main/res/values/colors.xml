@@ -8,7 +8,7 @@
     <!--Estado da conexão-->
     <color name="corConectado">#008000</color>
     <color name="corConectando">#808080</color>
-    <color name="corOuvindo">#7b68ee</color>
+    <color name="corOuvindo">#FF0000</color>
     <color name="corNaoConectado">#FF0000</color>
 
     <!--Estado do Pedido-->

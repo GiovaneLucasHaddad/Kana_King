@@ -8,6 +8,8 @@ import android.widget.Toast;
 
 import com.example.android.kanaking.model.Caixa;
 
+import java.util.ArrayList;
+
 public class DaoCaixa {
     private SQLiteDatabase db;
 
@@ -37,7 +39,10 @@ public class DaoCaixa {
         return  db.update(Esquema.Caixa.TABELA,valores,selecao,args);
     }
 
-    public Caixa ultimoCaixa(){//Traz o último registro de caixa para iniciar a lista de Pedidos
+    public Caixa ultimoCaixa(long ultimoId){//Traz o último registro de caixa para iniciar a lista de Pedidos
+        if(ultimoId == -1){
+            return null;
+        }
         String[] projecao = {
                 Esquema.Caixa._ID,
                 Esquema.Caixa.NUMERO,
@@ -47,10 +52,11 @@ public class DaoCaixa {
                 Esquema.Caixa.HORA_FECHAMENTO,
                 Esquema.Caixa.FUNDO};
         String selecao = Esquema.Caixa._ID + " = ?";
-        String[] args = {"" + ultimoId()};
+        String[] args = {"" + ultimoId};
 
-        Cursor cursor = db.query(Esquema.Caixa.TABELA,projecao,selecao,args,null,null,null);
         Caixa caixa = null;
+        String aux;
+        Cursor cursor = db.query(Esquema.Caixa.TABELA,projecao,selecao,args,null,null,null);
         if (cursor.getCount() > 0){
             cursor.moveToFirst();
             caixa = new Caixa();
@@ -58,19 +64,30 @@ public class DaoCaixa {
             caixa.setNumero(cursor.getLong(cursor.getColumnIndexOrThrow(Esquema.Caixa.NUMERO)));
             caixa.setDataAbertura(cursor.getString(cursor.getColumnIndexOrThrow(Esquema.Caixa.DATA_ABERTURA)));
             caixa.setHoraAbertura(cursor.getString(cursor.getColumnIndexOrThrow(Esquema.Caixa.HORA_ABERTURA)));
-            caixa.setDataFechamento(cursor.getString(cursor.getColumnIndexOrThrow(Esquema.Caixa.DATA_FECHAMENTO)));
-            caixa.setHoraFechamento(cursor.getString(cursor.getColumnIndexOrThrow(Esquema.Caixa.HORA_FECHAMENTO)));
+
+            aux = cursor.getString(cursor.getColumnIndexOrThrow(Esquema.Caixa.DATA_FECHAMENTO));
+            if(aux != null){
+                caixa.setDataFechamento(aux);
+            }
+            aux = cursor.getString(cursor.getColumnIndexOrThrow(Esquema.Caixa.HORA_FECHAMENTO));
+            if(aux != null){
+                caixa.setHoraFechamento(aux);
+            }
             caixa.setFundo(cursor.getDouble(cursor.getColumnIndexOrThrow(Esquema.Caixa.FUNDO)));
         }
         cursor.close();
         return caixa;
     }
 
-    private long ultimoId(){
-        String consulta = "SELECT MAX(" + Esquema.Caixa._ID + ") FROM " + Esquema.Caixa.TABELA;
-        Cursor cursor = db.rawQuery(consulta,null);
-        cursor.moveToFirst();
-        long id = cursor.getLong(cursor.getColumnIndexOrThrow(Esquema.Caixa._ID));
+    public long ultimoId(){
+        String[] projecao = {Esquema.Caixa._ID};
+        String ordem = Esquema.Caixa._ID + " ASC";
+        long id = -1;
+        Cursor cursor = db.query(Esquema.Caixa.TABELA,projecao,null,null,null,null,ordem);
+        if (cursor.getCount() > 0) {
+            cursor.moveToLast();
+            id = cursor.getLong(cursor.getColumnIndexOrThrow(Esquema.Caixa._ID));
+        }
         cursor.close();
         return id;
     }

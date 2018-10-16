@@ -70,23 +70,33 @@ public class PedidoAdapter extends BaseAdapter {
             public void onClick(View v) {
                 Toast.makeText(mContext, "Clique no número", Toast.LENGTH_SHORT).show();
                 int estado = 0;
-                //TODO - Ver se dá pra acessar ou definir entre CAIXA e MOENDA
 
-                if(Vendas.MODO.equals(CAIXA)){
+                if(Vendas.MODO.equals(CAIXA)){  //TODO - esse funcionamento precisa estar no Handler, portanto,
+                                                //TODO - esse botão tem que mandar uma mensagem (enviar())
                     Toast.makeText(mContext, "MODO CAIXA", Toast.LENGTH_SHORT).show();
+                    switch(pedidoAtual.getEstado()){
+                        case LANCADO:
+                            estado = TERMINADO;
+                            break;
+                        case PREPARANDO:
+                            estado = TERMINADO;
+                            break;
+                        case PRONTO:
+                            estado = TERMINADO;
+                            break;
+                    }
+                }else{
+                    Toast.makeText(mContext, "MODO MOENDA", Toast.LENGTH_SHORT).show();
+                    switch(pedidoAtual.getEstado()){
+                        case LANCADO:
+                            estado = PREPARANDO;
+                            break;
+                        case PREPARANDO:
+                            estado = PRONTO;
+                            break;
+                    }
+                }
 
-                }
-                switch(pedidoAtual.getEstado()){
-                    case LANCADO:
-                        estado = PREPARANDO;
-                        break;
-                    case PREPARANDO:
-                        estado = PRONTO;
-                        break;
-                    case PRONTO:
-                        estado = TERMINADO;
-                        break;
-                }
                 pedidoAtual.setEstado(estado);
 
                 notifyDataSetChanged();

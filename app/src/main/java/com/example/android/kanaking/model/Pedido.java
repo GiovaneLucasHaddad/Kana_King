@@ -125,6 +125,10 @@ public class Pedido {
         return itemPedidos;
     }
 
+    public void setItemPedidos(ArrayList<ItemPedido> itemPedidos) {
+        this.itemPedidos = itemPedidos;
+    }
+
     public Caixa getCaixa() {
         return caixa;
     }

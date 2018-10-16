@@ -52,7 +52,7 @@ public class DaoItemPedido {
         return db.update(Esquema.ItemPedido.TABELA,valores,selecao,args);
     }
 
-    public ArrayList<ItemPedido> buscarItemPedidos(Pedido pedido){
+    public void buscarItemPedidos(Pedido pedido){
         String[] projecao = {
                 Esquema.ItemPedido._ID,
                 Esquema.ItemPedido.SEQUENCIA,
@@ -82,6 +82,6 @@ public class DaoItemPedido {
             itemPedidos.add(itemAux);
         }
         cursor.close();
-        return itemPedidos;
+        pedido.setItemPedidos(itemPedidos);
     }
 }

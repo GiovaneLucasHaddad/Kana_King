@@ -31,23 +31,23 @@ public interface Constantes {
 
     // Campos titulo para o JSON
     //Pedido
-    String P_ID = "P_ID";
+    String P_VENDA = "P_VENDA";
     String P_COMANDA = "P_COMANDA";
     String P_ESTADO = "P_ESTADO";
     String P_VALOR = "P_VALOR";
     String P_PAGTO = "P_PAGTO";
     String P_DATA = "P_DATA";
     String P_HORA = "P_HORA";
-    String P_CAIXA_ID = "P_CAIXA_ID";
+    String P_CAIXA_NUM = "P_C_NUM";
     //ItemPedido
     String ITEM_PEDIDOS = "ITEM_PEDIDOS";
-    String IP_ID = "IP_ID";
+    String IP_SEQUENCIA = "IP_SEQ";
     String IP_SABOR = "IP_SABOR";
     String IP_RECIP = "IP_RECIP";
     String IP_QTD = "IP_QTD";
     String IP_ENTREGUE = "IP_ENTREGUE";
     String IP_OBS = "IP_OBS";
-    String IP_PEDIDO_ID = "IP_PEDIDO_ID";
+    String IP_PEDIDO_VENDA = "IP_P_VENDA";
 
     //Formas de pagamento
     int CARTAO = 1;
