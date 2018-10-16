@@ -14,11 +14,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.android.kanaking.model.Pedido;
+import com.example.android.kanaking.view.Vendas;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.example.android.kanaking.Constantes.CAIXA;
 import static com.example.android.kanaking.Constantes.CANCELADO;
 import static com.example.android.kanaking.Constantes.CARTAO;
 import static com.example.android.kanaking.Constantes.DINHEIRO;
@@ -32,8 +34,8 @@ public class PedidoAdapter extends BaseAdapter {
     private List<Pedido> listaPedidos = new ArrayList<>();
 
     public PedidoAdapter(@NonNull Context context,  ArrayList<Pedido> list) {
-        mContext = context;
-        listaPedidos = list;
+        this.mContext = context;
+        this.listaPedidos = list;
     }
 
     @Override
@@ -48,7 +50,7 @@ public class PedidoAdapter extends BaseAdapter {
 
     @Override
     public long getItemId(int position) {
-        return position;
+        return listaPedidos.get(position).getVenda();
     }
 
     @NonNull
@@ -69,6 +71,11 @@ public class PedidoAdapter extends BaseAdapter {
                 Toast.makeText(mContext, "Clique no número", Toast.LENGTH_SHORT).show();
                 int estado = 0;
                 //TODO - Ver se dá pra acessar ou definir entre CAIXA e MOENDA
+
+                if(Vendas.MODO.equals(CAIXA)){
+                    Toast.makeText(mContext, "MODO CAIXA", Toast.LENGTH_SHORT).show();
+
+                }
                 switch(pedidoAtual.getEstado()){
                     case LANCADO:
                         estado = PREPARANDO;

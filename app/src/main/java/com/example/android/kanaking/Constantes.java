@@ -15,6 +15,7 @@ public interface Constantes {
 
     String CAIXA = "CAIXA";
     String MOENDA = "MOENDA";
+    String AUXILIAR = "AUXILIAR";
 
     // Estados de um pedido ou controle de Vendas
     int ABRINDO_CAIXA = 1;
@@ -85,7 +86,7 @@ public interface Constantes {
     Double PRECOS [] =
         //COCO_FRUTA, COPO_300, COPO_400, COPO_500, GARRAFA_500, GARRAFA_1000
     {0.0, 6.0,        4.0,      5.0,      6.0,      7.0,         12.0};
-    //QUANTIDADE RECIPIENTE
+    //QUANTIDADE (ML) RECIPIENTES
     int QTD_RECIPIENTE [] =
         //COCO_FRUTA, COPO_300, COPO_400, COPO_500, GARRAFA_500, GARRAFA_1000
     {0, 0,            300,      400,      500,      500,         1000};

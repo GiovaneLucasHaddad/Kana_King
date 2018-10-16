@@ -90,7 +90,7 @@ import static com.example.android.kanaking.Constantes.TOAST;
 
 public class Vendas extends AppCompatActivity{
 
-    private static String MODO;
+    public static String MODO;
 
     //Relacionado ao Bluetooth
     private static final int SOLICITACAO_CONEXAO_SEGURA = 1;

@@ -35,7 +35,7 @@ public class ItemPedidoAdapter extends BaseAdapter {
 
     @Override
     public long getItemId(int position) {
-        return position;
+        return  listaItens.get(position).getSequencia();
     }
 
     @Override
