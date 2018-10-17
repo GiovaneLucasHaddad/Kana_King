@@ -29,5 +29,6 @@
 
 
     <color name="corEspacoItens">#DCDCDC</color>
+    <color name="cor50PCTransparente">#7FDCDCDC</color>
 
 </resources>

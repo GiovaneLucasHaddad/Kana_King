@@ -107,6 +107,7 @@ public class Vendas extends AppCompatActivity{
 
     private NumberPicker comanda;
     private ListView listaPedidos;
+    private LinearLayout bloqueio;
     private PedidoAdapter pedidoAdapter;
     private ArrayList<Pedido> pedidosList;
     private Spinner pagamento;
@@ -201,6 +202,7 @@ public class Vendas extends AppCompatActivity{
         barraEstado = (LinearLayout)findViewById(R.id.fundo_estado);
         estado = (TextView)findViewById(R.id.estado);
         listaPedidos = findViewById(R.id.lista_pedidos);
+        bloqueio = findViewById(R.id.bloqueio);
 
         //Configurando abertura de caixa
         DaoCaixa daoCaixa = new DaoCaixa(this);
@@ -219,9 +221,12 @@ public class Vendas extends AppCompatActivity{
         if (abrirCaixa){
             Toast.makeText(this,"Caixa fechado/Primeiro Caixa", Toast.LENGTH_SHORT).show();
             listaPedidos.setEnabled(false);
+            bloqueio.setVisibility(View.VISIBLE);
         }else{
             Toast.makeText(this,"Caixa aberto", Toast.LENGTH_SHORT).show();
             Toast.makeText(Vendas.this, "Caixa: DataAbertura: " + caixa.getDataAbertura() + " HoraAbertura: " + caixa.getHoraAbertura() + " DataFechamento: " + caixa.getDataFechamento() + " HoraFechamento: " + caixa.getHoraFechamento() + " Fundo: " + caixa.getFundo(), Toast.LENGTH_SHORT).show();
+            listaPedidos.setEnabled(true);
+            bloqueio.setVisibility(View.INVISIBLE);
         }
 
         //Configurando o ArrayAdapter PedidoAdapter para a ListView listaPedidos
@@ -556,7 +561,6 @@ public class Vendas extends AppCompatActivity{
                     switch (msg.arg1) {
                         case BluetoothService.ESTADO_CONECTADO:
                             setStatus(getString(R.string.title_connected_to, nomeDispositivoConectado));
-                            pedidosList.clear();
                             break;
                         case BluetoothService.ESTADO_CONECTANDO:
                             setStatus(R.string.title_connecting);
@@ -615,7 +619,10 @@ public class Vendas extends AppCompatActivity{
                         }
                         numCaixa++;
                         abrirCaixa = false;
+                        pedidosList.clear();
+                        pedidoAdapter.notifyDataSetChanged();
                         listaPedidos.setEnabled(true);
+                        bloqueio.setVisibility(View.INVISIBLE);
                         invalidateOptionsMenu();
 
                     } else {//FECHANDO_CAIXA
@@ -626,6 +633,7 @@ public class Vendas extends AppCompatActivity{
                         }
                         abrirCaixa = true;
                         listaPedidos.setEnabled(false);
+                        bloqueio.setVisibility(View.VISIBLE);
                         invalidateOptionsMenu();
 
                     }
@@ -691,7 +699,10 @@ public class Vendas extends AppCompatActivity{
                         //////////////////////////////
                         numCaixa++;
                         abrirCaixa = false;
+                        pedidosList.clear();
+                        pedidoAdapter.notifyDataSetChanged();
                         listaPedidos.setEnabled(true);
+                        bloqueio.setVisibility(View.INVISIBLE);
                         invalidateOptionsMenu();
 
                     } else {//FECHANDO_CAIXA
@@ -706,6 +717,7 @@ public class Vendas extends AppCompatActivity{
                         //////////////////////////////
                         abrirCaixa = true;
                         listaPedidos.setEnabled(false);
+                        bloqueio.setVisibility(View.VISIBLE);
                         invalidateOptionsMenu();
 
                     }

@@ -16,7 +16,6 @@ public class DaoCaixa {
     public DaoCaixa(Context context){
         BD auxBD = new BD(context);
         db = auxBD.getWritableDatabase();
-        Toast.makeText(context,"Caixa iniciado",Toast.LENGTH_SHORT).show();
     }
 
     public long abrirCaixa(Caixa caixa){

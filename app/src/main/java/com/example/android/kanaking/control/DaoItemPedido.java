@@ -17,7 +17,6 @@ public class DaoItemPedido {
     public DaoItemPedido(Context context){
         BD auxBD = new BD(context);
         db = auxBD.getWritableDatabase();
-        Toast.makeText(context,"ItemPedido iniciado",Toast.LENGTH_SHORT).show();
     }
 
     public long inserir(ItemPedido itemPedido){
