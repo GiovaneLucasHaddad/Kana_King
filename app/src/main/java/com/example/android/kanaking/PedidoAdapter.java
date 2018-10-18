@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.FrameLayout;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -25,6 +26,7 @@ import static com.example.android.kanaking.Constantes.CANCELADO;
 import static com.example.android.kanaking.Constantes.CARTAO;
 import static com.example.android.kanaking.Constantes.DINHEIRO;
 import static com.example.android.kanaking.Constantes.LANCADO;
+import static com.example.android.kanaking.Constantes.MOENDA;
 import static com.example.android.kanaking.Constantes.PREPARANDO;
 import static com.example.android.kanaking.Constantes.PRONTO;
 import static com.example.android.kanaking.Constantes.TERMINADO;
@@ -64,45 +66,7 @@ public class PedidoAdapter extends BaseAdapter {
 
         TextView comanda = (TextView)listItem.findViewById(R.id.comanda);
         comanda.setText(String.valueOf(pedidoAtual.getComanda()));
-
-        comanda.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(mContext, "Clique no número", Toast.LENGTH_SHORT).show();
-                int estado = 0;
-
-                if(Vendas.MODO.equals(CAIXA)){  //TODO - esse funcionamento precisa estar no Handler, portanto,
-                                                //TODO - esse botão tem que mandar uma mensagem (enviar())
-                    Toast.makeText(mContext, "MODO CAIXA", Toast.LENGTH_SHORT).show();
-                    switch(pedidoAtual.getEstado()){
-                        case LANCADO:
-                            estado = TERMINADO;
-                            break;
-                        case PREPARANDO:
-                            estado = TERMINADO;
-                            break;
-                        case PRONTO:
-                            estado = TERMINADO;
-                            break;
-                    }
-                }else{
-                    Toast.makeText(mContext, "MODO MOENDA", Toast.LENGTH_SHORT).show();
-                    switch(pedidoAtual.getEstado()){
-                        case LANCADO:
-                            estado = PREPARANDO;
-                            break;
-                        case PREPARANDO:
-                            estado = PRONTO;
-                            break;
-                    }
-                }
-
-                pedidoAtual.setEstado(estado);
-
-                notifyDataSetChanged();
-
-            }
-        });
+        comanda.setTag(pedidoAtual);
 
         //Configurando GridView
         GridView itemGrid = listItem.findViewById(R.id.itens);
@@ -126,18 +90,25 @@ public class PedidoAdapter extends BaseAdapter {
 
         });
 
-        TextView valor = (TextView)listItem.findViewById(R.id.valor);
-        DecimalFormat df = new DecimalFormat(",##0.00");
-        valor.setText(df.format(pedidoAtual.getValor()));
+        if(Vendas.MODO.equals(CAIXA)){
+            TextView valor = (TextView)listItem.findViewById(R.id.valor);
+            DecimalFormat df = new DecimalFormat(",##0.00");
+            valor.setText(df.format(pedidoAtual.getValor()));
 
-        ImageView tipoPagamento = (ImageView)listItem.findViewById(R.id.tipo_pagamento);
-        switch(pedidoAtual.getFormaPagamento()){
-            case CARTAO:
-                tipoPagamento.setImageResource(R.drawable.cartao);
-                break;
-            case DINHEIRO:
-                tipoPagamento.setImageResource(R.drawable.dinheiro);
+            ImageView tipoPagamento = (ImageView)listItem.findViewById(R.id.tipo_pagamento);
+            switch(pedidoAtual.getFormaPagamento()){
+                case CARTAO:
+                    tipoPagamento.setImageResource(R.drawable.cartao);
+                    break;
+                case DINHEIRO:
+                    tipoPagamento.setImageResource(R.drawable.dinheiro);
+                    break;
+            }
+        }else{
+            FrameLayout pagEOpcoes = listItem.findViewById(R.id.pag_e_opcoes);
+            pagEOpcoes.setVisibility(View.GONE);
         }
+
 
 
         LinearLayout fundo = (LinearLayout)listItem.findViewById(R.id.fundo);

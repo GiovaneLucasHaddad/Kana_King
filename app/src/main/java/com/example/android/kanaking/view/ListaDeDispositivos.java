@@ -74,14 +74,14 @@ public class ListaDeDispositivos extends Activity {
         // Set result CANCELED in case the user backs out
         setResult(Activity.RESULT_CANCELED);
 
-        // Initialize the button to perform device discovery
-        Button scanButton = (Button) findViewById(R.id.button_scan);
-        scanButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                doDiscovery();
-                v.setVisibility(View.GONE);
-            }
-        });
+//        // Initialize the button to perform device discovery
+//        Button scanButton = (Button) findViewById(R.id.button_scan);
+//        scanButton.setOnClickListener(new View.OnClickListener() {
+//            public void onClick(View v) {
+//                doDiscovery();
+//                v.setVisibility(View.GONE);
+//            }
+//        });
 
         // Initialize array adapters. One for already paired devices and
         // one for newly discovered devices
@@ -141,23 +141,23 @@ public class ListaDeDispositivos extends Activity {
     /**
      * Start device discover with the BluetoothAdapter
      */
-    private void doDiscovery() {
-
-        // Indicate scanning in the title
-        setProgressBarIndeterminateVisibility(true);
-        setTitle(R.string.scanning);
-
-        // Turn on sub-title for new devices
-        findViewById(R.id.title_new_devices).setVisibility(View.VISIBLE);
-
-        // If we're already discovering, stop it
-        if (mBtAdapter.isDiscovering()) {
-            mBtAdapter.cancelDiscovery();
-        }
-
-        // Request discover from BluetoothAdapter
-        mBtAdapter.startDiscovery();
-    }
+//    private void doDiscovery() {
+//
+//        // Indicate scanning in the title
+//        setProgressBarIndeterminateVisibility(true);
+//        setTitle(R.string.scanning);
+//
+//        // Turn on sub-title for new devices
+//        findViewById(R.id.title_new_devices).setVisibility(View.VISIBLE);
+//
+//        // If we're already discovering, stop it
+//        if (mBtAdapter.isDiscovering()) {
+//            mBtAdapter.cancelDiscovery();
+//        }
+//
+//        // Request discover from BluetoothAdapter
+//        mBtAdapter.startDiscovery();
+//    }
 
     /**
      * The on-click listener for all devices in the ListViews

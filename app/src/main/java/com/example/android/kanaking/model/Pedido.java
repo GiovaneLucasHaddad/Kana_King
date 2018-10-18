@@ -27,6 +27,19 @@ public class Pedido {
         caixa = null;
     }
 
+    public Pedido(Pedido pedido){
+        id = pedido.id;
+        venda = pedido.venda;
+        comanda = pedido.comanda;
+        estado = pedido.estado;
+        valor = pedido.valor;
+        formaPagamento = pedido.formaPagamento;
+        data = pedido.data;
+        hora = pedido.hora;
+        itemPedidos = pedido.itemPedidos;
+        caixa = pedido.caixa;
+    }
+
     public Pedido(long id, long venda, int comanda, int estado, double valor, int formaPagamento, String data, String hora, ArrayList<ItemPedido> itens) {
         this.id = id;
         this.venda = venda;

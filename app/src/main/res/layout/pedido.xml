@@ -12,7 +12,8 @@
         android:layout_weight="1"
         android:gravity="center"
         android:textColor="@android:color/black"
-        android:textSize="30sp" />
+        android:textSize="30sp"
+        android:onClick="mudarEstado"/>
 
     <GridView
         android:id="@+id/itens"
@@ -28,6 +29,7 @@
         android:verticalSpacing="2dp"
         android:background="@color/corEspacoItens"/>
     <FrameLayout
+        android:id="@+id/pag_e_opcoes"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="2">

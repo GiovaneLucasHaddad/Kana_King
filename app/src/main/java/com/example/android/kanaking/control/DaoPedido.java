@@ -44,8 +44,8 @@ public class DaoPedido {
         ContentValues valores = new ContentValues();
         valores.put(Esquema.Pedido.ESTADO,pedido.getEstado());
 
-        String selecao = Esquema.Pedido.VENDA + " = ?";
-        String[] args = {"" + pedido.getVenda()};
+        String selecao = Esquema.Pedido.VENDA + " = ? AND " + Esquema.Pedido.CAIXA + " = ?";
+        String[] args = {"" + pedido.getVenda(), "" + pedido.getCaixa().getNumero()};
 
         return db.update(Esquema.Pedido.TABELA,valores,selecao,args);
     }

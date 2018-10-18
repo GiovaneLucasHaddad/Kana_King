@@ -16,6 +16,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.GridView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -77,6 +78,8 @@ import static com.example.android.kanaking.Constantes.MENSAGEM_NOME_DISPOSITIVO;
 import static com.example.android.kanaking.Constantes.MENSAGEM_TOAST;
 import static com.example.android.kanaking.Constantes.MOENDA;
 import static com.example.android.kanaking.Constantes.OBSERVACAO;
+import static com.example.android.kanaking.Constantes.PREPARANDO;
+import static com.example.android.kanaking.Constantes.PRONTO;
 import static com.example.android.kanaking.Constantes.PURO;
 import static com.example.android.kanaking.Constantes.P_COMANDA;
 import static com.example.android.kanaking.Constantes.P_DATA;
@@ -86,10 +89,12 @@ import static com.example.android.kanaking.Constantes.P_PAGTO;
 import static com.example.android.kanaking.Constantes.P_VALOR;
 import static com.example.android.kanaking.Constantes.P_VENDA;
 import static com.example.android.kanaking.Constantes.QUANTIDADE;
+import static com.example.android.kanaking.Constantes.REABRINDO_CAIXA;
 import static com.example.android.kanaking.Constantes.RECIPIENTE;
 import static com.example.android.kanaking.Constantes.SABOR;
 import static com.example.android.kanaking.Constantes.SICILIANO;
 import static com.example.android.kanaking.Constantes.TAITI;
+import static com.example.android.kanaking.Constantes.TERMINADO;
 import static com.example.android.kanaking.Constantes.TOAST;
 
 public class Vendas extends AppCompatActivity{
@@ -107,7 +112,7 @@ public class Vendas extends AppCompatActivity{
 
     private NumberPicker comanda;
     private ListView listaPedidos;
-    private LinearLayout bloqueio;
+    private FrameLayout bloqueio;
     private PedidoAdapter pedidoAdapter;
     private ArrayList<Pedido> pedidosList;
     private Spinner pagamento;
@@ -583,59 +588,83 @@ public class Vendas extends AppCompatActivity{
 
                     Pedido pedido = JSONStringToPedido(writeMessage);
                     int estado = pedido.getEstado();
-                    if (estado > FECHANDO_CAIXA) {//Operação com Pedido
-                        DaoPedido daoPedido = new DaoPedido(activity);
-                        long id = daoPedido.inserir(pedido);
-                        if (id == -1){
-                            Toast.makeText(activity, "Ocorreu algum erro ao lançar o Pedido", Toast.LENGTH_SHORT).show();
-                            numPedido--;
-                            break;
-                        }
-                        pedido.setId(id);
-
-                        ArrayList<ItemPedido> itemPedidos = pedido.getItemPedidos();
-                        DaoItemPedido daoItemPedido = new DaoItemPedido(activity);
-                        for(int cont = 0; cont < itemPedidos.size(); cont++){
-                            id = daoItemPedido.inserir(itemPedidos.get(cont));
-                            if(id == -1){
-                                Toast.makeText(activity, "Ocorreu algum erro ao lançar Itens do Pedido", Toast.LENGTH_SHORT).show();
+                    switch(estado){
+                        case ABRINDO_CAIXA: {
+                            DaoCaixa daoCaixa = new DaoCaixa(activity);
+                            if (daoCaixa.abrirCaixa(caixa) == -1) {
+                                Toast.makeText(activity, "Ocorreu algum erro ao abrir o caixa", Toast.LENGTH_SHORT).show();
                                 break;
                             }
-                            itemPedidos.get(cont).setId(id);
-                        }
-
-                        if(id == -1){
-                            Toast.makeText(activity, "Desculpe, tente novamente", Toast.LENGTH_SHORT).show();
-                        }
-                        pedidosList.add(0, pedido);
-                        caixa.addPedido(pedido);
-                        zerar();
-                        pedidoAdapter.notifyDataSetChanged();
-                    } else if (estado == ABRINDO_CAIXA) {
-                        DaoCaixa daoCaixa = new DaoCaixa(activity);
-                        if (daoCaixa.abrirCaixa(caixa) == -1){
-                            Toast.makeText(activity, "Ocorreu algum erro ao abrir o caixa", Toast.LENGTH_SHORT).show();
+                            numCaixa++;
+                            abrirCaixa = false;
+                            pedidosList.clear();
+                            pedidoAdapter.notifyDataSetChanged();
+                            listaPedidos.setEnabled(true);
+                            bloqueio.setVisibility(View.INVISIBLE);
+                            invalidateOptionsMenu();
                             break;
                         }
-                        numCaixa++;
-                        abrirCaixa = false;
-                        pedidosList.clear();
-                        pedidoAdapter.notifyDataSetChanged();
-                        listaPedidos.setEnabled(true);
-                        bloqueio.setVisibility(View.INVISIBLE);
-                        invalidateOptionsMenu();
-
-                    } else {//FECHANDO_CAIXA
-                        DaoCaixa daoCaixa = new DaoCaixa(activity);
-                        if (daoCaixa.fecharCaixa(caixa) < 1){
-                            Toast.makeText(activity, "Ocorreu algum erro ao fechar o caixa", Toast.LENGTH_SHORT).show();
+                        case FECHANDO_CAIXA: {
+                            DaoCaixa daoCaixa = new DaoCaixa(activity);
+                            if (daoCaixa.fecharCaixa(caixa) < 1) {
+                                Toast.makeText(activity, "Ocorreu algum erro ao fechar o caixa", Toast.LENGTH_SHORT).show();
+                                break;
+                            }
+                            abrirCaixa = true;
+                            listaPedidos.setEnabled(false);
+                            bloqueio.setVisibility(View.VISIBLE);
+                            invalidateOptionsMenu();
                             break;
                         }
-                        abrirCaixa = true;
-                        listaPedidos.setEnabled(false);
-                        bloqueio.setVisibility(View.VISIBLE);
-                        invalidateOptionsMenu();
+                        case REABRINDO_CAIXA: {
+                            abrirCaixa = false;
+                            listaPedidos.setEnabled(true);
+                            bloqueio.setVisibility(View.INVISIBLE);
+                            invalidateOptionsMenu();
+                            break;
+                        }
+                        case LANCADO: {
+                            DaoPedido daoPedido = new DaoPedido(activity);
+                            long id = daoPedido.inserir(pedido);
+                            if (id == -1) {
+                                Toast.makeText(activity, "Ocorreu algum erro ao lançar o Pedido", Toast.LENGTH_SHORT).show();
+                                numPedido--;
+                                break;
+                            }
+                            pedido.setId(id);
 
+                            ArrayList<ItemPedido> itemPedidos = pedido.getItemPedidos();
+                            DaoItemPedido daoItemPedido = new DaoItemPedido(activity);
+                            for (int cont = 0; cont < itemPedidos.size(); cont++) {
+                                id = daoItemPedido.inserir(itemPedidos.get(cont));
+                                if (id == -1) {
+                                    Toast.makeText(activity, "Ocorreu algum erro ao lançar Itens do Pedido", Toast.LENGTH_SHORT).show();
+                                    break;
+                                }
+                                itemPedidos.get(cont).setId(id);
+                            }
+
+                            if (id == -1) {
+                                Toast.makeText(activity, "Desculpe, tente novamente", Toast.LENGTH_SHORT).show();
+                            }
+                            pedidosList.add(pedido);
+                            caixa.addPedido(pedido);
+                            zerar();
+                            pedidoAdapter.notifyDataSetChanged();
+                            break;
+                        }
+                        case PREPARANDO:{
+                            executarMudancaEstado(pedido);
+                            break;
+                        }
+                        case PRONTO:{
+                            executarMudancaEstado(pedido);
+                            break;
+                        }
+                        case TERMINADO:{
+                            executarMudancaEstado(pedido);
+                            break;
+                        }
                     }
                     break;
                 }
@@ -644,82 +673,105 @@ public class Vendas extends AppCompatActivity{
                     // Construir um string com os bytes validos do buffer
                     String readMessage = new String(readBuf, 0, msg.arg1);
 
-//                    Toast.makeText(activity, "Ler: " + readMessage, Toast.LENGTH_LONG).show();
-
                     Pedido pedido = JSONStringToPedido(readMessage);
                     int estado = pedido.getEstado();
-                    if (estado > FECHANDO_CAIXA) {//Operação com Pedido
-                        ////////////////////////////////////
-                        DaoPedido daoPedido = new DaoPedido(activity);
-                        long id = daoPedido.inserir(pedido);
-                        if (id == -1){
-                            Toast.makeText(activity, "Ocorreu algum erro ao lançar o Pedido", Toast.LENGTH_SHORT).show();
-                            numPedido--;
-                            break;
-                        }
-                        pedido.setId(id);
+                    switch (estado) {
+                        case ABRINDO_CAIXA: {
+                            Toast.makeText(activity, "Ler: Abrir Caixa", Toast.LENGTH_SHORT).show();
 
-                        ArrayList<ItemPedido> itemPedidos = pedido.getItemPedidos();
-                        DaoItemPedido daoItemPedido = new DaoItemPedido(activity);
-                        for(int cont = 0; cont < itemPedidos.size(); cont++){
-                            id = daoItemPedido.inserir(itemPedidos.get(cont));
-                            if(id == -1){
-                                Toast.makeText(activity, "Ocorreu algum erro ao lançar Itens do Pedido", Toast.LENGTH_SHORT).show();
+                            caixa = new Caixa();
+                            caixa.setFundo(pedido.getValor());
+                            caixa.setNumero(pedido.getVenda());
+                            caixa.setDataAbertura(pedido.getData());
+                            caixa.setHoraAbertura(pedido.getHora());
+                            //////////////////////////////
+                            DaoCaixa daoCaixa = new DaoCaixa(activity);
+                            if (daoCaixa.abrirCaixa(caixa) == -1) {
+                                Toast.makeText(activity, "Ocorreu algum erro ao abrir o caixa", Toast.LENGTH_SHORT).show();
                                 break;
                             }
-                            itemPedidos.get(cont).setId(id);
-                        }
-
-                        if(id == -1){
-                            Toast.makeText(activity, "Desculpe, tente novamente", Toast.LENGTH_SHORT).show();
-                        }
-                        ////////////////////////////////////
-                        pedidosList.add(0, pedido);
-                        caixa.addPedido(pedido);
-                        if(MODO.equals(MOENDA)) {
-                            Toast.makeText(activity, "Verificando modo", Toast.LENGTH_SHORT).show();
-                            adicionarSomaItens(pedido);
-                        }
-                        pedidoAdapter.notifyDataSetChanged();
-
-                    } else if (estado == ABRINDO_CAIXA) {
-                        Toast.makeText(activity, "Ler: Abrir Caixa", Toast.LENGTH_SHORT).show();
-
-                        caixa = new Caixa();
-                        caixa.setFundo(pedido.getValor());
-                        caixa.setNumero(pedido.getVenda());
-                        caixa.setDataAbertura(pedido.getData());
-                        caixa.setHoraAbertura(pedido.getHora());
-                        //////////////////////////////
-                        DaoCaixa daoCaixa = new DaoCaixa(activity);
-                        if (daoCaixa.abrirCaixa(caixa) == -1){
-                            Toast.makeText(activity, "Ocorreu algum erro ao abrir o caixa", Toast.LENGTH_SHORT).show();
+                            //////////////////////////////
+                            numCaixa++;
+                            abrirCaixa = false;
+                            pedidosList.clear();
+                            pedidoAdapter.notifyDataSetChanged();
+                            listaPedidos.setEnabled(true);
+                            bloqueio.setVisibility(View.INVISIBLE);
+                            invalidateOptionsMenu();
                             break;
                         }
-                        //////////////////////////////
-                        numCaixa++;
-                        abrirCaixa = false;
-                        pedidosList.clear();
-                        pedidoAdapter.notifyDataSetChanged();
-                        listaPedidos.setEnabled(true);
-                        bloqueio.setVisibility(View.INVISIBLE);
-                        invalidateOptionsMenu();
 
-                    } else {//FECHANDO_CAIXA
-                        caixa.setDataFechamento(pedido.getData());
-                        caixa.setHoraFechamento(pedido.getHora());
-                        //////////////////////////////
-                        DaoCaixa daoCaixa = new DaoCaixa(activity);
-                        if (daoCaixa.fecharCaixa(caixa) < 1){
-                            Toast.makeText(activity, "Ocorreu algum erro ao fechar o caixa", Toast.LENGTH_SHORT).show();
+                        case FECHANDO_CAIXA: {
+                            caixa.setDataFechamento(pedido.getData());
+                            caixa.setHoraFechamento(pedido.getHora());
+                            //////////////////////////////
+                            DaoCaixa daoCaixa = new DaoCaixa(activity);
+                            if (daoCaixa.fecharCaixa(caixa) < 1) {
+                                Toast.makeText(activity, "Ocorreu algum erro ao fechar o caixa", Toast.LENGTH_SHORT).show();
+                                break;
+                            }
+                            //////////////////////////////
+                            abrirCaixa = true;
+                            listaPedidos.setEnabled(false);
+                            bloqueio.setVisibility(View.VISIBLE);
+                            invalidateOptionsMenu();
                             break;
                         }
-                        //////////////////////////////
-                        abrirCaixa = true;
-                        listaPedidos.setEnabled(false);
-                        bloqueio.setVisibility(View.VISIBLE);
-                        invalidateOptionsMenu();
+                        case REABRINDO_CAIXA: {
+                            //////////////////////////////
+                            abrirCaixa = false;
+                            listaPedidos.setEnabled(true);
+                            bloqueio.setVisibility(View.INVISIBLE);
+                            invalidateOptionsMenu();
+                            break;
+                        }
+                        case LANCADO: {
+                            ////////////////////////////////////
+                            DaoPedido daoPedido = new DaoPedido(activity);
+                            long id = daoPedido.inserir(pedido);
+                            if (id == -1) {
+                                Toast.makeText(activity, "Ocorreu algum erro ao lançar o Pedido", Toast.LENGTH_SHORT).show();
+                                numPedido--;
+                                break;
+                            }
+                            pedido.setId(id);
 
+                            ArrayList<ItemPedido> itemPedidos = pedido.getItemPedidos();
+                            DaoItemPedido daoItemPedido = new DaoItemPedido(activity);
+                            for (int cont = 0; cont < itemPedidos.size(); cont++) {
+                                id = daoItemPedido.inserir(itemPedidos.get(cont));
+                                if (id == -1) {
+                                    Toast.makeText(activity, "Ocorreu algum erro ao lançar Itens do Pedido", Toast.LENGTH_SHORT).show();
+                                    break;
+                                }
+                                itemPedidos.get(cont).setId(id);
+                            }
+
+                            if (id == -1) {
+                                Toast.makeText(activity, "Desculpe, tente novamente", Toast.LENGTH_SHORT).show();
+                            }
+                            ////////////////////////////////////
+                            pedidosList.add(pedido);
+                            caixa.addPedido(pedido);
+                            if (MODO.equals(MOENDA)) {
+                                Toast.makeText(activity, "Verificando modo", Toast.LENGTH_SHORT).show();
+                                adicionarSomaItens(pedido);
+                            }
+                            pedidoAdapter.notifyDataSetChanged();
+                            break;
+                        }
+                        case PREPARANDO:{
+                            executarMudancaEstado(pedido);
+                            break;
+                        }
+                        case PRONTO:{
+                            executarMudancaEstado(pedido);
+                            break;
+                        }
+                        case TERMINADO:{
+                            executarMudancaEstado(pedido);
+                            break;
+                        }
                     }
                     break;
                 }
@@ -763,6 +815,58 @@ public class Vendas extends AppCompatActivity{
         });
         popup.inflate(R.menu.menu_pedido);
         popup.show();
+    }
+
+    public void mudarEstado(View v){
+        int estado = 0;
+        Pedido pedidoAux = (Pedido) v.getTag();
+        Pedido pedido = new Pedido(pedidoAux);
+        Toast.makeText(this, "Estado: " + pedido.getEstado(), Toast.LENGTH_SHORT).show();
+
+        if(MODO.equals(CAIXA)){
+            Toast.makeText(this, "MODO CAIXA", Toast.LENGTH_SHORT).show();
+            switch(pedido.getEstado()){
+                case LANCADO:
+                    estado = TERMINADO;
+                    break;
+                case PREPARANDO:
+                    estado = TERMINADO;
+                    break;
+                case PRONTO:
+                    estado = TERMINADO;
+                    break;
+            }
+        }else{
+            Toast.makeText(this, "MODO MOENDA", Toast.LENGTH_SHORT).show();
+            switch(pedido.getEstado()){
+                case LANCADO:
+                    estado = PREPARANDO;
+                    break;
+                case PREPARANDO:
+                    estado = PRONTO;
+                    break;
+            }
+        }
+        Toast.makeText(this, "novo estado: " + estado, Toast.LENGTH_SHORT).show();
+
+        if(estado != 0) {
+            pedido.setEstado(estado);
+            enviar(PedidoToStringJSON(pedido));
+        }
+    }
+
+    public void executarMudancaEstado(Pedido pedido){
+        DaoPedido daoPedido = new DaoPedido(this);
+        if(daoPedido.atualizarEstado(pedido) < 1){
+            Toast.makeText(this, "Ocorreu algum erro ao preparar o Pedido", Toast.LENGTH_SHORT).show();
+        }
+        for(int cont = 0; cont < pedidosList.size(); cont++){
+            if(pedidosList.get(cont).getVenda() == pedido.getVenda()){
+                pedidosList.get(cont).setEstado(pedido.getEstado());
+                pedidoAdapter.notifyDataSetChanged();
+                break;
+            }
+        }
     }
 
     @Override
@@ -845,10 +949,11 @@ public class Vendas extends AppCompatActivity{
                     menuItem = (MenuItem) menu.findItem(R.id.reabrirCaixa);
                     menuItem.setEnabled(false);
 
-                }else if (!caixa.isAberto()){//Último caixa está fechado
+                }else if (abrirCaixa){//Último caixa está fechado
                     menuItem.setTitle(R.string.abrir_caixa);
                     menuItem = (MenuItem) menu.findItem(R.id.reabrirCaixa);
                     menuItem.setEnabled(true);
+
                 }else{//Último caixa aberto
                     menuItem.setTitle(R.string.fechar_caixa);
                     menuItem = (MenuItem) menu.findItem(R.id.reabrirCaixa);
@@ -915,7 +1020,6 @@ public class Vendas extends AppCompatActivity{
                         builder.show();
                         //Sobre o AlertDialog
 
-                        //TODO - Rever o Reabrir Caixa
                         //TODO - Chamar tela com o relatório do caixa
                         return true;
 
@@ -946,7 +1050,10 @@ public class Vendas extends AppCompatActivity{
             }
             case R.id.reabrirCaixa:{
                 if(isConectado()) {
-                    item.setEnabled(false);
+                    Pedido pedido = new Pedido();
+                    pedido.setEstado(REABRINDO_CAIXA);
+                    pedido.setVenda(caixa.getNumero());
+                    enviar(PedidoToStringJSON(pedido));
                 }
             }
             case R.id.relAgora: {
@@ -965,6 +1072,8 @@ public class Vendas extends AppCompatActivity{
         JSONArray jsonItens = new JSONArray();
         JSONObject jsonItem;
         ItemPedido itemPedido;
+        ArrayList<ItemPedido> itensPedido;
+        itensPedido = pedido.getItemPedidos();
         try {
             jsonPedido.put(P_VENDA,pedido.getVenda());
             jsonPedido.put(P_COMANDA,pedido.getComanda());
@@ -974,8 +1083,8 @@ public class Vendas extends AppCompatActivity{
             jsonPedido.put(P_DATA,pedido.getData());
             jsonPedido.put(P_HORA,pedido.getHora());
 //            jsonPedido.put(P_CAIXA_NUM,pedido.getCaixa().getNumero());
-            for(int cont = 0; cont < itensList.size(); cont++){
-                itemPedido = itensList.get(cont);
+            for(int cont = 0; cont < itensPedido.size(); cont++){
+                itemPedido = itensPedido.get(cont);
                 jsonItem = new JSONObject();
                 jsonItem.put(IP_SEQUENCIA,itemPedido.getSequencia());
                 jsonItem.put(IP_SABOR,itemPedido.getSabor());
@@ -989,6 +1098,7 @@ public class Vendas extends AppCompatActivity{
             jsonPedido.put(ITEM_PEDIDOS,jsonItens);
         } catch (JSONException e) {
             e.printStackTrace();
+            Toast.makeText(this, "Falha ao montar JSON", Toast.LENGTH_SHORT).show();
             return null;
         }
         return jsonPedido.toString();
@@ -1026,6 +1136,7 @@ public class Vendas extends AppCompatActivity{
             }
         }catch(JSONException e){
             e.printStackTrace();
+            Toast.makeText(this, "Falha ao montar JSON", Toast.LENGTH_SHORT).show();
         }
 
         return pedido;

@@ -26,8 +26,8 @@ public interface Constantes {
     int CANCELADO = 6;
     int TERMINADO = 7;
     int APAGANDO = 8;
-    int MUDANDO_ESTADO = 9;
-    int ENTREGANDO_ITEM = 10;
+    int ENTREGANDO_ITEM = 9;
+    int REABRINDO_CAIXA = 10;//TODO - Ao gerar nova versão do banco, colocar reabrindo caixa próximo de abrindo/fechando
 
     // Campos titulo para o JSON
     //Pedido
