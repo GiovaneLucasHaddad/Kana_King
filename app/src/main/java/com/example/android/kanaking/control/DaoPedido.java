@@ -35,8 +35,9 @@ public class DaoPedido {
     }
 
     public int remover(Pedido pedido){
-        String selecao = Esquema.Pedido.VENDA + " LIKE ?";
-        String[] args = { ""+pedido.getVenda() };
+        String selecao = Esquema.Pedido.VENDA + " = ? AND " + Esquema.Pedido.CAIXA + " = ?";
+        String[] args = { ""+pedido.getVenda(), "" + pedido.getCaixa().getNumero()};
+
         return db.delete(Esquema.Pedido.TABELA, selecao, args);
     }
 

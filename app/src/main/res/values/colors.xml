@@ -13,9 +13,9 @@
 
     <!--Estado do Pedido-->
     <color name="corLancado">#0000FF</color>
-    <color name="corPreparando">#FF8C00</color>
+    <color name="corPreparando">#FF0000</color>
     <color name="corPronto">#00FF00</color>
-    <color name="corCancelado">#FF0000</color>
+    <color name="corCancelado">#696969</color>
     <color name="corTerminado">#A9A9A9</color>
     <color name="branco">#ffffff</color>
 

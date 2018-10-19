@@ -51,7 +51,9 @@ import java.util.ArrayList;
 
 import static com.example.android.kanaking.Constantes.ABACAXI;
 import static com.example.android.kanaking.Constantes.ABRINDO_CAIXA;
+import static com.example.android.kanaking.Constantes.APAGANDO;
 import static com.example.android.kanaking.Constantes.CAIXA;
+import static com.example.android.kanaking.Constantes.CANCELADO;
 import static com.example.android.kanaking.Constantes.CANCELAR;
 import static com.example.android.kanaking.Constantes.COCO;
 import static com.example.android.kanaking.Constantes.CONCLUIR;
@@ -665,6 +667,14 @@ public class Vendas extends AppCompatActivity{
                             executarMudancaEstado(pedido);
                             break;
                         }
+                        case CANCELADO:{
+                            executarMudancaEstado(pedido);
+                            break;
+                        }
+                        case APAGANDO:{
+                            remover(pedido);
+                            break;
+                        }
                     }
                     break;
                 }
@@ -772,6 +782,14 @@ public class Vendas extends AppCompatActivity{
                             executarMudancaEstado(pedido);
                             break;
                         }
+                        case CANCELADO:{
+                            executarMudancaEstado(pedido);
+                            break;
+                        }
+                        case APAGANDO:{
+                            remover(pedido);
+                            break;
+                        }
                     }
                     break;
                 }
@@ -793,38 +811,12 @@ public class Vendas extends AppCompatActivity{
         }
     };
 
-
-
-    public void menuPopup(View v){
-        PopupMenu popup = new PopupMenu(this, v);
-        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                switch (item.getItemId()){
-                    case R.id.cancelar:
-                        Toast.makeText(Vendas.this,"Cancelar",Toast.LENGTH_SHORT).show();
-                        return true;
-//                        break;
-                    case R.id.apagar:
-                        Toast.makeText(Vendas.this,"Apagar",Toast.LENGTH_SHORT).show();
-                        return true;
-//                        break;
-                }
-                return false;
-            }
-        });
-        popup.inflate(R.menu.menu_pedido);
-        popup.show();
-    }
-
     public void mudarEstado(View v){
         int estado = 0;
         Pedido pedidoAux = (Pedido) v.getTag();
         Pedido pedido = new Pedido(pedidoAux);
-        Toast.makeText(this, "Estado: " + pedido.getEstado(), Toast.LENGTH_SHORT).show();
 
         if(MODO.equals(CAIXA)){
-            Toast.makeText(this, "MODO CAIXA", Toast.LENGTH_SHORT).show();
             switch(pedido.getEstado()){
                 case LANCADO:
                     estado = TERMINADO;
@@ -837,7 +829,6 @@ public class Vendas extends AppCompatActivity{
                     break;
             }
         }else{
-            Toast.makeText(this, "MODO MOENDA", Toast.LENGTH_SHORT).show();
             switch(pedido.getEstado()){
                 case LANCADO:
                     estado = PREPARANDO;
@@ -847,7 +838,6 @@ public class Vendas extends AppCompatActivity{
                     break;
             }
         }
-        Toast.makeText(this, "novo estado: " + estado, Toast.LENGTH_SHORT).show();
 
         if(estado != 0) {
             pedido.setEstado(estado);
@@ -858,11 +848,51 @@ public class Vendas extends AppCompatActivity{
     public void executarMudancaEstado(Pedido pedido){
         DaoPedido daoPedido = new DaoPedido(this);
         if(daoPedido.atualizarEstado(pedido) < 1){
-            Toast.makeText(this, "Ocorreu algum erro ao preparar o Pedido", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Ocorreu algum erro ao alterar estado do Pedido", Toast.LENGTH_SHORT).show();
         }
         for(int cont = 0; cont < pedidosList.size(); cont++){
             if(pedidosList.get(cont).getVenda() == pedido.getVenda()){
                 pedidosList.get(cont).setEstado(pedido.getEstado());
+                pedidoAdapter.notifyDataSetChanged();
+                break;
+            }
+        }
+    }
+
+    public void opcoes(View v){
+        Pedido pedidoAux = (Pedido) v.getTag();
+        final Pedido pedido = new Pedido(pedidoAux);
+
+        PopupMenu popup = new PopupMenu(this, v);
+        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()){
+                    case R.id.cancelar:
+                        pedido.setEstado(CANCELADO);
+                        enviar(PedidoToStringJSON(pedido));
+                        return true;
+                    case R.id.apagar:
+                        pedido.setEstado(APAGANDO);
+                        enviar(PedidoToStringJSON(pedido));
+                        return true;
+                }
+                return false;
+            }
+        });
+        popup.inflate(R.menu.menu_pedido);
+        popup.show();
+
+    }
+
+    public void remover(Pedido pedido){
+        DaoPedido daoPedido = new DaoPedido(this);
+        if(daoPedido.remover(pedido) < 1){
+            Toast.makeText(this, "Ocorreu algum erro ao remover o Pedido", Toast.LENGTH_SHORT).show();
+        }
+        for(int cont = 0; cont < pedidosList.size(); cont++){
+            if(pedidosList.get(cont).getVenda() == pedido.getVenda()){
+                pedidosList.remove(cont);
                 pedidoAdapter.notifyDataSetChanged();
                 break;
             }

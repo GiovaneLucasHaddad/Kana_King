@@ -3,11 +3,13 @@
     <item
         android:id="@+id/taiti"
         android:icon="@drawable/t"
-        android:title="Limão Taiti" />
+        android:title="Limão Taiti"
+        android:titleCondensed="Taiti" />
     <item
         android:id="@+id/siciliano"
         android:icon="@drawable/s"
-        android:title="Limão Siciliano" />
+        android:title="Limão Siciliano"
+        android:titleCondensed="Siciliano" />
     <item
         android:id="@+id/abacaxi"
         android:icon="@drawable/a"

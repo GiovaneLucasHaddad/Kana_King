@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.GridView;
 import android.widget.ImageView;
@@ -104,6 +105,10 @@ public class PedidoAdapter extends BaseAdapter {
                     tipoPagamento.setImageResource(R.drawable.dinheiro);
                     break;
             }
+
+            Button opcoes = listItem.findViewById(R.id.opcoes);
+            opcoes.setTag(pedidoAtual);
+
         }else{
             FrameLayout pagEOpcoes = listItem.findViewById(R.id.pag_e_opcoes);
             pagEOpcoes.setVisibility(View.GONE);
