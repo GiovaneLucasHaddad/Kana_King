@@ -61,6 +61,7 @@ import static com.example.android.kanaking.Constantes.COPO_300;
 import static com.example.android.kanaking.Constantes.COPO_400;
 import static com.example.android.kanaking.Constantes.COPO_500;
 import static com.example.android.kanaking.Constantes.DEVICE_NAME;
+import static com.example.android.kanaking.Constantes.DINHEIRO;
 import static com.example.android.kanaking.Constantes.FECHANDO_CAIXA;
 import static com.example.android.kanaking.Constantes.GARRAFA_1000;
 import static com.example.android.kanaking.Constantes.GARRAFA_500;
@@ -126,10 +127,15 @@ public class Vendas extends AppCompatActivity{
 
     //Controle de soma dos sabores
     private TextView somaTaiti;
+    private int totalTaiti = 0;
     private TextView somaSiciliano;
+    private int totalSiciliano = 0;
     private TextView somaAbacaxi;
+    private int totalAbacaxi = 0;
     private TextView somaPuro;
+    private int totalPuro = 0;
     private TextView somaGengibre;
+    private int totalGengibre = 0;
 
     //Controle de objetos
     boolean abrirCaixa = false;//true quando o caixa está fechado
@@ -149,61 +155,6 @@ public class Vendas extends AppCompatActivity{
 
         Intent intent = getIntent();
         MODO = intent.getStringExtra("MODO");
-
-        if(MODO.equals(CAIXA)) {
-            LinearLayout barraContagem = findViewById(R.id.barra_contagem);
-            barraContagem.setVisibility(View.GONE);
-
-            //Configurando NumberPicker
-            comanda = (NumberPicker) findViewById(R.id.add_comanda);
-            comanda.setMaxValue(20);
-            comanda.setMinValue(1);
-
-            //Configurando Spinner Forma de pagamento
-            ArrayList<Pagamento> listaPagto = new ArrayList<>();
-            listaPagto.add(new Pagamento(R.drawable.dinheiro));
-            listaPagto.add(new Pagamento(R.drawable.cartao));
-
-            pagamento = findViewById(R.id.add_pagamento);
-            PagamentoAdapter pagtoAdapter = new PagamentoAdapter(this, R.layout.lista_imagem, listaPagto);
-            pagamento.setAdapter(pagtoAdapter);
-
-            //Configurando GridView onde aparecerão os itens do pedido a lançar
-            GridView itemGrid = (GridView) findViewById(R.id.add_itens);
-            if (itensList == null) {
-                itensList = new ArrayList<>();
-            }
-
-            if (itemAdapter == null) {
-                itemAdapter = new ItemPedidoAdapter(this, itensList);
-                itemGrid.setAdapter(itemAdapter);
-            } else {
-                itemAdapter.notifyDataSetChanged();
-            }
-            //Tratamento de cliques
-            itemGrid.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-                @Override
-                public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                    Toast.makeText(Vendas.this, "Clique longo", Toast.LENGTH_SHORT).show();
-                    return false;
-                }
-            });
-        }else if(MODO.equals(MOENDA)){
-            LinearLayout barraLancamento = findViewById(R.id.barra_lancamento);
-            barraLancamento.setVisibility(View.GONE);
-            somaTaiti = findViewById(R.id.soma_taiti);
-            somaSiciliano= findViewById(R.id.soma_siciliano);
-            somaAbacaxi= findViewById(R.id.soma_abacaxi);
-            somaPuro= findViewById(R.id.soma_puro);
-            somaGengibre= findViewById(R.id.soma_gengibre);
-        }
-
-        //Obtendo o adaptador Bluetooth e verificando se é suportado
-        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (bluetoothAdapter == null){
-            Toast.makeText(Vendas.this,"Bluetooth não suportado!",Toast.LENGTH_LONG).show();
-            finish();
-        }
 
         textValor = (EditText)findViewById(R.id.add_valor);
         barraEstado = (LinearLayout)findViewById(R.id.fundo_estado);
@@ -257,6 +208,66 @@ public class Vendas extends AppCompatActivity{
 //        }else {
 //            pedidoAdapter.notifyDataSetChanged();
 //        }
+
+        //Particularidades de usuários
+        if(MODO.equals(CAIXA)) {
+            LinearLayout barraContagem = findViewById(R.id.barra_contagem);
+            barraContagem.setVisibility(View.GONE);
+
+            //Configurando NumberPicker
+            comanda = (NumberPicker) findViewById(R.id.add_comanda);
+            comanda.setMaxValue(20);
+            comanda.setMinValue(1);
+
+            //Configurando Spinner Forma de pagamento
+            ArrayList<Pagamento> listaPagto = new ArrayList<>();
+            listaPagto.add(new Pagamento(R.drawable.dinheiro));
+            listaPagto.add(new Pagamento(R.drawable.cartao));
+
+            pagamento = findViewById(R.id.add_pagamento);
+            PagamentoAdapter pagtoAdapter = new PagamentoAdapter(this, R.layout.lista_imagem, listaPagto);
+            pagamento.setAdapter(pagtoAdapter);
+
+            //Configurando GridView onde aparecerão os itens do pedido a lançar
+            GridView itemGrid = (GridView) findViewById(R.id.add_itens);
+            if (itensList == null) {
+                itensList = new ArrayList<>();
+            }
+
+            if (itemAdapter == null) {
+                itemAdapter = new ItemPedidoAdapter(this, itensList);
+                itemGrid.setAdapter(itemAdapter);
+            } else {
+                itemAdapter.notifyDataSetChanged();
+            }
+            //Tratamento de cliques
+            itemGrid.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+                @Override
+                public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                    Toast.makeText(Vendas.this, "Clique longo", Toast.LENGTH_SHORT).show();
+                    return false;
+                }
+            });
+        }else if(MODO.equals(MOENDA)){
+            LinearLayout barraLancamento = findViewById(R.id.barra_lancamento);
+            barraLancamento.setVisibility(View.GONE);
+            somaTaiti = findViewById(R.id.soma_taiti);
+            somaSiciliano= findViewById(R.id.soma_siciliano);
+            somaAbacaxi= findViewById(R.id.soma_abacaxi);
+            somaPuro= findViewById(R.id.soma_puro);
+            somaGengibre= findViewById(R.id.soma_gengibre);
+            for (int cont = 0; cont < pedidosList.size(); cont++) {
+                calcSomaItens(pedidosList.get(cont));
+            }
+            mostrarSomaItens();
+        }
+
+        //Obtendo o adaptador Bluetooth e verificando se é suportado
+        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (bluetoothAdapter == null) {
+            Toast.makeText(Vendas.this, "Bluetooth não suportado!", Toast.LENGTH_LONG).show();
+            finish();
+        }
     }
 
     @Override
@@ -765,7 +776,8 @@ public class Vendas extends AppCompatActivity{
                             caixa.addPedido(pedido);
                             if (MODO.equals(MOENDA)) {
                                 Toast.makeText(activity, "Verificando modo", Toast.LENGTH_SHORT).show();
-                                adicionarSomaItens(pedido);
+                                calcSomaItens(pedido);
+                                mostrarSomaItens();
                             }
                             pedidoAdapter.notifyDataSetChanged();
                             break;
@@ -1085,17 +1097,77 @@ public class Vendas extends AppCompatActivity{
                     pedido.setVenda(caixa.getNumero());
                     enviar(PedidoToStringJSON(pedido));
                 }
+                return true;
             }
             case R.id.relAgora: {
-
+                relatorioVendas();
                 return true;
             }
             case R.id.relPeriodo: {
+                //AlertDialog
+                LayoutInflater layoutInflater = getLayoutInflater();
+                View view = layoutInflater.inflate(R.layout.rel_vendas_periodo, null);
+                TextView fundo = view.findViewById(R.id.rel_vp_periodo);
+                fundo.setText("0,00");
+                TextView dinheiro = view.findViewById(R.id.rel_vp_total_dinheiro);
+                TextView cartao = view.findViewById(R.id.rel_vp_total_cartao);
+                TextView geral = view.findViewById(R.id.rel_vp_total_geral);
 
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle(R.string.rel_vendas_periodo);
+                builder.setView(view);
+                builder.setPositiveButton("Certo!", null);
+                builder.show();
+                //AlertDialog
                 return true;
             }
         }
         return false;
+    }
+    public void relatorioVendas(){
+        Pedido pedido;
+        Double fundoCaixa = caixa.getFundo();
+        Double totalDinheiro = 0.0;
+        Double totalCartao = 0.0;
+        Double totalGeral = 0.0;
+        Double totalCaixa = 0.0;
+
+        for(int cont = 0; cont < pedidosList.size(); cont++){
+            pedido = pedidosList.get(cont);
+            if(pedido.getFormaPagamento() == DINHEIRO){
+                totalDinheiro += pedido.getValor();
+            }else{
+                totalCartao += pedido.getValor();
+            }
+        }
+        totalGeral = totalDinheiro + totalCartao;
+        totalCaixa = fundoCaixa + totalDinheiro;
+
+        //AlertDialog
+        LayoutInflater layoutInflater = getLayoutInflater();
+        View view = layoutInflater.inflate(R.layout.rel_vendas, null);
+
+        TextView fundo = view.findViewById(R.id.rel_v_fundo_caixa);
+        fundo.setText(String.valueOf(fundoCaixa));
+
+        TextView dinheiro = view.findViewById(R.id.rel_v_total_dinheiro);
+        dinheiro.setText(String.valueOf(totalDinheiro));
+
+        TextView cartao = view.findViewById(R.id.rel_v_total_cartao);
+        cartao.setText(String.valueOf(totalCartao));
+
+        TextView geral = view.findViewById(R.id.rel_v_total_geral);
+        geral.setText(String.valueOf(totalGeral));
+
+        TextView caixa = view.findViewById(R.id.rel_v_total_caixa);
+        caixa.setText(String.valueOf(totalCaixa));
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.rel_vendas_ate_agora);
+        builder.setView(view);
+        builder.setPositiveButton("Certo!", null);
+        builder.show();
+        //AlertDialog
     }
     public String PedidoToStringJSON(Pedido pedido){
         JSONObject jsonPedido = new JSONObject();
@@ -1171,12 +1243,18 @@ public class Vendas extends AppCompatActivity{
 
         return pedido;
     }
-    public void adicionarSomaItens(Pedido pedido){
-        Toast.makeText(this, "Adicionar soma itens", Toast.LENGTH_SHORT).show();
-        somaTaiti.setText(pedido.getQtdTotal(TAITI)+" mL");
-        somaSiciliano.setText(pedido.getQtdTotal(SICILIANO)+" mL");
-        somaAbacaxi.setText(pedido.getQtdTotal(ABACAXI)+" mL");
-        somaPuro.setText(pedido.getQtdTotal(PURO)+" mL");
-        somaGengibre.setText(pedido.getQtdTotal(GENGIBRE)+" mL");
+    public void calcSomaItens(Pedido pedido){
+        totalTaiti += pedido.getQtdTotal(TAITI);
+        totalSiciliano+= pedido.getQtdTotal(SICILIANO);
+        totalAbacaxi += pedido.getQtdTotal(ABACAXI);
+        totalPuro += pedido.getQtdTotal(PURO);
+        totalGengibre += pedido.getQtdTotal(GENGIBRE);
+    }
+    public void mostrarSomaItens(){
+        somaTaiti.setText(totalTaiti + " mL");
+        somaSiciliano.setText(totalSiciliano + " mL");
+        somaAbacaxi.setText(totalAbacaxi + " mL");
+        somaPuro.setText(totalPuro + " mL");
+        somaGengibre.setText(totalGengibre + " mL");
     }
 }

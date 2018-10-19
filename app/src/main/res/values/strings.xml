@@ -38,5 +38,16 @@
     <string name="title_connected_to">Conectado com <xliff:g id="device_name">%1$s</xliff:g></string>
     <string name="title_connecting">Conectando...</string>
     <string name="title_listening">Aguardando conexão...</string>
+
     <string name="caixa_fechado">Caixa fechado</string>
+
+    <!--Relatório de Vendas até agora e Vendas por período-->
+    <string name="rel_vendas_ate_agora">Relatório de Vendas até agora</string>
+    <string name="rel_vendas_periodo">Relatório de Vendas por período</string>
+    <string name="rel_fundo_caixa">Fundo de Caixa:</string>
+    <string name="rel_total_dinheiro">Total vendas Dinheiro:</string>
+    <string name="rel_total_cartao">Total vendas Cartão:</string>
+    <string name="rel_total_geral">Total geral de Vendas:</string>
+    <string name="rel_total_caixa">Valor total em caixa:</string>
+    <string name="rel_periodo_consulta">Período de consulta:</string>
 </resources>
