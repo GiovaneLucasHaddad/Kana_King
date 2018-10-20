@@ -70,20 +70,23 @@ public class DaoPedido {
 
         Cursor cursor = db.query(Esquema.Pedido.TABELA,projecao,selecao,args,null,null,ordem);
         Pedido pedidoAux = null;
-        ArrayList<Pedido> pedidos = new ArrayList<>();
-        while(cursor.moveToNext()){
-            pedidoAux = new Pedido();
-            pedidoAux.setId(cursor.getLong(cursor.getColumnIndexOrThrow(Esquema.Pedido._ID)));
-            pedidoAux.setVenda(cursor.getLong(cursor.getColumnIndexOrThrow(Esquema.Pedido.VENDA)));
-            pedidoAux.setComanda(cursor.getInt(cursor.getColumnIndexOrThrow(Esquema.Pedido.COMANDA)));
-            pedidoAux.setEstado(cursor.getInt(cursor.getColumnIndexOrThrow(Esquema.Pedido.ESTADO)));
-            pedidoAux.setValor(cursor.getDouble(cursor.getColumnIndexOrThrow(Esquema.Pedido.VALOR)));
-            pedidoAux.setFormaPagamento(cursor.getInt(cursor.getColumnIndexOrThrow(Esquema.Pedido.FORMA_PAGAMENTO)));
-            pedidoAux.setData(cursor.getString(cursor.getColumnIndexOrThrow(Esquema.Pedido.DATA)));
-            pedidoAux.setHora(cursor.getString(cursor.getColumnIndexOrThrow(Esquema.Pedido.HORA)));
-            pedidoAux.setCaixa(caixa);
+        ArrayList<Pedido> pedidos = null;
+        if(cursor.getCount() > 0){
+            pedidos = new ArrayList<>();
+            while(cursor.moveToNext()){
+                pedidoAux = new Pedido();
+                pedidoAux.setId(cursor.getLong(cursor.getColumnIndexOrThrow(Esquema.Pedido._ID)));
+                pedidoAux.setVenda(cursor.getLong(cursor.getColumnIndexOrThrow(Esquema.Pedido.VENDA)));
+                pedidoAux.setComanda(cursor.getInt(cursor.getColumnIndexOrThrow(Esquema.Pedido.COMANDA)));
+                pedidoAux.setEstado(cursor.getInt(cursor.getColumnIndexOrThrow(Esquema.Pedido.ESTADO)));
+                pedidoAux.setValor(cursor.getDouble(cursor.getColumnIndexOrThrow(Esquema.Pedido.VALOR)));
+                pedidoAux.setFormaPagamento(cursor.getInt(cursor.getColumnIndexOrThrow(Esquema.Pedido.FORMA_PAGAMENTO)));
+                pedidoAux.setData(cursor.getString(cursor.getColumnIndexOrThrow(Esquema.Pedido.DATA)));
+                pedidoAux.setHora(cursor.getString(cursor.getColumnIndexOrThrow(Esquema.Pedido.HORA)));
+                pedidoAux.setCaixa(caixa);
 
-            pedidos.add(pedidoAux);
+                pedidos.add(pedidoAux);
+            }
         }
         cursor.close();
 

@@ -90,4 +90,5 @@ public interface Constantes {
     int QTD_RECIPIENTE [] =
         //COCO_FRUTA, COPO_300, COPO_400, COPO_500, GARRAFA_500, GARRAFA_1000
     {0, 0,            300,      400,      500,      500,         1000};
+
 }

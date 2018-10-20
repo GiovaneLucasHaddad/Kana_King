@@ -83,14 +83,6 @@ public class PedidoAdapter extends BaseAdapter {
             }
         });
 
-        itemGrid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Toast.makeText(mContext, "Clique simples",Toast.LENGTH_SHORT).show();
-            }
-
-        });
-
         if(Vendas.MODO.equals(CAIXA)){
             TextView valor = (TextView)listItem.findViewById(R.id.valor);
             DecimalFormat df = new DecimalFormat(",##0.00");

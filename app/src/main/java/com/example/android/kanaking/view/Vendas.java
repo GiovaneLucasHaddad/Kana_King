@@ -47,7 +47,10 @@ import org.json.JSONObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
 import static com.example.android.kanaking.Constantes.ABACAXI;
 import static com.example.android.kanaking.Constantes.ABRINDO_CAIXA;
@@ -138,7 +141,6 @@ public class Vendas extends AppCompatActivity{
     private int totalGengibre = 0;
 
     //Controle de objetos
-    boolean abrirCaixa = false;//true quando o caixa está fechado
     private Caixa caixa;
     private ItemPedido itemAux;
     private int etapa = 0;
@@ -167,24 +169,19 @@ public class Vendas extends AppCompatActivity{
         long id = daoCaixa.ultimoId();
         Toast.makeText(this, "Ultimo ID: " + id, Toast.LENGTH_SHORT).show();
         caixa = daoCaixa.ultimoCaixa(id);
-        if(caixa == null){//Primeiro Caixa
-            abrirCaixa = true;
-        }else{
+        if(caixa != null){
             numCaixa = caixa.getNumero() + 1;
-            if(!caixa.isAberto()) {//Último caixa fechado
-                abrirCaixa = true;
+            if (caixa.isAberto()){
+                Toast.makeText(Vendas.this, "Caixa: DataAbertura: " + caixa.getDataAbertura() + " HoraAbertura: " + caixa.getHoraAbertura() + " DataFechamento: " + caixa.getDataFechamento() + " HoraFechamento: " + caixa.getHoraFechamento() + " Fundo: " + caixa.getFundo(), Toast.LENGTH_SHORT).show();
+                listaPedidos.setEnabled(true);
+                bloqueio.setVisibility(View.INVISIBLE);
+            }else{
+                listaPedidos.setEnabled(false);
+                bloqueio.setVisibility(View.VISIBLE);
             }
-        }
-
-        if (abrirCaixa){
-            Toast.makeText(this,"Caixa fechado/Primeiro Caixa", Toast.LENGTH_SHORT).show();
+        }else{//Primeiro Caixa
             listaPedidos.setEnabled(false);
             bloqueio.setVisibility(View.VISIBLE);
-        }else{
-            Toast.makeText(this,"Caixa aberto", Toast.LENGTH_SHORT).show();
-            Toast.makeText(Vendas.this, "Caixa: DataAbertura: " + caixa.getDataAbertura() + " HoraAbertura: " + caixa.getHoraAbertura() + " DataFechamento: " + caixa.getDataFechamento() + " HoraFechamento: " + caixa.getHoraFechamento() + " Fundo: " + caixa.getFundo(), Toast.LENGTH_SHORT).show();
-            listaPedidos.setEnabled(true);
-            bloqueio.setVisibility(View.INVISIBLE);
         }
 
         //Configurando o ArrayAdapter PedidoAdapter para a ListView listaPedidos
@@ -329,18 +326,41 @@ public class Vendas extends AppCompatActivity{
 //    }
 
     public void adicionar(View view){
-        if (!abrirCaixa){//caixa aberto
-            Double valor = Double.valueOf(textValor.getText().toString().replace(",","."));
-            if(valor > 0.0) {
-                numItemPedido = 1;
-                Pedido pedido = new Pedido(comanda.getValue(), numPedido, comanda.getValue(), LANCADO, valor, pagamento.getSelectedItemPosition(), "", "", itensList);
-                numPedido++;
-                enviar(PedidoToStringJSON(pedido));
-            }else{
-                Toast.makeText(this,"Pedido sem preço", Toast.LENGTH_SHORT).show();
+        if(isConectado()) {
+            if (caixa != null){
+                if (caixa.isAberto()) {//caixa aberto
+                    Double valor = Double.valueOf(textValor.getText().toString().replace(",", "."));
+                    if (valor > 0.0) {
+                        numItemPedido = 1;
+                        //Formatação da data
+                        SimpleDateFormat formatData = new SimpleDateFormat("yyyy-MM-dd");
+                        SimpleDateFormat formatHora = new SimpleDateFormat("HH:mm:ss");
+
+                        Date data = new Date();
+                        Calendar cal = Calendar.getInstance();
+                        cal.setTime(data);
+                        Date data_atual = cal.getTime();
+                        Pedido pedido = new Pedido(comanda.getValue(), numPedido, comanda.getValue(), LANCADO, valor, pagamento.getSelectedItemPosition(), formatData.format(data_atual), formatHora.format(data_atual), itensList);
+
+//                        //Para testes
+//                        if (itensList.size() > 0) {
+//                            if (itensList.get(1).getPedido() == null) {
+//                                Toast.makeText(this, "Pedido nulo antes de enviar", Toast.LENGTH_SHORT).show();
+//                            } else {
+//                                Toast.makeText(this, "Pedido identificado antes de enviar", Toast.LENGTH_SHORT).show();
+//                            }
+//                        }
+                        numPedido++;
+                        enviar(PedidoToStringJSON(pedido));
+                    } else {
+                        Toast.makeText(this, "Pedido sem preço", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Toast.makeText(this, "Caixa fechado", Toast.LENGTH_SHORT).show();
+                }
+            }else {
+                Toast.makeText(this, "Caixa fechado", Toast.LENGTH_SHORT).show();
             }
-        }else{
-            Toast.makeText(this,"Caixa fechado", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -609,7 +629,6 @@ public class Vendas extends AppCompatActivity{
                                 break;
                             }
                             numCaixa++;
-                            abrirCaixa = false;
                             pedidosList.clear();
                             pedidoAdapter.notifyDataSetChanged();
                             listaPedidos.setEnabled(true);
@@ -623,14 +642,17 @@ public class Vendas extends AppCompatActivity{
                                 Toast.makeText(activity, "Ocorreu algum erro ao fechar o caixa", Toast.LENGTH_SHORT).show();
                                 break;
                             }
-                            abrirCaixa = true;
                             listaPedidos.setEnabled(false);
                             bloqueio.setVisibility(View.VISIBLE);
                             invalidateOptionsMenu();
                             break;
                         }
                         case REABRINDO_CAIXA: {
-                            abrirCaixa = false;
+                            DaoCaixa daoCaixa = new DaoCaixa(activity);
+                            if (daoCaixa.reabrirCaixa(caixa) < 1) {
+                                Toast.makeText(activity, "Ocorreu algum erro ao reabrir o caixa", Toast.LENGTH_SHORT).show();
+                                break;
+                            }
                             listaPedidos.setEnabled(true);
                             bloqueio.setVisibility(View.INVISIBLE);
                             invalidateOptionsMenu();
@@ -656,6 +678,16 @@ public class Vendas extends AppCompatActivity{
                                 }
                                 itemPedidos.get(cont).setId(id);
                             }
+                            //Para testes //TODO - tirar, só para saber se dá pra identificar um
+                            // TODO - itemPedido na hora do lançamento e quando já está lançado -
+                            // TODO - para implementar a entrega de itemPedido
+//                            if(itemPedidos.size()>0) {
+//                                if(itemPedidos.get(1).getPedido()==null){
+//                                    Toast.makeText(activity, "Pedido nulo após de enviar", Toast.LENGTH_SHORT).show();
+//                                }else{
+//                                    Toast.makeText(activity, "Pedido identificado após de enviar", Toast.LENGTH_SHORT).show();
+//                                }
+//                            }
 
                             if (id == -1) {
                                 Toast.makeText(activity, "Desculpe, tente novamente", Toast.LENGTH_SHORT).show();
@@ -705,15 +737,14 @@ public class Vendas extends AppCompatActivity{
                             caixa.setNumero(pedido.getVenda());
                             caixa.setDataAbertura(pedido.getData());
                             caixa.setHoraAbertura(pedido.getHora());
-                            //////////////////////////////
+
                             DaoCaixa daoCaixa = new DaoCaixa(activity);
                             if (daoCaixa.abrirCaixa(caixa) == -1) {
                                 Toast.makeText(activity, "Ocorreu algum erro ao abrir o caixa", Toast.LENGTH_SHORT).show();
                                 break;
                             }
-                            //////////////////////////////
+
                             numCaixa++;
-                            abrirCaixa = false;
                             pedidosList.clear();
                             pedidoAdapter.notifyDataSetChanged();
                             listaPedidos.setEnabled(true);
@@ -725,29 +756,30 @@ public class Vendas extends AppCompatActivity{
                         case FECHANDO_CAIXA: {
                             caixa.setDataFechamento(pedido.getData());
                             caixa.setHoraFechamento(pedido.getHora());
-                            //////////////////////////////
                             DaoCaixa daoCaixa = new DaoCaixa(activity);
                             if (daoCaixa.fecharCaixa(caixa) < 1) {
                                 Toast.makeText(activity, "Ocorreu algum erro ao fechar o caixa", Toast.LENGTH_SHORT).show();
                                 break;
                             }
-                            //////////////////////////////
-                            abrirCaixa = true;
                             listaPedidos.setEnabled(false);
                             bloqueio.setVisibility(View.VISIBLE);
                             invalidateOptionsMenu();
                             break;
                         }
                         case REABRINDO_CAIXA: {
-                            //////////////////////////////
-                            abrirCaixa = false;
+                            caixa.setDataFechamento("");
+                            caixa.setHoraFechamento("");
+                            DaoCaixa daoCaixa = new DaoCaixa(activity);
+                            if (daoCaixa.reabrirCaixa(caixa) < 1) {
+                                Toast.makeText(activity, "Ocorreu algum erro ao reabrir o caixa", Toast.LENGTH_SHORT).show();
+                                break;
+                            }
                             listaPedidos.setEnabled(true);
                             bloqueio.setVisibility(View.INVISIBLE);
                             invalidateOptionsMenu();
                             break;
                         }
                         case LANCADO: {
-                            ////////////////////////////////////
                             DaoPedido daoPedido = new DaoPedido(activity);
                             long id = daoPedido.inserir(pedido);
                             if (id == -1) {
@@ -771,11 +803,9 @@ public class Vendas extends AppCompatActivity{
                             if (id == -1) {
                                 Toast.makeText(activity, "Desculpe, tente novamente", Toast.LENGTH_SHORT).show();
                             }
-                            ////////////////////////////////////
                             pedidosList.add(pedido);
                             caixa.addPedido(pedido);
                             if (MODO.equals(MOENDA)) {
-                                Toast.makeText(activity, "Verificando modo", Toast.LENGTH_SHORT).show();
                                 calcSomaItens(pedido);
                                 mostrarSomaItens();
                             }
@@ -963,14 +993,15 @@ public class Vendas extends AppCompatActivity{
                     menuItem = (MenuItem) menu.findItem(R.id.reabrirCaixa);
                     menuItem.setEnabled(false);
 
-                }else if (!caixa.isAberto()){//Último caixa fechado
-                    menuItem.setTitle(R.string.abrir_caixa);
-                    menuItem = (MenuItem) menu.findItem(R.id.reabrirCaixa);
-                    menuItem.setEnabled(true);
-                }else{//Último caixa aberto
+                }else if (caixa.isAberto()){//Último caixa aberto
                     menuItem.setTitle(R.string.fechar_caixa);
                     menuItem = (MenuItem) menu.findItem(R.id.reabrirCaixa);
                     menuItem.setEnabled(false);
+
+                }else{//Último caixa está fechado
+                    menuItem.setTitle(R.string.abrir_caixa);
+                    menuItem = (MenuItem) menu.findItem(R.id.reabrirCaixa);
+                    menuItem.setEnabled(true);
                 }
                 return true;
             case MOENDA:
@@ -991,15 +1022,15 @@ public class Vendas extends AppCompatActivity{
                     menuItem = (MenuItem) menu.findItem(R.id.reabrirCaixa);
                     menuItem.setEnabled(false);
 
-                }else if (abrirCaixa){//Último caixa está fechado
-                    menuItem.setTitle(R.string.abrir_caixa);
-                    menuItem = (MenuItem) menu.findItem(R.id.reabrirCaixa);
-                    menuItem.setEnabled(true);
-
-                }else{//Último caixa aberto
+                }else if (caixa.isAberto()){//Último caixa aberto
                     menuItem.setTitle(R.string.fechar_caixa);
                     menuItem = (MenuItem) menu.findItem(R.id.reabrirCaixa);
                     menuItem.setEnabled(false);
+
+                }else{//Último caixa está fechado
+                    menuItem.setTitle(R.string.abrir_caixa);
+                    menuItem = (MenuItem) menu.findItem(R.id.reabrirCaixa);
+                    menuItem.setEnabled(true);
                 }
                 return true;
             case MOENDA:
@@ -1030,7 +1061,7 @@ public class Vendas extends AppCompatActivity{
 //            }
             case R.id.abrirCaixa: {
                 if(isConectado()) {
-                    if (abrirCaixa) {//Fechado -> Operação Abrir
+                    if (item.getTitle().equals("Abrir Caixa")) {//Abrir Caixa
                         caixa = new Caixa();
 
                         //Sobre o AlertDialog
@@ -1046,8 +1077,18 @@ public class Vendas extends AppCompatActivity{
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 caixa.setNumero(numCaixa);
                                 caixa.setFundo(Double.parseDouble(valor_fundo.getText().toString().replace(",", ".")));
-                                caixa.setDataAbertura("1");
-                                caixa.setHoraAbertura("1");
+
+                                //Formatando data
+                                SimpleDateFormat formatData = new SimpleDateFormat("yyyy-MM-dd");
+                                SimpleDateFormat formatHora = new SimpleDateFormat("HH:mm:ss");
+
+                                Date data = new Date();
+                                Calendar cal = Calendar.getInstance();
+                                cal.setTime(data);
+                                Date data_atual = cal.getTime();
+
+                                caixa.setDataAbertura(formatData.format(data_atual));
+                                caixa.setHoraAbertura(formatHora.format(data_atual));
 
                                 Pedido pedido = new Pedido();
                                 pedido.setEstado(ABRINDO_CAIXA);
@@ -1062,18 +1103,26 @@ public class Vendas extends AppCompatActivity{
                         builder.show();
                         //Sobre o AlertDialog
 
-                        //TODO - Chamar tela com o relatório do caixa
                         return true;
 
-                    } else {//Aberto -> Operação Fechar
+                    } else {//Fechar Caixa
                         //Sobre o AlertDialog
                         AlertDialog.Builder builder = new AlertDialog.Builder(this);
                         builder.setTitle("Confirma fechamento do caixa?");
                         builder.setPositiveButton("Confirmar", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
-                                caixa.setDataFechamento("2");
-                                caixa.setHoraFechamento("2");
+                                //Formatando data
+                                SimpleDateFormat formatData = new SimpleDateFormat("yyyy-MM-dd");
+                                SimpleDateFormat formatHora = new SimpleDateFormat("HH:mm:ss");
+
+                                Date data = new Date();
+                                Calendar cal = Calendar.getInstance();
+                                cal.setTime(data);
+                                Date data_atual = cal.getTime();
+
+                                caixa.setDataFechamento(formatData.format(data_atual));
+                                caixa.setHoraFechamento(formatHora.format(data_atual));
 
                                 Pedido pedido = new Pedido();
                                 pedido.setEstado(FECHANDO_CAIXA);
@@ -1086,12 +1135,17 @@ public class Vendas extends AppCompatActivity{
                         builder.show();
                         //Sobre o AlertDialog
 
+                        relatorioVendas();
                         return true;
                     }
                 }
+                return false;
             }
             case R.id.reabrirCaixa:{
                 if(isConectado()) {
+                    caixa.setDataFechamento("");
+                    caixa.setHoraFechamento("");
+
                     Pedido pedido = new Pedido();
                     pedido.setEstado(REABRINDO_CAIXA);
                     pedido.setVenda(caixa.getNumero());
@@ -1129,8 +1183,8 @@ public class Vendas extends AppCompatActivity{
         Double fundoCaixa = caixa.getFundo();
         Double totalDinheiro = 0.0;
         Double totalCartao = 0.0;
-        Double totalGeral = 0.0;
-        Double totalCaixa = 0.0;
+        Double totalGeral;
+        Double totalCaixa;
 
         for(int cont = 0; cont < pedidosList.size(); cont++){
             pedido = pedidosList.get(cont);
@@ -1146,6 +1200,10 @@ public class Vendas extends AppCompatActivity{
         //AlertDialog
         LayoutInflater layoutInflater = getLayoutInflater();
         View view = layoutInflater.inflate(R.layout.rel_vendas, null);
+
+        TextView data = view.findViewById(R.id.rel_v_data);
+        //TODO - colocar formater aqui
+        data.setText(caixa.getDataAbertura());
 
         TextView fundo = view.findViewById(R.id.rel_v_fundo_caixa);
         fundo.setText(String.valueOf(fundoCaixa));

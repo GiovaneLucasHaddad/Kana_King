@@ -38,6 +38,16 @@ public class DaoCaixa {
         return  db.update(Esquema.Caixa.TABELA,valores,selecao,args);
     }
 
+    public int reabrirCaixa(Caixa caixa){
+        ContentValues valores = new ContentValues();
+        valores.put(Esquema.Caixa.DATA_FECHAMENTO,"");
+        valores.put(Esquema.Caixa.HORA_FECHAMENTO,"");
+
+        String selecao = Esquema.Caixa._ID + " = ?";
+        String[] args = {"" + caixa.getId()};
+        return  db.update(Esquema.Caixa.TABELA,valores,selecao,args);
+    }
+
     public Caixa ultimoCaixa(long ultimoId){//Traz o último registro de caixa para iniciar a lista de Pedidos
         if(ultimoId == -1){
             return null;

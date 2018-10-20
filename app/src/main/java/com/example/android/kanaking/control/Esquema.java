@@ -38,4 +38,10 @@ public final class Esquema {
         public static final String ENTREGUE = "ENTREGUE";
         public static final String OBSERVACAO = "OBSERVACAO";
     }
+
+    public static class Configuracoes implements BaseColumns {
+        public static final String TABELA = "CONFIGURACOES";
+        public static final String MAC1 = "MAC1";
+        public static final String MAC2 = "MAC2";
+    }
 }
