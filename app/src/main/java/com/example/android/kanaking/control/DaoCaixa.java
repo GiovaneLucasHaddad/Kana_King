@@ -100,4 +100,30 @@ public class DaoCaixa {
         cursor.close();
         return id;
     }
+
+    public String pesuisarCaixas(String dataInicial, String dataFinal){
+        String[] projecao = {
+                Esquema.Caixa.NUMERO};
+        String selecao = Esquema.Caixa.DATA_ABERTURA + " BETWEEN ? AND ?";
+        String[] args = {dataInicial,dataFinal};
+        String ordem = Esquema.Caixa.NUMERO + " ASC";
+
+        StringBuilder caixas = new StringBuilder();
+        String aux;
+        Cursor cursor = db.query(Esquema.Caixa.TABELA,projecao,selecao,args,null,null,ordem);
+        if (cursor.getCount() > 0){
+            while(cursor.moveToNext()) {
+                aux = String.valueOf(cursor.getLong(cursor.getColumnIndexOrThrow(Esquema.Caixa.NUMERO)));
+                if(aux.equals("")){
+                    continue;
+                }
+                caixas.append(aux).append(",");
+            }
+        }
+        cursor.close();
+        if(caixas.toString().equals("")){
+            return "";
+        }
+        return caixas.substring(0,caixas.length()-1);
+    }
 }

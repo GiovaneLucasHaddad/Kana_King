@@ -7,6 +7,5 @@
         android:id="@+id/valor_fundo"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:numeric="decimal"
-        android:text="0,00" />
+        android:inputType="numberDecimal"/>
 </LinearLayout>

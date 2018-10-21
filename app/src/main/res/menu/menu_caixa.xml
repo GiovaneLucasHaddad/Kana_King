@@ -7,11 +7,6 @@
         app:showAsAction="ifRoom" />
 
     <item
-        android:id="@+id/conectar_inseguro"
-        android:title="@string/conectar_inseguro"
-        app:showAsAction="ifRoom" />
-
-    <item
         android:id="@+id/abrirCaixa"
         android:title="@string/abrir_caixa"
         app:showAsAction="ifRoom" />

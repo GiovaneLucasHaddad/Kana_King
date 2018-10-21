@@ -1,6 +1,8 @@
 package com.example.android.kanaking.view;
 
 import android.app.Activity;
+import android.app.DatePickerDialog;
+import android.app.Dialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.DialogInterface;
@@ -10,11 +12,15 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.GridView;
@@ -47,10 +53,13 @@ import org.json.JSONObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.text.DecimalFormat;
+import java.text.Format;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 import static com.example.android.kanaking.Constantes.ABACAXI;
 import static com.example.android.kanaking.Constantes.ABRINDO_CAIXA;
@@ -111,6 +120,9 @@ public class Vendas extends AppCompatActivity{
     private static final int SOLICITACAO_CONEXAO_SEGURA = 1;
     private static final int SOLICITACAO_CONEXAO_INSEGURA = 2;
     private static final int SOLICITACAO_ATIVACAO = 3;
+    private static final int DIALOGO_DATA = 4;
+    private static final int INICIAL = 1;
+    private static final int FINAL = 2;
     private BluetoothAdapter bluetoothAdapter;
     private BluetoothService servicoBluetooth;
     private StringBuffer bufferSaida;
@@ -148,6 +160,9 @@ public class Vendas extends AppCompatActivity{
     private long numCaixa = 1;
     private long numPedido = 1;
     private int numItemPedido = 1;
+    private int tipoData;
+    String dataInicial= "";
+    String dataFinal = "";
 
 
     @Override
@@ -254,7 +269,9 @@ public class Vendas extends AppCompatActivity{
             somaPuro= findViewById(R.id.soma_puro);
             somaGengibre= findViewById(R.id.soma_gengibre);
             for (int cont = 0; cont < pedidosList.size(); cont++) {
-                calcSomaItens(pedidosList.get(cont));
+                if(pedidosList.get(cont).somaMoenda()){
+                    calcSomaItens(pedidosList.get(cont));
+                }
             }
             mostrarSomaItens();
         }
@@ -472,7 +489,8 @@ public class Vendas extends AppCompatActivity{
 
                                 itemAux.setSequencia(numItemPedido);
                                 numItemPedido++;
-                                itensList.add(0,itemAux);
+                                ItemPedido itemPedido = new ItemPedido(itemAux);
+                                itensList.add(0,itemPedido);
                                 itemAdapter.notifyDataSetChanged();
 
                                 break;
@@ -750,6 +768,11 @@ public class Vendas extends AppCompatActivity{
                             listaPedidos.setEnabled(true);
                             bloqueio.setVisibility(View.INVISIBLE);
                             invalidateOptionsMenu();
+                            if (MODO.equals(MOENDA)) {
+                                zerarSomaItens();
+                                calcSomaItens(pedido);
+                                mostrarSomaItens();
+                            }
                             break;
                         }
 
@@ -822,14 +845,26 @@ public class Vendas extends AppCompatActivity{
                         }
                         case TERMINADO:{
                             executarMudancaEstado(pedido);
+                            if (MODO.equals(MOENDA)) {
+                                subtraiSomaItens(pedido);
+                                mostrarSomaItens();
+                            }
                             break;
                         }
                         case CANCELADO:{
                             executarMudancaEstado(pedido);
+                            if (MODO.equals(MOENDA)) {
+                                subtraiSomaItens(pedido);
+                                mostrarSomaItens();
+                            }
                             break;
                         }
                         case APAGANDO:{
                             remover(pedido);
+                            if (MODO.equals(MOENDA)) {
+                                subtraiSomaItens(pedido);
+                                mostrarSomaItens();
+                            }
                             break;
                         }
                     }
@@ -1048,12 +1083,12 @@ public class Vendas extends AppCompatActivity{
                 startActivityForResult(intentServidor, SOLICITACAO_CONEXAO_SEGURA);
                 return true;
             }
-            case R.id.conectar_inseguro: {
-                //Ver a lista de dispositivos
-                Intent intentServidor = new Intent(this, ListaDeDispositivos.class);
-                startActivityForResult(intentServidor, SOLICITACAO_CONEXAO_INSEGURA);
-                return true;
-            }
+//            case R.id.conectar_inseguro: {
+//                //Ver a lista de dispositivos
+//                Intent intentServidor = new Intent(this, ListaDeDispositivos.class);
+//                startActivityForResult(intentServidor, SOLICITACAO_CONEXAO_INSEGURA);
+//                return true;
+//            }
 //            case R.id.visivel: {
 //                //Tornar Visível aos outros dispositivos
 //                tornarVisivel();
@@ -1068,6 +1103,37 @@ public class Vendas extends AppCompatActivity{
                         LayoutInflater layoutInflater = getLayoutInflater();
                         View view = layoutInflater.inflate(R.layout.fundo_caixa, null);
                         final EditText valor_fundo = view.findViewById(R.id.valor_fundo);
+                        valor_fundo.addTextChangedListener(new TextWatcher() {
+                            @Override
+                            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                            }
+
+                            private String current = "";
+                            @Override
+                            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                                if(!s.toString().equals(current)) {
+                                    Locale myLocale = new Locale("pt", "BR");
+                                    //Nesse bloco ele monta a maskara para money
+                                    valor_fundo.removeTextChangedListener(this);
+                                    String cleanString = s.toString().replaceAll("[R$,.]", "");
+                                    Double parsed = Double.parseDouble(cleanString);
+                                    String formatted = NumberFormat.getCurrencyInstance(myLocale).format((parsed / 100));
+                                    current = formatted;
+                                    valor_fundo.setText(formatted);
+                                    valor_fundo.setSelection(formatted.length());
+
+                                    //Nesse bloco ele faz a conta do total (Caso a qtde esteja preenchida)
+//                                    String qtde = txtQtdeLitros.getText().toString();
+
+                                    valor_fundo.addTextChangedListener(this);
+                                }
+                            }
+                            @Override
+                            public void afterTextChanged(Editable s) {
+
+                            }
+                        });
 
                         AlertDialog.Builder builder = new AlertDialog.Builder(this);
                         builder.setTitle("Digite o valor inicial do caixa");
@@ -1129,13 +1195,14 @@ public class Vendas extends AppCompatActivity{
                                 pedido.setData(caixa.getDataFechamento());
                                 pedido.setHora(caixa.getHoraFechamento());
                                 enviar(PedidoToStringJSON(pedido));
+
+                                relatorioVendas();
                             }
                         });
                         builder.setNegativeButton("Cancelar", null);
                         builder.show();
                         //Sobre o AlertDialog
 
-                        relatorioVendas();
                         return true;
                     }
                 }
@@ -1158,19 +1225,44 @@ public class Vendas extends AppCompatActivity{
                 return true;
             }
             case R.id.relPeriodo: {
+                dataInicial = "";
+                dataFinal = "";
                 //AlertDialog
                 LayoutInflater layoutInflater = getLayoutInflater();
-                View view = layoutInflater.inflate(R.layout.rel_vendas_periodo, null);
-                TextView fundo = view.findViewById(R.id.rel_vp_periodo);
-                fundo.setText("0,00");
-                TextView dinheiro = view.findViewById(R.id.rel_vp_total_dinheiro);
-                TextView cartao = view.findViewById(R.id.rel_vp_total_cartao);
-                TextView geral = view.findViewById(R.id.rel_vp_total_geral);
+                View view = layoutInflater.inflate(R.layout.definir_periodo, null);
+
+                final Button btnDataInicial = view.findViewById(R.id.periodo_d_inicial);
+                btnDataInicial.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        tipoData = INICIAL;
+                        showDialog(DIALOGO_DATA);
+                        v.setBackgroundResource(R.color.corPronto);
+                    }
+                });
+                Button btnDataFinal = view.findViewById(R.id.periodo_d_final);
+                btnDataFinal.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        tipoData = FINAL;
+                        showDialog(DIALOGO_DATA);
+                        v.setBackgroundResource(R.color.corPronto);
+                    }
+                });
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setTitle(R.string.rel_vendas_periodo);
+                builder.setTitle("Defina o período a consultar");
                 builder.setView(view);
-                builder.setPositiveButton("Certo!", null);
+                builder.setPositiveButton("Continuar", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        if(dataInicial.equals("") || dataFinal.equals("")){
+                            Toast.makeText(Vendas.this, "Não foi escolhida a data Inicial ou Final", Toast.LENGTH_SHORT).show();
+                        }else{
+                            relatorioPeriodo(dataInicial,dataFinal);
+                        }
+                    }
+                });
                 builder.show();
                 //AlertDialog
                 return true;
@@ -1182,43 +1274,58 @@ public class Vendas extends AppCompatActivity{
         Pedido pedido;
         Double fundoCaixa = caixa.getFundo();
         Double totalDinheiro = 0.0;
+        int qtdDinheiro = 0;
         Double totalCartao = 0.0;
+        int qtdCartao = 0;
         Double totalGeral;
+        int qtdTotal;
         Double totalCaixa;
 
         for(int cont = 0; cont < pedidosList.size(); cont++){
             pedido = pedidosList.get(cont);
-            if(pedido.getFormaPagamento() == DINHEIRO){
-                totalDinheiro += pedido.getValor();
-            }else{
-                totalCartao += pedido.getValor();
+            if(pedido.getEstado() != CANCELADO) {
+                if (pedido.getFormaPagamento() == DINHEIRO) {
+                    totalDinheiro += pedido.getValor();
+                    qtdDinheiro++;
+                } else {
+                    totalCartao += pedido.getValor();
+                    qtdCartao++;
+                }
             }
         }
+
         totalGeral = totalDinheiro + totalCartao;
         totalCaixa = fundoCaixa + totalDinheiro;
+        qtdTotal = qtdDinheiro + qtdCartao;
 
         //AlertDialog
         LayoutInflater layoutInflater = getLayoutInflater();
         View view = layoutInflater.inflate(R.layout.rel_vendas, null);
 
         TextView data = view.findViewById(R.id.rel_v_data);
-        //TODO - colocar formater aqui
-        data.setText(caixa.getDataAbertura());
+
+        //Convertendo data do banco para a GUI
+        String dataCaixa = caixa.getDataAbertura().replaceAll("-","/");
+        String[] s = dataCaixa.split("/");
+        dataCaixa = s[2]+"/"+s[1]+"/"+s[0];
+        data.setText(dataCaixa);
+
+        DecimalFormat df = new DecimalFormat(",##0.00");
 
         TextView fundo = view.findViewById(R.id.rel_v_fundo_caixa);
-        fundo.setText(String.valueOf(fundoCaixa));
+        fundo.setText(df.format(fundoCaixa));
 
         TextView dinheiro = view.findViewById(R.id.rel_v_total_dinheiro);
-        dinheiro.setText(String.valueOf(totalDinheiro));
+        dinheiro.setText(df.format(totalDinheiro) + " (" + String.valueOf(qtdDinheiro) + " Pedidos)" );
 
         TextView cartao = view.findViewById(R.id.rel_v_total_cartao);
-        cartao.setText(String.valueOf(totalCartao));
+        cartao.setText(df.format(totalCartao) + " (" + String.valueOf(qtdCartao) + " Pedidos)");
 
         TextView geral = view.findViewById(R.id.rel_v_total_geral);
-        geral.setText(String.valueOf(totalGeral));
+        geral.setText(df.format(totalGeral) + " (" + String.valueOf(qtdTotal) + " Pedidos)");
 
         TextView caixa = view.findViewById(R.id.rel_v_total_caixa);
-        caixa.setText(String.valueOf(totalCaixa));
+        caixa.setText(df.format(totalCaixa));
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.rel_vendas_ate_agora);
@@ -1227,6 +1334,101 @@ public class Vendas extends AppCompatActivity{
         builder.show();
         //AlertDialog
     }
+    public void relatorioPeriodo(String dataInicial, String dataFinal){
+        DaoPedido daoPedido = new DaoPedido(this);
+        DaoCaixa daoCaixa = new DaoCaixa(this);
+        ArrayList<Pedido> pedidos;
+        Toast.makeText(this, "Data inicial: " + dataInicial + " | Data final: " + dataFinal, Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "RESULTADO = " + daoCaixa.pesuisarCaixas(dataInicial, dataFinal), Toast.LENGTH_SHORT).show();
+
+//        pedidos = daoPedido.buscarPeriodo(daoCaixa.pesuisarCaixas(dataInicial, dataFinal));
+//
+//        Pedido pedido;
+//
+//        Double totalDinheiro = 0.0;
+//        int qtdDinheiro = 0;
+//        Double totalCartao = 0.0;
+//        int qtdCartao = 0;
+//        Double totalGeral;
+//        int qtdTotal;
+//
+//        for(int cont = 0; cont < pedidos.size(); cont++){
+//            pedido = pedidos.get(cont);
+//            if(pedido.getEstado() != CANCELADO) {
+//                if (pedido.getFormaPagamento() == DINHEIRO) {
+//                    totalDinheiro += pedido.getValor();
+//                    qtdDinheiro++;
+//                } else {
+//                    totalCartao += pedido.getValor();
+//                    qtdCartao++;
+//                }
+//            }
+//        }
+//
+//        totalGeral = totalDinheiro + totalCartao;
+//        qtdTotal = qtdDinheiro + qtdCartao;
+//
+//        //AlertDialog
+//        LayoutInflater layoutInflater = getLayoutInflater();
+//        View view = layoutInflater.inflate(R.layout.rel_vendas_periodo, null);
+//
+//        TextView data = view.findViewById(R.id.rel_vp_periodo);
+//
+//
+//        DecimalFormat df = new DecimalFormat(",##0.00");
+//
+//        TextView dinheiro = view.findViewById(R.id.rel_vp_total_dinheiro);
+//        dinheiro.setText(df.format(totalDinheiro) + " (" + String.valueOf(qtdDinheiro) + " Pedidos)" );
+//
+//        TextView cartao = view.findViewById(R.id.rel_vp_total_cartao);
+//        cartao.setText(df.format(totalCartao) + " (" + String.valueOf(qtdCartao) + " Pedidos)");
+//
+//        TextView geral = view.findViewById(R.id.rel_vp_total_geral);
+//        geral.setText(df.format(totalGeral) + " (" + String.valueOf(qtdTotal) + " Pedidos)");
+//
+//        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+//        builder.setTitle(R.string.rel_vendas_ate_agora);
+//        builder.setView(view);
+//        builder.setPositiveButton("Certo!", null);
+//        builder.show();
+//        //AlertDialog
+    }
+
+    public void setDataInicial(View view) {
+
+    }
+
+    public void setDataFinal(View view) {
+
+    }
+
+    @Override
+    protected Dialog onCreateDialog(int id) {
+        Calendar calendario = Calendar.getInstance();
+
+        int ano = calendario.get(Calendar.YEAR);
+        int mes = calendario.get(Calendar.MONTH);
+        int dia = calendario.get(Calendar.DAY_OF_MONTH);
+
+        switch (id) {
+            case DIALOGO_DATA:
+                return new DatePickerDialog(this, mDateSetListener, ano, mes, dia);
+        }
+        return null;
+    }
+
+    private DatePickerDialog.OnDateSetListener mDateSetListener = new DatePickerDialog.OnDateSetListener() {
+                public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+                    if(tipoData == INICIAL){
+                        dataInicial = String.valueOf(year) + "-" + String.valueOf(monthOfYear+1) + "-" + String.valueOf(dayOfMonth);
+                        Toast.makeText(Vendas.this, "dataInicial" + dataInicial, Toast.LENGTH_SHORT).show();
+                    }else{
+                        dataFinal = String.valueOf(year) + "-" + String.valueOf(monthOfYear+1) + "-" + String.valueOf(dayOfMonth);
+                        Toast.makeText(Vendas.this, "dataFinal" + dataFinal, Toast.LENGTH_SHORT).show();
+                    }
+                }
+            };
+
     public String PedidoToStringJSON(Pedido pedido){
         JSONObject jsonPedido = new JSONObject();
         JSONArray jsonItens = new JSONArray();
@@ -1308,11 +1510,25 @@ public class Vendas extends AppCompatActivity{
         totalPuro += pedido.getQtdTotal(PURO);
         totalGengibre += pedido.getQtdTotal(GENGIBRE);
     }
+    public void subtraiSomaItens(Pedido pedido){
+        totalTaiti -= pedido.getQtdTotal(TAITI);
+        totalSiciliano -= pedido.getQtdTotal(SICILIANO);
+        totalAbacaxi -= pedido.getQtdTotal(ABACAXI);
+        totalPuro -= pedido.getQtdTotal(PURO);
+        totalGengibre -= pedido.getQtdTotal(GENGIBRE);
+    }
     public void mostrarSomaItens(){
         somaTaiti.setText(totalTaiti + " mL");
         somaSiciliano.setText(totalSiciliano + " mL");
         somaAbacaxi.setText(totalAbacaxi + " mL");
         somaPuro.setText(totalPuro + " mL");
         somaGengibre.setText(totalGengibre + " mL");
+    }
+    public void zerarSomaItens(){
+        totalTaiti = 0;
+        totalSiciliano = 0;
+        totalAbacaxi = 0;
+        totalPuro = 0;
+        totalGengibre = 0;
     }
 }

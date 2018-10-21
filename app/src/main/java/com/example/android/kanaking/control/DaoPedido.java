@@ -128,4 +128,45 @@ public class DaoPedido {
         return pedidoAux;
     }
 
+    public ArrayList<Pedido> buscarPeriodo(String numCaixas){
+        if (numCaixas.equals("")){
+            return null;
+        }
+        String[] projecao = {
+                Esquema.Pedido._ID,
+                Esquema.Pedido.VENDA,
+                Esquema.Pedido.COMANDA,
+                Esquema.Pedido.ESTADO,
+                Esquema.Pedido.VALOR,
+                Esquema.Pedido.FORMA_PAGAMENTO,
+                Esquema.Pedido.DATA,
+                Esquema.Pedido.HORA};
+        String selecao = Esquema.Pedido.CAIXA + " IN (?)";
+        String[] args = {numCaixas};
+        String ordem = Esquema.Pedido.CAIXA + " ASC, " + Esquema.Pedido.VENDA + " ASC";
+
+        Cursor cursor = db.query(Esquema.Pedido.TABELA,projecao,selecao,args,null,null,ordem);
+        Pedido pedidoAux = null;
+        ArrayList<Pedido> pedidos = null;
+        if(cursor.getCount() > 0){
+            pedidos = new ArrayList<>();
+            while(cursor.moveToNext()){
+                pedidoAux = new Pedido();
+                pedidoAux.setId(cursor.getLong(cursor.getColumnIndexOrThrow(Esquema.Pedido._ID)));
+                pedidoAux.setVenda(cursor.getLong(cursor.getColumnIndexOrThrow(Esquema.Pedido.VENDA)));
+                pedidoAux.setComanda(cursor.getInt(cursor.getColumnIndexOrThrow(Esquema.Pedido.COMANDA)));
+                pedidoAux.setEstado(cursor.getInt(cursor.getColumnIndexOrThrow(Esquema.Pedido.ESTADO)));
+                pedidoAux.setValor(cursor.getDouble(cursor.getColumnIndexOrThrow(Esquema.Pedido.VALOR)));
+                pedidoAux.setFormaPagamento(cursor.getInt(cursor.getColumnIndexOrThrow(Esquema.Pedido.FORMA_PAGAMENTO)));
+                pedidoAux.setData(cursor.getString(cursor.getColumnIndexOrThrow(Esquema.Pedido.DATA)));
+                pedidoAux.setHora(cursor.getString(cursor.getColumnIndexOrThrow(Esquema.Pedido.HORA)));
+
+                pedidos.add(pedidoAux);
+            }
+        }
+        cursor.close();
+
+        return pedidos;
+    }
+
 }

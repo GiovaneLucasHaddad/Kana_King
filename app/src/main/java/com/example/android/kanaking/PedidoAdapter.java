@@ -27,7 +27,6 @@ import static com.example.android.kanaking.Constantes.CANCELADO;
 import static com.example.android.kanaking.Constantes.CARTAO;
 import static com.example.android.kanaking.Constantes.DINHEIRO;
 import static com.example.android.kanaking.Constantes.LANCADO;
-import static com.example.android.kanaking.Constantes.MOENDA;
 import static com.example.android.kanaking.Constantes.PREPARANDO;
 import static com.example.android.kanaking.Constantes.PRONTO;
 import static com.example.android.kanaking.Constantes.TERMINADO;

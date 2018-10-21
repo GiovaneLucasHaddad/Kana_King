@@ -20,7 +20,7 @@
     <string name="fechar_caixa">Fechar Caixa</string>
     <string name="abrir_caixa">Abrir Caixa</string>
     <string name="reabrir_caixa">Reabrir Caixa</string>
-    <string name="conectar_seguro">Conectar (Seguro)</string>
+    <string name="conectar_seguro">Conectar</string>
     <string name="conectar_inseguro">Conectar (Inseguro)</string>
     <string name="relAgora">Vendas até agora</string>
     <string name="relPeriodo">Vendas por período</string>
@@ -50,4 +50,6 @@
     <string name="rel_total_geral">Total geral de Vendas:</string>
     <string name="rel_total_caixa">Valor total em caixa:</string>
     <string name="rel_periodo_consulta">Período de consulta:</string>
+    <string name="data_inicial">Data Inicial</string>
+    <string name="data_final">Data Final</string>
 </resources>

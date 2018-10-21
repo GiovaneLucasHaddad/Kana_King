@@ -24,7 +24,7 @@
             android:name=".view.ListaDeDispositivos"
             android:configChanges="orientation|keyboardHidden"
             android:label="@string/select_device"
-            android:theme="@android:style/Theme.Holo.Dialog"/>
+            android:theme="@android:style/Theme.DeviceDefault.Dialog"/>
     </application>
 
 </manifest>

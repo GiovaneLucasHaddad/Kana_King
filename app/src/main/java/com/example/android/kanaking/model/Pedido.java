@@ -2,6 +2,13 @@ package com.example.android.kanaking.model;
 
 import java.util.ArrayList;
 
+import static com.example.android.kanaking.Constantes.APAGANDO;
+import static com.example.android.kanaking.Constantes.CANCELADO;
+import static com.example.android.kanaking.Constantes.LANCADO;
+import static com.example.android.kanaking.Constantes.PREPARANDO;
+import static com.example.android.kanaking.Constantes.PRONTO;
+import static com.example.android.kanaking.Constantes.TERMINADO;
+
 public class Pedido {
     private long id;
     private long venda;
@@ -68,6 +75,23 @@ public class Pedido {
             }
         }
         return qtde;
+    }
+    public boolean somaMoenda(){
+        switch(estado){
+            case LANCADO:
+                return true;
+            case PREPARANDO:
+                return true;
+            case PRONTO:
+                return true;
+            case CANCELADO:
+                return false;
+            case TERMINADO:
+                return false;
+            case APAGANDO:
+                return false;
+        }
+        return false;
     }
 
     public long getId() {

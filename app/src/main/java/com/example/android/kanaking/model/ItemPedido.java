@@ -32,8 +32,25 @@ public class ItemPedido {
     private Pedido pedido;
 
     public ItemPedido() {
+        id = 0;
+        sequencia = 0;
+        sabor = 0;
+        recipiente = 0;
         quantidade = 1;
         entregue = 0;
+        observacao = 0;
+        pedido = null;
+    }
+
+    public ItemPedido(ItemPedido itemPedido) {
+        id = itemPedido.id;
+        sequencia = itemPedido.sequencia;
+        sabor = itemPedido.sabor;
+        recipiente = itemPedido.recipiente;
+        quantidade = itemPedido.quantidade;
+        entregue = itemPedido.entregue;
+        observacao = itemPedido.observacao;
+        pedido = itemPedido.pedido;
     }
 
     public Double calcSoma (){

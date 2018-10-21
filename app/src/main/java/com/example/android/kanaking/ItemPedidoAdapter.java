@@ -13,6 +13,10 @@ import com.example.android.kanaking.model.ItemPedido;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.example.android.kanaking.Constantes.NENHUMA;
+import static com.example.android.kanaking.Constantes.POUCO_GELO;
+import static com.example.android.kanaking.Constantes.SEM_GELO;
+
 public class ItemPedidoAdapter extends BaseAdapter {
 
     private Context context;
@@ -54,17 +58,25 @@ public class ItemPedidoAdapter extends BaseAdapter {
             img.setImageResource(R.drawable.confirmar);
         }
 
+        switch (itemAtual.getObservacao()){
+            case NENHUMA:
+                break;
+            case POUCO_GELO:
+                img = view.findViewById(R.id.observacao);
+                img.setImageResource(R.drawable.gelo);
+                break;
+            case SEM_GELO:
+                img = view.findViewById(R.id.observacao);
+                img.setImageResource(R.drawable.sem_gelo);
+        }
+
         TextView recipiente = view.findViewById(R.id.recipiente);
         recipiente.setText(itemAtual.getRecipienteDescricao());
 
         TextView quantidade = view.findViewById(R.id.quantidade);
         quantidade.setText(itemAtual.getQuantidadeDescricao());
 
-//            imageView.setImageResource(lista[position]);
-//            imageView.setAdjustViewBounds(true);
-////            imageView.setLayoutParams(new ViewGroup.LayoutParams(85, 85));
-//            imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-//            imageView.setPadding(8, 8, 8, 8);
+
         return view;
     }
 }
