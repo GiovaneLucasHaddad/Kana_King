@@ -91,4 +91,7 @@ public interface Constantes {
         //COCO_FRUTA, COPO_300, COPO_400, COPO_500, GARRAFA_500, GARRAFA_1000
     {0, 0,            300,      400,      500,      500,         1000};
 
+    //Útil para entregue
+    int SIM = 1;
+    int NAO = 0;
 }

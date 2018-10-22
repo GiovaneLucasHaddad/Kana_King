@@ -12,6 +12,7 @@ import static com.example.android.kanaking.Constantes.COPO_500;
 import static com.example.android.kanaking.Constantes.GARRAFA_1000;
 import static com.example.android.kanaking.Constantes.GARRAFA_500;
 import static com.example.android.kanaking.Constantes.GENGIBRE;
+import static com.example.android.kanaking.Constantes.NAO;
 import static com.example.android.kanaking.Constantes.NENHUMA;
 import static com.example.android.kanaking.Constantes.POUCO_GELO;
 import static com.example.android.kanaking.Constantes.PRECOS;
@@ -37,7 +38,7 @@ public class ItemPedido {
         sabor = 0;
         recipiente = 0;
         quantidade = 1;
-        entregue = 0;
+        entregue = NAO;
         observacao = 0;
         pedido = null;
     }

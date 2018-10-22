@@ -16,6 +16,7 @@ import java.util.List;
 import static com.example.android.kanaking.Constantes.NENHUMA;
 import static com.example.android.kanaking.Constantes.POUCO_GELO;
 import static com.example.android.kanaking.Constantes.SEM_GELO;
+import static com.example.android.kanaking.Constantes.SIM;
 
 public class ItemPedidoAdapter extends BaseAdapter {
 
@@ -50,10 +51,12 @@ public class ItemPedidoAdapter extends BaseAdapter {
         if (convertView == null)
             view = LayoutInflater.from(context).inflate(R.layout.item_pedido,parent,false);
 
+        view.setTag(itemAtual);
+
         ImageView img = view.findViewById(R.id.sabor);
         img.setImageResource(itemAtual.getImgSaborRec());
 
-        if (itemAtual.getEntregue() == 1){
+        if (itemAtual.getEntregue() == SIM){
             img = view.findViewById(R.id.entregue);
             img.setImageResource(R.drawable.confirmar);
         }

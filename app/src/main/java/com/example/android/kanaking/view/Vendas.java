@@ -74,6 +74,7 @@ import static com.example.android.kanaking.Constantes.COPO_400;
 import static com.example.android.kanaking.Constantes.COPO_500;
 import static com.example.android.kanaking.Constantes.DEVICE_NAME;
 import static com.example.android.kanaking.Constantes.DINHEIRO;
+import static com.example.android.kanaking.Constantes.ENTREGANDO_ITEM;
 import static com.example.android.kanaking.Constantes.FECHANDO_CAIXA;
 import static com.example.android.kanaking.Constantes.GARRAFA_1000;
 import static com.example.android.kanaking.Constantes.GARRAFA_500;
@@ -108,6 +109,7 @@ import static com.example.android.kanaking.Constantes.REABRINDO_CAIXA;
 import static com.example.android.kanaking.Constantes.RECIPIENTE;
 import static com.example.android.kanaking.Constantes.SABOR;
 import static com.example.android.kanaking.Constantes.SICILIANO;
+import static com.example.android.kanaking.Constantes.SIM;
 import static com.example.android.kanaking.Constantes.TAITI;
 import static com.example.android.kanaking.Constantes.TERMINADO;
 import static com.example.android.kanaking.Constantes.TOAST;
@@ -187,7 +189,7 @@ public class Vendas extends AppCompatActivity{
         if(caixa != null){
             numCaixa = caixa.getNumero() + 1;
             if (caixa.isAberto()){
-                Toast.makeText(Vendas.this, "Caixa: DataAbertura: " + caixa.getDataAbertura() + " HoraAbertura: " + caixa.getHoraAbertura() + " DataFechamento: " + caixa.getDataFechamento() + " HoraFechamento: " + caixa.getHoraFechamento() + " Fundo: " + caixa.getFundo(), Toast.LENGTH_SHORT).show();
+//                Toast.makeText(Vendas.this, "Caixa: DataAbertura: " + caixa.getDataAbertura() + " HoraAbertura: " + caixa.getHoraAbertura() + " DataFechamento: " + caixa.getDataFechamento() + " HoraFechamento: " + caixa.getHoraFechamento() + " Fundo: " + caixa.getFundo(), Toast.LENGTH_SHORT).show();
                 listaPedidos.setEnabled(true);
                 bloqueio.setVisibility(View.INVISIBLE);
             }else{
@@ -726,6 +728,7 @@ public class Vendas extends AppCompatActivity{
                         }
                         case TERMINADO:{
                             executarMudancaEstado(pedido);
+                            entregarTodosItens(pedido);
                             break;
                         }
                         case CANCELADO:{
@@ -735,6 +738,9 @@ public class Vendas extends AppCompatActivity{
                         case APAGANDO:{
                             remover(pedido);
                             break;
+                        }
+                        case ENTREGANDO_ITEM:{
+                            entregarItem(pedido);
                         }
                     }
                     break;
@@ -849,6 +855,7 @@ public class Vendas extends AppCompatActivity{
                                 subtraiSomaItens(pedido);
                                 mostrarSomaItens();
                             }
+                            entregarTodosItens(pedido);
                             break;
                         }
                         case CANCELADO:{
@@ -866,6 +873,9 @@ public class Vendas extends AppCompatActivity{
                                 mostrarSomaItens();
                             }
                             break;
+                        }
+                        case ENTREGANDO_ITEM:{
+                            entregarItem(pedido);
                         }
                     }
                     break;
@@ -934,6 +944,49 @@ public class Vendas extends AppCompatActivity{
                 break;
             }
         }
+    }
+
+    public void selecaoItem(View v){
+        if(MODO.equals(CAIXA)) {
+            ItemPedido item = (ItemPedido) v.getTag();
+            Toast.makeText(this, "Item Id: " + item.getId() + " Sequencia: " + item.getSequencia(), Toast.LENGTH_SHORT).show();
+            //TODO - Pode ser mostrada uma mensagem de confirmação antes de apagar
+            //TODO - Ver se essa função será mantida e assinalar na documentação
+            if (item.getId() == 0) {//Lançamento de pedido
+                int seq = item.getSequencia();
+                for (int cont = 0; cont < itensList.size(); cont++) {
+                    if (itensList.get(cont).getSequencia() == seq) {
+                        itensList.remove(cont);
+                        break;
+                    }
+                }
+            } else {//ItemPedido de Pedido já lançado -> entregar ItemPedido
+                Pedido pedido = new Pedido();
+                pedido.setId(item.getSequencia());
+                pedido.setVenda(item.getPedido().getVenda());
+                pedido.setEstado(ENTREGANDO_ITEM);
+                enviar(PedidoToStringJSON(pedido));
+            }
+        }
+    }
+    public void entregarItem(Pedido pedido){
+        for(int cont = 0; cont < pedidosList.size(); cont++){
+            if(pedidosList.get(cont).getVenda() == pedido.getVenda()){
+                Pedido pedidoAux = pedidosList.get(cont);
+                ArrayList<ItemPedido> itensAux = pedidoAux.getItemPedidos();
+
+                for(int cont2 = 0; cont2 < itensAux.size(); cont++){
+                    if(itensAux.get(cont2).getSequencia() == pedido.getId()){
+                        itensAux.get(cont2).setEntregue(SIM);
+                        break;
+                    }
+                }
+                break;
+            }
+        }
+    }
+    public void entregarTodosItens(Pedido pedido){
+
     }
 
     public void opcoes(View v){
