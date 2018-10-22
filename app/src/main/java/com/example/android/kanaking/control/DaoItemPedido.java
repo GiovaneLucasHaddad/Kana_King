@@ -44,9 +44,8 @@ public class DaoItemPedido {
     public int atualizarEstado(ItemPedido itemPedido){
         ContentValues valores = new ContentValues();
         valores.put(Esquema.ItemPedido.ENTREGUE,itemPedido.getEntregue());
-//TODO - ao executar a atualização, verificar se todos os itens já estão terminados para mudar o estado do Pedido
-        String selecao = Esquema.ItemPedido.SEQUENCIA + " = ?";
-        String[] args = {"" + itemPedido.getSequencia()};
+        String selecao = Esquema.ItemPedido.SEQUENCIA + " = ? AND " + Esquema.ItemPedido.VENDA + " = ? AND " + Esquema.ItemPedido.CAIXA + " = ?";
+        String[] args = {"" + itemPedido.getSequencia(), "" + itemPedido.getPedido().getVenda(), "" + itemPedido.getPedido().getCaixa().getNumero()};
 
         return db.update(Esquema.ItemPedido.TABELA,valores,selecao,args);
     }

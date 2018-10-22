@@ -39,7 +39,7 @@ public class ItemPedido {
         recipiente = 0;
         quantidade = 1;
         entregue = NAO;
-        observacao = 0;
+        observacao = NENHUMA;
         pedido = null;
     }
 

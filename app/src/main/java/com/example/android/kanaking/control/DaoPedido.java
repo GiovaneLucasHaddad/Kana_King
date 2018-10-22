@@ -145,7 +145,7 @@ public class DaoPedido {
         String[] args = {numCaixas};
         String ordem = Esquema.Pedido.CAIXA + " ASC, " + Esquema.Pedido.VENDA + " ASC";
 
-        Cursor cursor = db.query(Esquema.Pedido.TABELA,projecao,selecao,args,null,null,ordem);
+        Cursor cursor = db.query(Esquema.Pedido.TABELA,projecao,selecao,args,null,null,null);//ordem);
         Pedido pedidoAux = null;
         ArrayList<Pedido> pedidos = null;
         if(cursor.getCount() > 0){

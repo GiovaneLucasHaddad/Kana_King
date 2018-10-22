@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.android.kanaking.model.ItemPedido;
@@ -59,6 +60,9 @@ public class ItemPedidoAdapter extends BaseAdapter {
         if (itemAtual.getEntregue() == SIM){
             img = view.findViewById(R.id.entregue);
             img.setImageResource(R.drawable.confirmar);
+
+            LinearLayout fundo = view.findViewById(R.id.fundo_item);
+            fundo.setBackgroundResource(R.color.corTerminado);
         }
 
         switch (itemAtual.getObservacao()){
