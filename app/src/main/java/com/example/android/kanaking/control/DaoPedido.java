@@ -141,8 +141,8 @@ public class DaoPedido {
                 Esquema.Pedido.FORMA_PAGAMENTO,
                 Esquema.Pedido.DATA,
                 Esquema.Pedido.HORA};
-        String selecao = Esquema.Pedido.CAIXA + " = (?)";
-        String[] args = {"1"};
+        String selecao = Esquema.Pedido.CAIXA + " IN (?)";
+        String[] args = {numCaixas};
         String ordem = Esquema.Pedido.CAIXA + " ASC, " + Esquema.Pedido.VENDA + " ASC";
 
         Cursor cursor = db.query(Esquema.Pedido.TABELA,projecao,selecao,args,null,null,null);//ordem);

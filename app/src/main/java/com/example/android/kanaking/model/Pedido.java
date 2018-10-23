@@ -8,6 +8,7 @@ import static com.example.android.kanaking.Constantes.LANCADO;
 import static com.example.android.kanaking.Constantes.NAO;
 import static com.example.android.kanaking.Constantes.PREPARANDO;
 import static com.example.android.kanaking.Constantes.PRONTO;
+import static com.example.android.kanaking.Constantes.SIM;
 import static com.example.android.kanaking.Constantes.TERMINADO;
 
 public class Pedido {
@@ -71,6 +72,7 @@ public class Pedido {
         if(itemPedidos.size()>0) {
             for (int cont = 0; cont < itemPedidos.size(); cont++){
                 if(itemPedidos.get(cont).getSabor() == sabor){
+                    if(itemPedidos.get(cont).getEntregue() != SIM)
                     qtde = itemPedidos.get(cont).calcQtdRecipiente();
                 }
             }

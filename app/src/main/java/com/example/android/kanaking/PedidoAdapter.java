@@ -67,27 +67,19 @@ public class PedidoAdapter extends BaseAdapter {
         TextView comanda = (TextView)listItem.findViewById(R.id.comanda);
         comanda.setText(String.valueOf(pedidoAtual.getComanda()));
         comanda.setTag(pedidoAtual);
+        Toast.makeText(mContext, "Pedido Id: " + pedidoAtual.getId() + " Venda: " + pedidoAtual.getVenda() + " Comanda: " + pedidoAtual.getComanda(), Toast.LENGTH_SHORT).show();
 
         //Configurando GridView
         GridView itemGrid = listItem.findViewById(R.id.itens);
         ItemPedidoAdapter itemAdapter = new ItemPedidoAdapter(mContext,pedidoAtual.getItemPedidos());
         itemGrid.setAdapter(itemAdapter);
 
-
-        itemGrid.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                Toast.makeText(mContext, "Clique longo",Toast.LENGTH_SHORT).show();
-                return false;
-            }
-        });
-
         if(Vendas.MODO.equals(CAIXA)){
-            TextView valor = (TextView)listItem.findViewById(R.id.valor);
+            TextView valor = listItem.findViewById(R.id.valor);
             DecimalFormat df = new DecimalFormat(",##0.00");
             valor.setText(df.format(pedidoAtual.getValor()));
 
-            ImageView tipoPagamento = (ImageView)listItem.findViewById(R.id.tipo_pagamento);
+            ImageView tipoPagamento = listItem.findViewById(R.id.tipo_pagamento);
             switch(pedidoAtual.getFormaPagamento()){
                 case CARTAO:
                     tipoPagamento.setImageResource(R.drawable.cartao);
@@ -107,7 +99,7 @@ public class PedidoAdapter extends BaseAdapter {
 
 
 
-        LinearLayout fundo = (LinearLayout)listItem.findViewById(R.id.fundo);
+        LinearLayout fundo = listItem.findViewById(R.id.fundo);
         switch(pedidoAtual.getEstado()){
             case LANCADO://cores escolhidas com a ajuda de http://erikasarti.com/html/tabela-cores/
                 fundo.setBackgroundResource(R.color.corLancado);

@@ -166,8 +166,6 @@ public class Vendas extends AppCompatActivity{
     private String dataFinal = "";
     private boolean mostraTodos = false;
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -177,15 +175,15 @@ public class Vendas extends AppCompatActivity{
         MODO = intent.getStringExtra("MODO");
 
         textValor = (EditText)findViewById(R.id.add_valor);
-        barraEstado = (LinearLayout)findViewById(R.id.fundo_estado);
-        estado = (TextView)findViewById(R.id.estado);
+        barraEstado = findViewById(R.id.fundo_estado);
+        estado = findViewById(R.id.estado);
         listaPedidos = findViewById(R.id.lista_pedidos);
         bloqueio = findViewById(R.id.bloqueio);
 
         //Configurando abertura de caixa
         DaoCaixa daoCaixa = new DaoCaixa(this);
         long id = daoCaixa.ultimoId();
-        Toast.makeText(this, "Ultimo ID: " + id, Toast.LENGTH_SHORT).show();
+//        Toast.makeText(this, "Ultimo ID: " + id, Toast.LENGTH_SHORT).show();
         caixa = daoCaixa.ultimoCaixa(id);
         if(caixa != null){
             numCaixa = caixa.getNumero() + 1;
@@ -211,6 +209,7 @@ public class Vendas extends AppCompatActivity{
             for(int cont = 0; cont < pedidosList.size(); cont++){
                 daoItemPedido.buscarItemPedidos(pedidosList.get(cont));
             }
+            numPedido = pedidosList.get(pedidosList.size()-1).getVenda() + 1;
         }else{
             pedidosList = new ArrayList<>();
         }
@@ -229,7 +228,7 @@ public class Vendas extends AppCompatActivity{
             barraContagem.setVisibility(View.GONE);
 
             //Configurando NumberPicker
-            comanda = (NumberPicker) findViewById(R.id.add_comanda);
+            comanda = findViewById(R.id.add_comanda);
             comanda.setMaxValue(20);
             comanda.setMinValue(1);
 
@@ -243,7 +242,7 @@ public class Vendas extends AppCompatActivity{
             pagamento.setAdapter(pagtoAdapter);
 
             //Configurando GridView onde aparecerão os itens do pedido a lançar
-            GridView itemGrid = (GridView) findViewById(R.id.add_itens);
+            GridView itemGrid = findViewById(R.id.add_itens);
             if (itensList == null) {
                 itensList = new ArrayList<>();
             }
@@ -319,39 +318,42 @@ public class Vendas extends AppCompatActivity{
         }
     }
 
-    public void listarPedidos(){
-        if(mostraTodos){//Mostrar Todos
-            Toast.makeText(this, "Mostrar Todos", Toast.LENGTH_SHORT).show();
-            DaoPedido daoPedido = new DaoPedido(this);
-            pedidosList.clear();
-            pedidosList = daoPedido.buscarPedidos(caixa);
-
-            if (pedidosList != null) {
-                Toast.makeText(this, "pedidosList != null size()" + pedidosList.size(), Toast.LENGTH_SHORT).show();
-
-                DaoItemPedido daoItemPedido = new DaoItemPedido(this);
-                for(int cont = 0; cont < pedidosList.size(); cont++){
-                    daoItemPedido.buscarItemPedidos(pedidosList.get(cont));
-                }
-            }else{
-                Toast.makeText(this, "pedidosList null", Toast.LENGTH_SHORT).show();
-                pedidosList = new ArrayList<>();
-            }
-            pedidoAdapter.notifyDataSetChanged();
-        }else{//Esconder Camcelados e Terminados
-            Toast.makeText(this, "Esconder", Toast.LENGTH_SHORT).show();
-            if(pedidosList != null) {
-                for (int cont = 0; cont < pedidosList.size(); cont++) {
-                    if (!pedidosList.get(cont).consideraPedido()) {
-                        pedidosList.remove(cont);
-                        pedidoAdapter.notifyDataSetChanged();
-                    }
-                }
-            }else{
-                pedidosList = new ArrayList<>();
-            }
-        }
-    }
+//    public void listarPedidos(){
+//        if(mostraTodos){//Mostrar Todos
+//            Toast.makeText(this, "Mostrar Todos", Toast.LENGTH_SHORT).show();
+//            DaoPedido daoPedido = new DaoPedido(this);
+//            pedidosList = new ArrayList<>();
+//            pedidosList = daoPedido.buscarPedidos(caixa);
+//
+//            pedidoAdapter = new PedidoAdapter(this,pedidosList);
+//            listaPedidos.invalidateViews();
+//            listaPedidos.setAdapter(pedidoAdapter);
+//            if (pedidosList != null) {
+//                Toast.makeText(this, "pedidosList != null size()" + pedidosList.size(), Toast.LENGTH_SHORT).show();
+//
+//                DaoItemPedido daoItemPedido = new DaoItemPedido(this);
+//                for(int cont = 0; cont < pedidosList.size(); cont++){
+//                    daoItemPedido.buscarItemPedidos(pedidosList.get(cont));
+//                }
+//            }else{
+//                Toast.makeText(this, "pedidosList null", Toast.LENGTH_SHORT).show();
+//                pedidosList = new ArrayList<>();
+//            }
+//            pedidoAdapter.notifyDataSetChanged();
+//        }else{//Esconder Camcelados e Terminados
+//            Toast.makeText(this, "Esconder", Toast.LENGTH_SHORT).show();
+//            if(pedidosList != null) {
+//                for (int cont = 0; cont < pedidosList.size(); cont++) {
+//                    if (!pedidosList.get(cont).consideraPedido()) {
+//                        pedidosList.remove(cont);
+//                        pedidoAdapter.notifyDataSetChanged();
+//                    }
+//                }
+//            }else{
+//                pedidosList = new ArrayList<>();
+//            }
+//        }
+//    }
 
     private void configuraTransmissao(){
         //Inicializar serviço para conexões Bluetooth
@@ -360,15 +362,6 @@ public class Vendas extends AppCompatActivity{
         //Inicializar buffer de saída
         bufferSaida = new StringBuffer("");
     }
-
-//    private void tornarVisivel(){
-//        //Torna visível por 5 minutos
-//        if(bluetoothAdapter.getScanMode() != BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE){
-//            Intent intentVisivel = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-//            intentVisivel.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION,300);
-//            startActivity(intentVisivel);
-//        }
-//    }
 
     public void adicionar(View view){
         if(isConectado()) {
@@ -385,7 +378,7 @@ public class Vendas extends AppCompatActivity{
                         Calendar cal = Calendar.getInstance();
                         cal.setTime(data);
                         Date data_atual = cal.getTime();
-                        Pedido pedido = new Pedido(comanda.getValue(), numPedido, comanda.getValue(), LANCADO, valor, pagamento.getSelectedItemPosition(), formatData.format(data_atual), formatHora.format(data_atual), itensList);
+                        Pedido pedido = new Pedido(0, numPedido, comanda.getValue(), LANCADO, valor, pagamento.getSelectedItemPosition(), formatData.format(data_atual), formatHora.format(data_atual), itensList);
 
 //                        //Para testes
 //                        if (itensList.size() > 0) {
@@ -474,19 +467,19 @@ public class Vendas extends AppCompatActivity{
                     Menu menu = popup.getMenu();
                     MenuItem menuItem;
 
-                    menuItem = (MenuItem)menu.findItem(R.id.c_300);
+                    menuItem = menu.findItem(R.id.c_300);
                     menuItem.setIcon(itemAux.getIconeSabor(COPO_300));
 
-                    menuItem = (MenuItem)menu.findItem(R.id.c_400);
+                    menuItem = menu.findItem(R.id.c_400);
                     menuItem.setIcon(itemAux.getIconeSabor(COPO_400));
 
-                    menuItem = (MenuItem)menu.findItem(R.id.c_500);
+                    menuItem = menu.findItem(R.id.c_500);
                     menuItem.setIcon(itemAux.getIconeSabor(COPO_500));
 
-                    menuItem = (MenuItem)menu.findItem(R.id.g_500);
+                    menuItem = menu.findItem(R.id.g_500);
                     menuItem.setIcon(itemAux.getIconeSabor(GARRAFA_500));
 
-                    menuItem = (MenuItem)menu.findItem(R.id.g_1000);
+                    menuItem = menu.findItem(R.id.g_1000);
                     menuItem.setIcon(itemAux.getIconeSabor(GARRAFA_1000));
 
                 }
@@ -532,10 +525,10 @@ public class Vendas extends AppCompatActivity{
                 Menu menu = popup.getMenu();
                 MenuItem menuItem;
 
-                menuItem = (MenuItem) menu.findItem(R.id.qtde);
+                menuItem = menu.findItem(R.id.qtde);
                 menuItem.setTitle("Quantidade: " + itemAux.getQuantidade());
 
-                menuItem = (MenuItem) menu.findItem(R.id.obs);
+                menuItem = menu.findItem(R.id.obs);
                 menuItem.setTitle("Obs: " + itemAux.getObservacaoDescricao());
 
                 popup.show();
@@ -579,7 +572,7 @@ public class Vendas extends AppCompatActivity{
     }
 
     public void zerar(){
-        TextView valor, estado;
+        TextView valor;
         valor = (EditText)findViewById(R.id.add_valor);
 
         itensList.clear();
@@ -636,7 +629,7 @@ public class Vendas extends AppCompatActivity{
         barraEstado.setBackgroundResource(R.color.corConectado);
     }
 
-    private final Handler handler = new Handler(){
+    private final Handler handler = new Handler(){//Interação do BluetoothService com a UI
         @Override
         public void handleMessage(Message msg) {
             Activity activity = Vendas.this;
@@ -662,9 +655,6 @@ public class Vendas extends AppCompatActivity{
                     byte[] writeBuf = (byte[]) msg.obj;
                     // Construir uma string com o buffer
                     String writeMessage = new String(writeBuf);
-
-//                    Toast.makeText(activity, "Escrever: " + writeMessage, Toast.LENGTH_LONG).show();
-
                     Pedido pedido = JSONStringToPedido(writeMessage);
                     int estado = pedido.getEstado();
                     switch(estado){
@@ -709,7 +699,7 @@ public class Vendas extends AppCompatActivity{
                             long id = daoPedido.inserir(pedido);
                             if (id == -1) {
                                 Toast.makeText(activity, "Ocorreu algum erro ao lançar o Pedido", Toast.LENGTH_SHORT).show();
-                                numPedido--;
+//                                numPedido--;
                                 break;
                             }
                             pedido.setId(id);
@@ -724,16 +714,6 @@ public class Vendas extends AppCompatActivity{
                                 }
                                 itemPedidos.get(cont).setId(id);
                             }
-                            //Para testes //TODO - tirar, só para saber se dá pra identificar um
-                            // TODO - itemPedido na hora do lançamento e quando já está lançado -
-                            // TODO - para implementar a entrega de itemPedido
-//                            if(itemPedidos.size()>0) {
-//                                if(itemPedidos.get(1).getPedido()==null){
-//                                    Toast.makeText(activity, "Pedido nulo após de enviar", Toast.LENGTH_SHORT).show();
-//                                }else{
-//                                    Toast.makeText(activity, "Pedido identificado após de enviar", Toast.LENGTH_SHORT).show();
-//                                }
-//                            }
 
                             if (id == -1) {
                                 Toast.makeText(activity, "Desculpe, tente novamente", Toast.LENGTH_SHORT).show();
@@ -780,8 +760,6 @@ public class Vendas extends AppCompatActivity{
                     int estado = pedido.getEstado();
                     switch (estado) {
                         case ABRINDO_CAIXA: {
-                            Toast.makeText(activity, "Ler: Abrir Caixa", Toast.LENGTH_SHORT).show();
-
                             caixa = new Caixa();
                             caixa.setFundo(pedido.getValor());
                             caixa.setNumero(pedido.getVenda());
@@ -839,7 +817,7 @@ public class Vendas extends AppCompatActivity{
                             long id = daoPedido.inserir(pedido);
                             if (id == -1) {
                                 Toast.makeText(activity, "Ocorreu algum erro ao lançar o Pedido", Toast.LENGTH_SHORT).show();
-                                numPedido--;
+//                                numPedido--;
                                 break;
                             }
                             pedido.setId(id);
@@ -963,8 +941,14 @@ public class Vendas extends AppCompatActivity{
             Toast.makeText(this, "Ocorreu algum erro ao alterar estado do Pedido", Toast.LENGTH_SHORT).show();
         }
         for(int cont = 0; cont < pedidosList.size(); cont++){
-            if(pedidosList.get(cont).getVenda() == pedido.getVenda()){
-                pedidosList.get(cont).setEstado(pedido.getEstado());
+            Pedido pedidoAux = pedidosList.get(cont);
+            if(pedidoAux.getVenda() == pedido.getVenda()){
+                pedidoAux.setEstado(pedido.getEstado());
+//                if(!pedidoAux.consideraPedido()){
+//                    if(!mostraTodos){
+//                        pedidosList.remove(cont);
+//                    }
+//                }
                 pedidoAdapter.notifyDataSetChanged();
                 break;
             }
@@ -1017,10 +1001,11 @@ public class Vendas extends AppCompatActivity{
                 ItemPedido item = itensAux.get(cont);
                 if(item.getSequencia() == pedido.getComanda()){
                     item.setEntregue(SIM);
-                    executarEntregaItem(item);
                     if(MODO.equals(MOENDA)) {
                         subtraiSomaItem(item);
+                        mostrarSomaItens();
                     }
+                    executarEntregaItem(item);
                     if(pedidoAux.todosItensEntregues()){
                         pedidoAux.setEstado(TERMINADO);
                         executarMudancaEstado(pedidoAux);
@@ -1048,6 +1033,10 @@ public class Vendas extends AppCompatActivity{
             for(cont = 0; cont < itensAux.size(); cont++){
                 ItemPedido item = itensAux.get(cont);
                 item.setEntregue(SIM);
+                if(MODO.equals(MOENDA)) {
+                    subtraiSomaItem(item);
+                    mostrarSomaItens();
+                }
                 executarEntregaItem(item);
             }
 //            pedidoAdapter.notifyDataSetChanged();
@@ -1138,7 +1127,7 @@ public class Vendas extends AppCompatActivity{
         // Obter o objeto BluetoothDevice
         BluetoothDevice device = bluetoothAdapter.getRemoteDevice(address);
         // Tentar conectar ao dispositivo
-        servicoBluetooth.connect(device, seguro);//TODO- Potencial
+        servicoBluetooth.connect(device, seguro);//TODO- Potencial para implementação de mais um dispositivo
     }
 
     @Override
@@ -1147,20 +1136,20 @@ public class Vendas extends AppCompatActivity{
             case CAIXA:
                 getMenuInflater().inflate(R.menu.menu_caixa, menu);
                 MenuItem menuItem;
-                menuItem = (MenuItem) menu.findItem(R.id.abrirCaixa);
+                menuItem =  menu.findItem(R.id.abrirCaixa);
                 if(caixa == null){//Primeiro caixa
                     menuItem.setTitle(R.string.abrir_caixa);
-                    menuItem = (MenuItem) menu.findItem(R.id.reabrirCaixa);
+                    menuItem = menu.findItem(R.id.reabrirCaixa);
                     menuItem.setEnabled(false);
 
                 }else if (caixa.isAberto()){//Último caixa aberto
                     menuItem.setTitle(R.string.fechar_caixa);
-                    menuItem = (MenuItem) menu.findItem(R.id.reabrirCaixa);
+                    menuItem = menu.findItem(R.id.reabrirCaixa);
                     menuItem.setEnabled(false);
 
                 }else{//Último caixa está fechado
                     menuItem.setTitle(R.string.abrir_caixa);
-                    menuItem = (MenuItem) menu.findItem(R.id.reabrirCaixa);
+                    menuItem = menu.findItem(R.id.reabrirCaixa);
                     menuItem.setEnabled(true);
                 }
                 return true;
@@ -1176,28 +1165,28 @@ public class Vendas extends AppCompatActivity{
         switch(MODO){
             case CAIXA:
                 MenuItem menuItem;
-                menuItem = (MenuItem) menu.findItem(R.id.abrirCaixa);
+                menuItem = menu.findItem(R.id.abrirCaixa);
                 if(caixa == null){//Primeiro caixa
                     menuItem.setTitle(R.string.abrir_caixa);
-                    menuItem = (MenuItem) menu.findItem(R.id.reabrirCaixa);
+                    menuItem = menu.findItem(R.id.reabrirCaixa);
                     menuItem.setEnabled(false);
 
                 }else if (caixa.isAberto()){//Último caixa aberto
                     menuItem.setTitle(R.string.fechar_caixa);
-                    menuItem = (MenuItem) menu.findItem(R.id.reabrirCaixa);
+                    menuItem = menu.findItem(R.id.reabrirCaixa);
                     menuItem.setEnabled(false);
 
                 }else{//Último caixa está fechado
                     menuItem.setTitle(R.string.abrir_caixa);
-                    menuItem = (MenuItem) menu.findItem(R.id.reabrirCaixa);
+                    menuItem = menu.findItem(R.id.reabrirCaixa);
                     menuItem.setEnabled(true);
                 }
-                menuItem = (MenuItem) menu.findItem(R.id.mostrarTodos);
-                if(mostraTodos){
-                    menuItem.setTitle(R.string.esconder);
-                }else{
-                    menuItem.setTitle(R.string.mostrar_todos);
-                }
+//                menuItem = menu.findItem(R.id.mostrarTodos);
+//                if(mostraTodos){
+//                    menuItem.setTitle(R.string.esconder);
+//                }else{
+//                    menuItem.setTitle(R.string.mostrar_todos);
+//                }
                 return true;
             case MOENDA:
                 return true;
@@ -1346,16 +1335,16 @@ public class Vendas extends AppCompatActivity{
                 }
                 return true;
             }
-            case R.id.mostrarTodos:{
-                mostraTodos = !mostraTodos;
-                if(mostraTodos){
-                    item.setTitle(R.string.esconder);
-                }else{
-                    item.setTitle(R.string.mostrar_todos);
-                }
-                listarPedidos();
-                return true;
-            }
+//            case R.id.mostrarTodos:{
+//                mostraTodos = !mostraTodos;
+//                if(mostraTodos){
+//                    item.setTitle(R.string.esconder);
+//                }else{
+//                    item.setTitle(R.string.mostrar_todos);
+//                }
+//                listarPedidos();
+//                return true;
+//            }
             case R.id.relAgora: {
                 relatorioVendas();
                 return true;
@@ -1408,6 +1397,10 @@ public class Vendas extends AppCompatActivity{
     }
 
     public void relatorioVendas(){
+        if(caixa == null){
+            Toast.makeText(this, "Caixa não identificado", Toast.LENGTH_SHORT).show();
+            return;
+        }
         Pedido pedido;
         Double fundoCaixa = caixa.getFundo();
         Double totalDinheiro = 0.0;
@@ -1418,8 +1411,20 @@ public class Vendas extends AppCompatActivity{
         int qtdTotal;
         Double totalCaixa;
 
-        for(int cont = 0; cont < pedidosList.size(); cont++){
-            pedido = pedidosList.get(cont);
+        DaoPedido daoPedido = new DaoPedido(this);
+        ArrayList<Pedido> lista = daoPedido.buscarPedidos(caixa);
+
+        if (lista != null) {
+            DaoItemPedido daoItemPedido = new DaoItemPedido(this);
+            for(int cont = 0; cont < lista.size(); cont++){
+                daoItemPedido.buscarItemPedidos(lista.get(cont));
+            }
+        }else{
+            lista = new ArrayList<>();
+        }
+
+        for(int cont = 0; cont < lista.size(); cont++){
+            pedido = lista.get(cont);
             if(pedido.getEstado() != CANCELADO) {
                 if (pedido.getFormaPagamento() == DINHEIRO) {
                     totalDinheiro += pedido.getValor();
@@ -1475,85 +1480,83 @@ public class Vendas extends AppCompatActivity{
     public void relatorioPeriodo(String dataInicial, String dataFinal){
         DaoPedido daoPedido = new DaoPedido(this);
         DaoCaixa daoCaixa = new DaoCaixa(this);
-        Toast.makeText(this, "Data inicial: " + dataInicial + " | Data final: " + dataFinal, Toast.LENGTH_SHORT).show();
+//        Toast.makeText(this, "Data inicial: " + dataInicial + " | Data final: " + dataFinal, Toast.LENGTH_SHORT).show();
         String caixasPesquisar = daoCaixa.pesuisarCaixas(dataInicial, dataFinal);
-//        Toast.makeText(this, "RESULTADO = " + caixasPesquisar, Toast.LENGTH_SHORT).show();
 
-        ArrayList<Pedido> pedidos = daoPedido.buscarPeriodo(caixasPesquisar);
-//        if(pedidos == null){
-//            Toast.makeText(this, "pedidos = null", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(this, "" + caixasPesquisar, Toast.LENGTH_SHORT).show();
+        String[] numCaixa = caixasPesquisar.split(",");
+
+        ArrayList<Pedido> pedidos = new ArrayList<>();
+
+        for (String aNumCaixa : numCaixa) {
+            ArrayList<Pedido> temp = daoPedido.buscarPeriodo(aNumCaixa);
+            pedidos.addAll(temp);
+        }
+//        if(pedidos.size() < 1){
+//            Toast.makeText(this, "pedidos.size() < 1", Toast.LENGTH_SHORT).show();
 //        }else{
 //            Toast.makeText(this, "pedidos.size(): " + pedidos.size(), Toast.LENGTH_SHORT).show();
 //        }
 
-//
-//        Pedido pedido;
-//
-//        Double totalDinheiro = 0.0;
-//        int qtdDinheiro = 0;
-//        Double totalCartao = 0.0;
-//        int qtdCartao = 0;
-//        Double totalGeral;
-//        int qtdTotal;
-//
-//        for(int cont = 0; cont < pedidos.size(); cont++){
-//            pedido = pedidos.get(cont);
-//            if(pedido.getEstado() != CANCELADO) {
-//                if (pedido.getFormaPagamento() == DINHEIRO) {
-//                    totalDinheiro += pedido.getValor();
-//                    qtdDinheiro++;
-//                } else {
-//                    totalCartao += pedido.getValor();
-//                    qtdCartao++;
-//                }
-//            }
-//        }
-//
-//        totalGeral = totalDinheiro + totalCartao;
-//        qtdTotal = qtdDinheiro + qtdCartao;
-//
+        Pedido pedido;
+
+        Double totalDinheiro = 0.0;
+        int qtdDinheiro = 0;
+        Double totalCartao = 0.0;
+        int qtdCartao = 0;
+        Double totalGeral;
+        int qtdTotal;
+
+        for(int cont = 0; cont < pedidos.size(); cont++){
+            pedido = pedidos.get(cont);
+            if(pedido.getEstado() != CANCELADO) {
+                if (pedido.getFormaPagamento() == DINHEIRO) {
+                    totalDinheiro += pedido.getValor();
+                    qtdDinheiro++;
+                } else {
+                    totalCartao += pedido.getValor();
+                    qtdCartao++;
+                }
+            }
+        }
+
+        totalGeral = totalDinheiro + totalCartao;
+        qtdTotal = qtdDinheiro + qtdCartao;
+
         //AlertDialog
         LayoutInflater layoutInflater = getLayoutInflater();
         View view = layoutInflater.inflate(R.layout.rel_vendas_periodo, null);
 
-        TextView data = view.findViewById(R.id.rel_vp_periodo);
+        TextView periodo = view.findViewById(R.id.rel_vp_periodo);
 
         //Convertendo data
-        dataInicial.replaceAll("-","/");
+        dataInicial = dataInicial.replaceAll("-","/");
         String[] s = dataInicial.split("/");
         dataInicial = s[2]+"/"+s[1]+"/"+s[0];
 
-        dataFinal.replaceAll("-","/");
+        dataFinal = dataFinal.replaceAll("-","/");
         s = dataFinal.split("/");
         dataFinal = s[2]+"/"+s[1]+"/"+s[0];
 
-        data.setText(dataInicial + " até " + dataFinal);
+        periodo.setText(dataInicial + " até " + dataFinal);
 
-//        DecimalFormat df = new DecimalFormat(",##0.00");
-//
-//        TextView dinheiro = view.findViewById(R.id.rel_vp_total_dinheiro);
-//        dinheiro.setText(df.format(totalDinheiro) + " (" + String.valueOf(qtdDinheiro) + " Pedidos)" );
-//
-//        TextView cartao = view.findViewById(R.id.rel_vp_total_cartao);
-//        cartao.setText(df.format(totalCartao) + " (" + String.valueOf(qtdCartao) + " Pedidos)");
-//
-//        TextView geral = view.findViewById(R.id.rel_vp_total_geral);
-//        geral.setText(df.format(totalGeral) + " (" + String.valueOf(qtdTotal) + " Pedidos)");
+        DecimalFormat df = new DecimalFormat(",##0.00");
+
+        TextView dinheiro = view.findViewById(R.id.rel_vp_total_dinheiro);
+        dinheiro.setText(df.format(totalDinheiro) + " (" + String.valueOf(qtdDinheiro) + " Pedidos)" );
+
+        TextView cartao = view.findViewById(R.id.rel_vp_total_cartao);
+        cartao.setText(df.format(totalCartao) + " (" + String.valueOf(qtdCartao) + " Pedidos)");
+
+        TextView geral = view.findViewById(R.id.rel_vp_total_geral);
+        geral.setText(df.format(totalGeral) + " (" + String.valueOf(qtdTotal) + " Pedidos)");
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.rel_vendas_ate_agora);
+        builder.setTitle(R.string.rel_vendas_periodo);
         builder.setView(view);
         builder.setPositiveButton("Certo!", null);
         builder.show();
         //AlertDialog
-    }
-
-    public void setDataInicial(View view) {
-
-    }
-
-    public void setDataFinal(View view) {
-
     }
 
     @Override
@@ -1575,10 +1578,10 @@ public class Vendas extends AppCompatActivity{
                 public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
                     if(tipoData == INICIAL){
                         dataInicial = String.valueOf(year) + "-" + String.valueOf(monthOfYear+1) + "-" + String.valueOf(dayOfMonth);
-                        Toast.makeText(Vendas.this, "dataInicial" + dataInicial, Toast.LENGTH_SHORT).show();
+//                        Toast.makeText(Vendas.this, "dataInicial" + dataInicial, Toast.LENGTH_SHORT).show();
                     }else{
                         dataFinal = String.valueOf(year) + "-" + String.valueOf(monthOfYear+1) + "-" + String.valueOf(dayOfMonth);
-                        Toast.makeText(Vendas.this, "dataFinal" + dataFinal, Toast.LENGTH_SHORT).show();
+//                        Toast.makeText(Vendas.this, "dataFinal" + dataFinal, Toast.LENGTH_SHORT).show();
                     }
                 }
             };

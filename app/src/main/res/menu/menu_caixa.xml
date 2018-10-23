@@ -17,10 +17,10 @@
         android:title="@string/reabrir_caixa"
         app:showAsAction="ifRoom" />
 
-    <item
-        android:id="@+id/mostrarTodos"
-        android:title="@string/mostrar_todos"
-        app:showAsAction="ifRoom" />
+    <!--<item-->
+        <!--android:id="@+id/mostrarTodos"-->
+        <!--android:title="@string/mostrar_todos"-->
+        <!--app:showAsAction="ifRoom" />-->
 
     <item
         android:id="@+id/relAgora"
