@@ -65,15 +65,15 @@ public class ItemPedidoAdapter extends BaseAdapter {
             fundo.setBackgroundResource(R.color.corTerminado);
         }
 
+        img = view.findViewById(R.id.observacao);
         switch (itemAtual.getObservacao()){
             case NENHUMA:
+                img.setImageResource(0);
                 break;
             case POUCO_GELO:
-                img = view.findViewById(R.id.observacao);
                 img.setImageResource(R.drawable.gelo);
                 break;
             case SEM_GELO:
-                img = view.findViewById(R.id.observacao);
                 img.setImageResource(R.drawable.sem_gelo);
         }
 

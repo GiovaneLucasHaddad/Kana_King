@@ -77,7 +77,7 @@ public class Pedido {
         }
         return qtde;
     }
-    public boolean somaMoenda(){
+    public boolean consideraPedido(){
         switch(estado){
             case LANCADO:
                 return true;

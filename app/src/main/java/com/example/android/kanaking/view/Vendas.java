@@ -18,7 +18,6 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -53,7 +52,6 @@ import org.json.JSONObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.text.DecimalFormat;
-import java.text.Format;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -164,8 +162,10 @@ public class Vendas extends AppCompatActivity{
     private long numPedido = 1;
     private int numItemPedido = 1;
     private int tipoData;
-    String dataInicial= "";
-    String dataFinal = "";
+    private String dataInicial= "";
+    private String dataFinal = "";
+    private boolean mostraTodos = false;
+
 
 
     @Override
@@ -202,25 +202,24 @@ public class Vendas extends AppCompatActivity{
             bloqueio.setVisibility(View.VISIBLE);
         }
 
-        //Configurando o ArrayAdapter PedidoAdapter para a ListView listaPedidos
         //Preencher com as últimas vendas salvas
         DaoPedido daoPedido = new DaoPedido(this);
         pedidosList = daoPedido.buscarPedidos(caixa);
 
-        if (pedidosList == null) {//Nenhum pedido encontrado
-            pedidosList = new ArrayList<>();
-        }else{//Pedidos encontrados
+        if (pedidosList != null) {
             DaoItemPedido daoItemPedido = new DaoItemPedido(this);
             for(int cont = 0; cont < pedidosList.size(); cont++){
                 daoItemPedido.buscarItemPedidos(pedidosList.get(cont));
             }
-            numPedido = pedidosList.get(pedidosList.size()-1).getVenda() + 1;
+        }else{
+            pedidosList = new ArrayList<>();
         }
 
-//        if (pedidoAdapter == null){
+        //Configurando o Lista de Pedidos
+        if (pedidoAdapter == null){
         pedidoAdapter = new PedidoAdapter(this,pedidosList);
         listaPedidos.setAdapter(pedidoAdapter);
-//        }else {
+        }//else {
 //            pedidoAdapter.notifyDataSetChanged();
 //        }
 
@@ -255,14 +254,7 @@ public class Vendas extends AppCompatActivity{
             } else {
                 itemAdapter.notifyDataSetChanged();
             }
-            //Tratamento de cliques
-            itemGrid.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-                @Override
-                public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                    Toast.makeText(Vendas.this, "Clique longo", Toast.LENGTH_SHORT).show();
-                    return false;
-                }
-            });
+
         }else if(MODO.equals(MOENDA)){
             LinearLayout barraLancamento = findViewById(R.id.barra_lancamento);
             barraLancamento.setVisibility(View.GONE);
@@ -272,7 +264,7 @@ public class Vendas extends AppCompatActivity{
             somaPuro= findViewById(R.id.soma_puro);
             somaGengibre= findViewById(R.id.soma_gengibre);
             for (int cont = 0; cont < pedidosList.size(); cont++) {
-                if(pedidosList.get(cont).somaMoenda()){
+                if(pedidosList.get(cont).consideraPedido()){
                     calcSomaItens(pedidosList.get(cont));
                 }
             }
@@ -327,6 +319,39 @@ public class Vendas extends AppCompatActivity{
         }
     }
 
+    public void listarPedidos(){
+        if(mostraTodos){//Mostrar Todos
+            Toast.makeText(this, "Mostrar Todos", Toast.LENGTH_SHORT).show();
+            DaoPedido daoPedido = new DaoPedido(this);
+            pedidosList.clear();
+            pedidosList = daoPedido.buscarPedidos(caixa);
+
+            if (pedidosList != null) {
+                Toast.makeText(this, "pedidosList != null size()" + pedidosList.size(), Toast.LENGTH_SHORT).show();
+
+                DaoItemPedido daoItemPedido = new DaoItemPedido(this);
+                for(int cont = 0; cont < pedidosList.size(); cont++){
+                    daoItemPedido.buscarItemPedidos(pedidosList.get(cont));
+                }
+            }else{
+                Toast.makeText(this, "pedidosList null", Toast.LENGTH_SHORT).show();
+                pedidosList = new ArrayList<>();
+            }
+            pedidoAdapter.notifyDataSetChanged();
+        }else{//Esconder Camcelados e Terminados
+            Toast.makeText(this, "Esconder", Toast.LENGTH_SHORT).show();
+            if(pedidosList != null) {
+                for (int cont = 0; cont < pedidosList.size(); cont++) {
+                    if (!pedidosList.get(cont).consideraPedido()) {
+                        pedidosList.remove(cont);
+                        pedidoAdapter.notifyDataSetChanged();
+                    }
+                }
+            }else{
+                pedidosList = new ArrayList<>();
+            }
+        }
+    }
 
     private void configuraTransmissao(){
         //Inicializar serviço para conexões Bluetooth
@@ -385,7 +410,6 @@ public class Vendas extends AppCompatActivity{
     }
 
     public void adicionarItem(final View v){//Disparado pelo botão "+" de ItemPedidos
-        //Para adicionar itens de pedido
         PopupMenu popup = new PopupMenu(this, v);
 
         //Código copiado de https://readyandroid.wordpress.com/popup-menu-with-icon/
@@ -579,6 +603,7 @@ public class Vendas extends AppCompatActivity{
             }
         }
     }
+
     private boolean isConectado(){
         //Verificar se estamos conectados antes de tentar algo
         if (servicoBluetooth.getState() != BluetoothService.ESTADO_CONECTADO) {
@@ -975,6 +1000,7 @@ public class Vendas extends AppCompatActivity{
             }
         }
     }
+
     public void entregarItem(Pedido pedido){
         int cont;
         for(cont = 0; cont < pedidosList.size(); cont++){
@@ -1006,6 +1032,7 @@ public class Vendas extends AppCompatActivity{
             }
         }
     }
+
     public void entregarTodosItens(Pedido pedido){
         int cont;
         for(cont = 0; cont < pedidosList.size(); cont++){
@@ -1165,6 +1192,12 @@ public class Vendas extends AppCompatActivity{
                     menuItem = (MenuItem) menu.findItem(R.id.reabrirCaixa);
                     menuItem.setEnabled(true);
                 }
+                menuItem = (MenuItem) menu.findItem(R.id.mostrarTodos);
+                if(mostraTodos){
+                    menuItem.setTitle(R.string.esconder);
+                }else{
+                    menuItem.setTitle(R.string.mostrar_todos);
+                }
                 return true;
             case MOENDA:
                 return true;
@@ -1185,11 +1218,6 @@ public class Vendas extends AppCompatActivity{
 //                //Ver a lista de dispositivos
 //                Intent intentServidor = new Intent(this, ListaDeDispositivos.class);
 //                startActivityForResult(intentServidor, SOLICITACAO_CONEXAO_INSEGURA);
-//                return true;
-//            }
-//            case R.id.visivel: {
-//                //Tornar Visível aos outros dispositivos
-//                tornarVisivel();
 //                return true;
 //            }
             case R.id.abrirCaixa: {
@@ -1240,7 +1268,7 @@ public class Vendas extends AppCompatActivity{
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 caixa.setNumero(numCaixa);
-                                caixa.setFundo(Double.parseDouble(valor_fundo.getText().toString().replace(",", ".")));
+                                caixa.setFundo(Double.parseDouble(valor_fundo.getText().toString().replace("R$", "").replace(",",".")));
 
                                 //Formatando data
                                 SimpleDateFormat formatData = new SimpleDateFormat("yyyy-MM-dd");
@@ -1318,6 +1346,16 @@ public class Vendas extends AppCompatActivity{
                 }
                 return true;
             }
+            case R.id.mostrarTodos:{
+                mostraTodos = !mostraTodos;
+                if(mostraTodos){
+                    item.setTitle(R.string.esconder);
+                }else{
+                    item.setTitle(R.string.mostrar_todos);
+                }
+                listarPedidos();
+                return true;
+            }
             case R.id.relAgora: {
                 relatorioVendas();
                 return true;
@@ -1368,6 +1406,7 @@ public class Vendas extends AppCompatActivity{
         }
         return false;
     }
+
     public void relatorioVendas(){
         Pedido pedido;
         Double fundoCaixa = caixa.getFundo();
@@ -1432,6 +1471,7 @@ public class Vendas extends AppCompatActivity{
         builder.show();
         //AlertDialog
     }
+
     public void relatorioPeriodo(String dataInicial, String dataFinal){
         DaoPedido daoPedido = new DaoPedido(this);
         DaoCaixa daoCaixa = new DaoCaixa(this);
@@ -1439,7 +1479,7 @@ public class Vendas extends AppCompatActivity{
         String caixasPesquisar = daoCaixa.pesuisarCaixas(dataInicial, dataFinal);
 //        Toast.makeText(this, "RESULTADO = " + caixasPesquisar, Toast.LENGTH_SHORT).show();
 
-//        ArrayList<Pedido> pedidos = daoPedido.buscarPeriodo(caixasPesquisar);
+        ArrayList<Pedido> pedidos = daoPedido.buscarPeriodo(caixasPesquisar);
 //        if(pedidos == null){
 //            Toast.makeText(this, "pedidos = null", Toast.LENGTH_SHORT).show();
 //        }else{
@@ -1477,6 +1517,16 @@ public class Vendas extends AppCompatActivity{
         View view = layoutInflater.inflate(R.layout.rel_vendas_periodo, null);
 
         TextView data = view.findViewById(R.id.rel_vp_periodo);
+
+        //Convertendo data
+        dataInicial.replaceAll("-","/");
+        String[] s = dataInicial.split("/");
+        dataInicial = s[2]+"/"+s[1]+"/"+s[0];
+
+        dataFinal.replaceAll("-","/");
+        s = dataFinal.split("/");
+        dataFinal = s[2]+"/"+s[1]+"/"+s[0];
+
         data.setText(dataInicial + " até " + dataFinal);
 
 //        DecimalFormat df = new DecimalFormat(",##0.00");
@@ -1607,6 +1657,7 @@ public class Vendas extends AppCompatActivity{
 
         return pedido;
     }
+
     public void calcSomaItens(Pedido pedido){
         totalTaiti += pedido.getQtdTotal(TAITI);
         totalSiciliano+= pedido.getQtdTotal(SICILIANO);
@@ -1614,6 +1665,7 @@ public class Vendas extends AppCompatActivity{
         totalPuro += pedido.getQtdTotal(PURO);
         totalGengibre += pedido.getQtdTotal(GENGIBRE);
     }
+
     public void subtraiSomaItens(Pedido pedido){
         totalTaiti -= pedido.getQtdTotal(TAITI);
         totalSiciliano -= pedido.getQtdTotal(SICILIANO);
@@ -1621,6 +1673,7 @@ public class Vendas extends AppCompatActivity{
         totalPuro -= pedido.getQtdTotal(PURO);
         totalGengibre -= pedido.getQtdTotal(GENGIBRE);
     }
+
     public void subtraiSomaItem(ItemPedido itemPedido){
         switch(itemPedido.getSabor()){
             case TAITI:
@@ -1640,6 +1693,7 @@ public class Vendas extends AppCompatActivity{
                 break;
         }
     }
+
     public void mostrarSomaItens(){
         somaTaiti.setText(totalTaiti + " mL");
         somaSiciliano.setText(totalSiciliano + " mL");
@@ -1647,6 +1701,7 @@ public class Vendas extends AppCompatActivity{
         somaPuro.setText(totalPuro + " mL");
         somaGengibre.setText(totalGengibre + " mL");
     }
+
     public void zerarSomaItens(){
         totalTaiti = 0;
         totalSiciliano = 0;

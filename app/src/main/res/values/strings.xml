@@ -52,4 +52,6 @@
     <string name="rel_periodo_consulta">Período de consulta:</string>
     <string name="data_inicial">Data Inicial</string>
     <string name="data_final">Data Final</string>
+    <string name="esconder">Esconder</string>
+    <string name="mostrar_todos">Mostrar Todos</string>
 </resources>

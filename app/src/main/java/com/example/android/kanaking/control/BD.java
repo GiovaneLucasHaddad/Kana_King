@@ -7,7 +7,7 @@ import android.widget.Toast;
 
 public class BD extends SQLiteOpenHelper {
     public static final String NOME_BD = "KanaKing.db";
-    public static final int VERSAO_BD = 2;
+    public static final int VERSAO_BD = 3;
 
     public static final String CRIAR_TABELA_ITEM_PEDIDO =
             "CREATE TABLE " + Esquema.ItemPedido.TABELA + " ("
@@ -46,8 +46,8 @@ public class BD extends SQLiteOpenHelper {
     public static final String CRIAR_TABELA_CONFIGURACOES =
             "CREATE TABLE " + Esquema.Configuracoes.TABELA + " ("
                     + Esquema.Configuracoes._ID + " INTEGER PRIMARY KEY,"
-                    + Esquema.Configuracoes.MAC1 + " TEXT DEFAULT '0',"
-                    + Esquema.Configuracoes.MAC1 + " TEXT DEFAULT '0')";
+                    + Esquema.Configuracoes.MAC1 + " TEXT,"
+                    + Esquema.Configuracoes.MAC1 + " TEXT)";
 
     public static final String DELETAR_TABELA_ITEM_PEDIDO = "DROP TABLE IF EXISTS " + Esquema.ItemPedido.TABELA;
     public static final String DELETAR_TABELA_PEDIDO = "DROP TABLE IF EXISTS " + Esquema.Pedido.TABELA;
@@ -65,7 +65,7 @@ public class BD extends SQLiteOpenHelper {
         db.execSQL(CRIAR_TABELA_ITEM_PEDIDO);
         db.execSQL(CRIAR_TABELA_PEDIDO);
         db.execSQL(CRIAR_TABELA_CAIXA);
-        db.execSQL(CRIAR_TABELA_CONFIGURACOES);
+//        db.execSQL(CRIAR_TABELA_CONFIGURACOES);
 
 //        db.execSQL(INICIAR_TABELA_CONFIGURACOES);
     }
@@ -75,7 +75,7 @@ public class BD extends SQLiteOpenHelper {
         db.execSQL(DELETAR_TABELA_ITEM_PEDIDO);
         db.execSQL(DELETAR_TABELA_PEDIDO);
         db.execSQL(DELETAR_TABELA_CAIXA);
-        db.execSQL(DELETAR_TABELA_CONFIGURACOES);
+//        db.execSQL(DELETAR_TABELA_CONFIGURACOES);
         onCreate(db);
     }
 }

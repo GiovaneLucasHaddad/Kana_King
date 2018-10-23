@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
+<menu xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/conectar_seguro"
@@ -14,6 +15,11 @@
     <item
         android:id="@+id/reabrirCaixa"
         android:title="@string/reabrir_caixa"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/mostrarTodos"
+        android:title="@string/mostrar_todos"
         app:showAsAction="ifRoom" />
 
     <item
