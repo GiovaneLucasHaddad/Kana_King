@@ -218,9 +218,9 @@ public class Vendas extends AppCompatActivity{
         if (pedidoAdapter == null){
         pedidoAdapter = new PedidoAdapter(this,pedidosList);
         listaPedidos.setAdapter(pedidoAdapter);
-        }//else {
-//            pedidoAdapter.notifyDataSetChanged();
-//        }
+        }
+
+        listarPedidos();
 
         //Particularidades de usuários
         if(MODO.equals(CAIXA)) {
@@ -318,46 +318,45 @@ public class Vendas extends AppCompatActivity{
         }
     }
 
-//    public void listarPedidos(){
-//        if(mostraTodos){//Mostrar Todos
-//            Toast.makeText(this, "Mostrar Todos", Toast.LENGTH_SHORT).show();
-//            DaoPedido daoPedido = new DaoPedido(this);
-//            pedidosList = new ArrayList<>();
-//            pedidosList = daoPedido.buscarPedidos(caixa);
-//
-//            pedidoAdapter = new PedidoAdapter(this,pedidosList);
-//            listaPedidos.invalidateViews();
-//            listaPedidos.setAdapter(pedidoAdapter);
-//            if (pedidosList != null) {
+    public void listarPedidos(){
+        if(mostraTodos){//Mostrar Todos
+            DaoPedido daoPedido = new DaoPedido(this);
+            pedidosList = new ArrayList<>();
+            pedidosList = daoPedido.buscarPedidos(caixa);
+
+            pedidoAdapter = new PedidoAdapter(this,pedidosList);
+            listaPedidos.invalidateViews();
+            listaPedidos.setAdapter(pedidoAdapter);
+            if (pedidosList != null) {
 //                Toast.makeText(this, "pedidosList != null size()" + pedidosList.size(), Toast.LENGTH_SHORT).show();
-//
-//                DaoItemPedido daoItemPedido = new DaoItemPedido(this);
-//                for(int cont = 0; cont < pedidosList.size(); cont++){
-//                    daoItemPedido.buscarItemPedidos(pedidosList.get(cont));
-//                }
-//            }else{
+                DaoItemPedido daoItemPedido = new DaoItemPedido(this);
+                for(int cont = 0; cont < pedidosList.size(); cont++){
+                    daoItemPedido.buscarItemPedidos(pedidosList.get(cont));
+                }
+            }else{
 //                Toast.makeText(this, "pedidosList null", Toast.LENGTH_SHORT).show();
-//                pedidosList = new ArrayList<>();
-//            }
-//            pedidoAdapter.notifyDataSetChanged();
-//        }else{//Esconder Camcelados e Terminados
-//            Toast.makeText(this, "Esconder", Toast.LENGTH_SHORT).show();
-//            if(pedidosList != null) {
-//                for (int cont = 0; cont < pedidosList.size(); cont++) {
-//                    if (!pedidosList.get(cont).consideraPedido()) {
-//                        pedidosList.remove(cont);
-//                        pedidoAdapter.notifyDataSetChanged();
-//                    }
-//                }
-//            }else{
-//                pedidosList = new ArrayList<>();
-//            }
-//        }
-//    }
+                pedidosList = new ArrayList<>();
+            }
+            pedidoAdapter.notifyDataSetChanged();
+        }else{//Esconder Camcelados e Terminados
+            if(pedidosList != null) {
+                for (int cont = 0; cont < pedidosList.size(); cont++) {
+                    Pedido pedido = pedidosList.get(cont);
+                    if (!pedido.consideraPedido()) {
+                        pedidosList.remove(cont);
+                        cont--;//A cada Pedido removido da lista, os seguintes voltam uma posição
+                    }
+                }
+                pedidoAdapter.notifyDataSetChanged();
+            }else{
+                pedidosList = new ArrayList<>();
+            }
+        }
+    }
 
     private void configuraTransmissao(){
         //Inicializar serviço para conexões Bluetooth
-        servicoBluetooth = new BluetoothService(this,handler);
+        servicoBluetooth = new BluetoothService(handler);
 
         //Inicializar buffer de saída
         bufferSaida = new StringBuffer("");
@@ -380,14 +379,6 @@ public class Vendas extends AppCompatActivity{
                         Date data_atual = cal.getTime();
                         Pedido pedido = new Pedido(0, numPedido, comanda.getValue(), LANCADO, valor, pagamento.getSelectedItemPosition(), formatData.format(data_atual), formatHora.format(data_atual), itensList);
 
-//                        //Para testes
-//                        if (itensList.size() > 0) {
-//                            if (itensList.get(1).getPedido() == null) {
-//                                Toast.makeText(this, "Pedido nulo antes de enviar", Toast.LENGTH_SHORT).show();
-//                            } else {
-//                                Toast.makeText(this, "Pedido identificado antes de enviar", Toast.LENGTH_SHORT).show();
-//                            }
-//                        }
                         numPedido++;
                         enviar(PedidoToStringJSON(pedido));
                     } else {
@@ -944,11 +935,11 @@ public class Vendas extends AppCompatActivity{
             Pedido pedidoAux = pedidosList.get(cont);
             if(pedidoAux.getVenda() == pedido.getVenda()){
                 pedidoAux.setEstado(pedido.getEstado());
-//                if(!pedidoAux.consideraPedido()){
-//                    if(!mostraTodos){
-//                        pedidosList.remove(cont);
-//                    }
-//                }
+                if(!pedidoAux.consideraPedido()){
+                    if(!mostraTodos){
+                        pedidosList.remove(cont);
+                    }
+                }
                 pedidoAdapter.notifyDataSetChanged();
                 break;
             }
@@ -958,21 +949,19 @@ public class Vendas extends AppCompatActivity{
     public void selecaoItem(View v){
         if(MODO.equals(CAIXA)) {
             ItemPedido item = (ItemPedido) v.getTag();
-            //TODO - Pode ser mostrada uma mensagem de confirmação antes de apagar
-            //TODO - Ver se essa função será mantida e assinalar na documentação
-            if (item.getId() == 0) {//Lançamento de pedido
-//                int seq = item.getSequencia();
-//                for (int cont = 0; cont < itensList.size(); cont++) {
-//                    if (itensList.get(cont).getSequencia() == seq) {
-//                        soma -= item.calcSoma();
-//                        DecimalFormat df = new DecimalFormat(",##0.00");
-//                        textValor.setText(df.format(soma));
-//
-//                        itensList.remove(cont);
-//                        pedidoAdapter.notifyDataSetChanged();
-//                        break;
-//                    }
-//                }
+            if (item.getId() == 0) {//Lançamento de pedido -> Remover da lista a ser lançada
+                int seq = item.getSequencia();
+                for (int cont = 0; cont < itensList.size(); cont++) {
+                    if (itensList.get(cont).getSequencia() == seq) {
+                        soma -= item.calcSoma();
+                        DecimalFormat df = new DecimalFormat(",##0.00");
+                        textValor.setText(df.format(soma));
+
+                        itensList.remove(cont);
+                        itemAdapter.notifyDataSetChanged();
+                        break;
+                    }
+                }
             } else {//ItemPedido de Pedido já lançado -> entregar ItemPedido
                 if(item.getEntregue() == NAO) {
                     Pedido pedido = new Pedido();
@@ -1181,12 +1170,12 @@ public class Vendas extends AppCompatActivity{
                     menuItem = menu.findItem(R.id.reabrirCaixa);
                     menuItem.setEnabled(true);
                 }
-//                menuItem = menu.findItem(R.id.mostrarTodos);
-//                if(mostraTodos){
-//                    menuItem.setTitle(R.string.esconder);
-//                }else{
-//                    menuItem.setTitle(R.string.mostrar_todos);
-//                }
+                menuItem = menu.findItem(R.id.mostrarTodos);
+                if(mostraTodos){
+                    menuItem.setTitle(R.string.esconder);
+                }else{
+                    menuItem.setTitle(R.string.mostrar_todos);
+                }
                 return true;
             case MOENDA:
                 return true;
@@ -1237,10 +1226,6 @@ public class Vendas extends AppCompatActivity{
                                     current = formatted;
                                     valor_fundo.setText(formatted);
                                     valor_fundo.setSelection(formatted.length());
-
-                                    //Nesse bloco ele faz a conta do total (Caso a qtde esteja preenchida)
-//                                    String qtde = txtQtdeLitros.getText().toString();
-
                                     valor_fundo.addTextChangedListener(this);
                                 }
                             }
@@ -1335,16 +1320,16 @@ public class Vendas extends AppCompatActivity{
                 }
                 return true;
             }
-//            case R.id.mostrarTodos:{
-//                mostraTodos = !mostraTodos;
-//                if(mostraTodos){
-//                    item.setTitle(R.string.esconder);
-//                }else{
-//                    item.setTitle(R.string.mostrar_todos);
-//                }
-//                listarPedidos();
-//                return true;
-//            }
+            case R.id.mostrarTodos:{
+                mostraTodos = !mostraTodos;
+                if(mostraTodos){
+                    item.setTitle(R.string.esconder);
+                }else{
+                    item.setTitle(R.string.mostrar_todos);
+                }
+                listarPedidos();
+                return true;
+            }
             case R.id.relAgora: {
                 relatorioVendas();
                 return true;
@@ -1578,10 +1563,8 @@ public class Vendas extends AppCompatActivity{
                 public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
                     if(tipoData == INICIAL){
                         dataInicial = String.valueOf(year) + "-" + String.valueOf(monthOfYear+1) + "-" + String.valueOf(dayOfMonth);
-//                        Toast.makeText(Vendas.this, "dataInicial" + dataInicial, Toast.LENGTH_SHORT).show();
                     }else{
                         dataFinal = String.valueOf(year) + "-" + String.valueOf(monthOfYear+1) + "-" + String.valueOf(dayOfMonth);
-//                        Toast.makeText(Vendas.this, "dataFinal" + dataFinal, Toast.LENGTH_SHORT).show();
                     }
                 }
             };

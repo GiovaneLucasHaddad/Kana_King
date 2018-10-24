@@ -5,7 +5,6 @@ import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.FrameLayout;
@@ -13,7 +12,6 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.android.kanaking.model.Pedido;
 import com.example.android.kanaking.view.Vendas;
@@ -33,7 +31,7 @@ import static com.example.android.kanaking.Constantes.TERMINADO;
 
 public class PedidoAdapter extends BaseAdapter {
     private Context mContext;
-    private List<Pedido> listaPedidos = new ArrayList<>();
+    private List<Pedido> listaPedidos;
 
     public PedidoAdapter(@NonNull Context context,  ArrayList<Pedido> list) {
         this.mContext = context;
@@ -64,10 +62,9 @@ public class PedidoAdapter extends BaseAdapter {
         if(listItem == null)
             listItem = LayoutInflater.from(mContext).inflate(R.layout.pedido,parent,false);
 
-        TextView comanda = (TextView)listItem.findViewById(R.id.comanda);
+        TextView comanda = listItem.findViewById(R.id.comanda);
         comanda.setText(String.valueOf(pedidoAtual.getComanda()));
         comanda.setTag(pedidoAtual);
-        Toast.makeText(mContext, "Pedido Id: " + pedidoAtual.getId() + " Venda: " + pedidoAtual.getVenda() + " Comanda: " + pedidoAtual.getComanda(), Toast.LENGTH_SHORT).show();
 
         //Configurando GridView
         GridView itemGrid = listItem.findViewById(R.id.itens);

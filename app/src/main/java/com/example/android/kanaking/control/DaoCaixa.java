@@ -4,11 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.widget.Toast;
-
 import com.example.android.kanaking.model.Caixa;
-
-import java.util.ArrayList;
 
 public class DaoCaixa {
     private SQLiteDatabase db;

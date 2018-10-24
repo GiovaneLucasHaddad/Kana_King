@@ -3,13 +3,12 @@ package com.example.android.kanaking.control;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.widget.Toast;
 
 public class BD extends SQLiteOpenHelper {
-    public static final String NOME_BD = "KanaKing.db";
-    public static final int VERSAO_BD = 3;
+    private static final String NOME_BD = "KanaKing.db";
+    private static final int VERSAO_BD = 3;
 
-    public static final String CRIAR_TABELA_ITEM_PEDIDO =
+    private static final String CRIAR_TABELA_ITEM_PEDIDO =
             "CREATE TABLE " + Esquema.ItemPedido.TABELA + " ("
                     + Esquema.ItemPedido._ID + " INTEGER PRIMARY KEY,"
                     + Esquema.ItemPedido.SEQUENCIA + " INTEGER,"
@@ -21,7 +20,7 @@ public class BD extends SQLiteOpenHelper {
                     + Esquema.ItemPedido.ENTREGUE + " INTEGER,"
                     + Esquema.ItemPedido.OBSERVACAO + " INTEGER)";
 
-    public static final String CRIAR_TABELA_PEDIDO =
+    private static final String CRIAR_TABELA_PEDIDO =
             "CREATE TABLE " + Esquema.Pedido.TABELA + " ("
                     + Esquema.Pedido._ID + " INTEGER PRIMARY KEY,"
                     + Esquema.Pedido.VENDA + " INTEGER,"
@@ -33,7 +32,7 @@ public class BD extends SQLiteOpenHelper {
                     + Esquema.Pedido.DATA + " TEXT,"
                     + Esquema.Pedido.HORA + " TEXT)";
 
-    public static final String CRIAR_TABELA_CAIXA =
+    private static final String CRIAR_TABELA_CAIXA =
             "CREATE TABLE " + Esquema.Caixa.TABELA + " ("
                     + Esquema.Caixa._ID + " INTEGER PRIMARY KEY,"
                     + Esquema.Caixa.NUMERO + " INTEGER,"
@@ -43,18 +42,18 @@ public class BD extends SQLiteOpenHelper {
                     + Esquema.Caixa.HORA_FECHAMENTO + " TEXT,"
                     + Esquema.Caixa.FUNDO + " REAL)";
 
-    public static final String CRIAR_TABELA_CONFIGURACOES =
-            "CREATE TABLE " + Esquema.Configuracoes.TABELA + " ("
-                    + Esquema.Configuracoes._ID + " INTEGER PRIMARY KEY,"
-                    + Esquema.Configuracoes.MAC1 + " TEXT,"
-                    + Esquema.Configuracoes.MAC1 + " TEXT)";
+//    private static final String CRIAR_TABELA_CONFIGURACOES =
+//            "CREATE TABLE " + Esquema.Configuracoes.TABELA + " ("
+//                    + Esquema.Configuracoes._ID + " INTEGER PRIMARY KEY,"
+//                    + Esquema.Configuracoes.MAC1 + " TEXT,"
+//                    + Esquema.Configuracoes.MAC1 + " TEXT)";
 
-    public static final String DELETAR_TABELA_ITEM_PEDIDO = "DROP TABLE IF EXISTS " + Esquema.ItemPedido.TABELA;
-    public static final String DELETAR_TABELA_PEDIDO = "DROP TABLE IF EXISTS " + Esquema.Pedido.TABELA;
-    public static final String DELETAR_TABELA_CAIXA = "DROP TABLE IF EXISTS " + Esquema.Caixa.TABELA;
-    public static final String DELETAR_TABELA_CONFIGURACOES = "DROP TABLE IF EXISTS " + Esquema.Configuracoes.TABELA;
+    private static final String DELETAR_TABELA_ITEM_PEDIDO = "DROP TABLE IF EXISTS " + Esquema.ItemPedido.TABELA;
+    private static final String DELETAR_TABELA_PEDIDO = "DROP TABLE IF EXISTS " + Esquema.Pedido.TABELA;
+    private static final String DELETAR_TABELA_CAIXA = "DROP TABLE IF EXISTS " + Esquema.Caixa.TABELA;
+//    private static final String DELETAR_TABELA_CONFIGURACOES = "DROP TABLE IF EXISTS " + Esquema.Configuracoes.TABELA;
 
-    public static final String INICIAR_TABELA_CONFIGURACOES = "INSERT INTO " + Esquema.Configuracoes.TABELA + " DEFAULT VALUES";
+//    private static final String INICIAR_TABELA_CONFIGURACOES = "INSERT INTO " + Esquema.Configuracoes.TABELA + " DEFAULT VALUES";
 
     public BD(Context context){
         super(context, NOME_BD, null, VERSAO_BD);
