@@ -4,7 +4,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.widget.Toast;
 
 import com.example.android.kanaking.model.Caixa;
 import com.example.android.kanaking.model.Pedido;
@@ -69,7 +68,7 @@ public class DaoPedido {
         String ordem = Esquema.Pedido.VENDA + " ASC";
 
         Cursor cursor = db.query(Esquema.Pedido.TABELA,projecao,selecao,args,null,null,ordem);
-        Pedido pedidoAux = null;
+        Pedido pedidoAux;
         ArrayList<Pedido> pedidos = null;
         if(cursor.getCount() > 0){
             pedidos = new ArrayList<>();
@@ -93,40 +92,40 @@ public class DaoPedido {
         return pedidos;
     }
 
-    public Pedido buscarPedido(Long id, Caixa caixa){ //Consulta um pedido que acabou de ser inserido
-        String[] projecao = {
-                Esquema.Pedido._ID,
-                Esquema.Pedido.VENDA,
-                Esquema.Pedido.COMANDA,
-                Esquema.Pedido.ESTADO,
-                Esquema.Pedido.VALOR,
-                Esquema.Pedido.FORMA_PAGAMENTO,
-                Esquema.Pedido.DATA,
-                Esquema.Pedido.HORA};
-        String selecao = Esquema.Pedido._ID + " = ?";
-        String[] args = {"" + id};
-
-        Cursor cursor = db.query(Esquema.Pedido.TABELA,projecao,selecao,args,null,null,null);
-        Pedido pedidoAux = null;
-
-        if(cursor.getCount() > 0){
-            cursor.moveToFirst();
-
-            pedidoAux = new Pedido();
-            pedidoAux.setId(cursor.getLong(cursor.getColumnIndexOrThrow(Esquema.Pedido._ID)));
-            pedidoAux.setVenda(cursor.getLong(cursor.getColumnIndexOrThrow(Esquema.Pedido.VENDA)));
-            pedidoAux.setComanda(cursor.getInt(cursor.getColumnIndexOrThrow(Esquema.Pedido.COMANDA)));
-            pedidoAux.setEstado(cursor.getInt(cursor.getColumnIndexOrThrow(Esquema.Pedido.ESTADO)));
-            pedidoAux.setValor(cursor.getDouble(cursor.getColumnIndexOrThrow(Esquema.Pedido.VALOR)));
-            pedidoAux.setFormaPagamento(cursor.getInt(cursor.getColumnIndexOrThrow(Esquema.Pedido.FORMA_PAGAMENTO)));
-            pedidoAux.setData(cursor.getString(cursor.getColumnIndexOrThrow(Esquema.Pedido.DATA)));
-            pedidoAux.setHora(cursor.getString(cursor.getColumnIndexOrThrow(Esquema.Pedido.HORA)));
-            pedidoAux.setCaixa(caixa);
-        }
-        cursor.close();
-
-        return pedidoAux;
-    }
+//    public Pedido buscarPedido(Long id, Caixa caixa){ //Consulta um pedido que acabou de ser inserido
+//        String[] projecao = {
+//                Esquema.Pedido._ID,
+//                Esquema.Pedido.VENDA,
+//                Esquema.Pedido.COMANDA,
+//                Esquema.Pedido.ESTADO,
+//                Esquema.Pedido.VALOR,
+//                Esquema.Pedido.FORMA_PAGAMENTO,
+//                Esquema.Pedido.DATA,
+//                Esquema.Pedido.HORA};
+//        String selecao = Esquema.Pedido._ID + " = ?";
+//        String[] args = {"" + id};
+//
+//        Cursor cursor = db.query(Esquema.Pedido.TABELA,projecao,selecao,args,null,null,null);
+//        Pedido pedidoAux = null;
+//
+//        if(cursor.getCount() > 0){
+//            cursor.moveToFirst();
+//
+//            pedidoAux = new Pedido();
+//            pedidoAux.setId(cursor.getLong(cursor.getColumnIndexOrThrow(Esquema.Pedido._ID)));
+//            pedidoAux.setVenda(cursor.getLong(cursor.getColumnIndexOrThrow(Esquema.Pedido.VENDA)));
+//            pedidoAux.setComanda(cursor.getInt(cursor.getColumnIndexOrThrow(Esquema.Pedido.COMANDA)));
+//            pedidoAux.setEstado(cursor.getInt(cursor.getColumnIndexOrThrow(Esquema.Pedido.ESTADO)));
+//            pedidoAux.setValor(cursor.getDouble(cursor.getColumnIndexOrThrow(Esquema.Pedido.VALOR)));
+//            pedidoAux.setFormaPagamento(cursor.getInt(cursor.getColumnIndexOrThrow(Esquema.Pedido.FORMA_PAGAMENTO)));
+//            pedidoAux.setData(cursor.getString(cursor.getColumnIndexOrThrow(Esquema.Pedido.DATA)));
+//            pedidoAux.setHora(cursor.getString(cursor.getColumnIndexOrThrow(Esquema.Pedido.HORA)));
+//            pedidoAux.setCaixa(caixa);
+//        }
+//        cursor.close();
+//
+//        return pedidoAux;
+//    }
 
     public ArrayList<Pedido> buscarPeriodo(String numCaixas){
         if (numCaixas.equals("")){
@@ -145,8 +144,8 @@ public class DaoPedido {
         String[] args = {numCaixas};
         String ordem = Esquema.Pedido.CAIXA + " ASC, " + Esquema.Pedido.VENDA + " ASC";
 
-        Cursor cursor = db.query(Esquema.Pedido.TABELA,projecao,selecao,args,null,null,null);//ordem);
-        Pedido pedidoAux = null;
+        Cursor cursor = db.query(Esquema.Pedido.TABELA,projecao,selecao,args,null,null,ordem);
+        Pedido pedidoAux;
         ArrayList<Pedido> pedidos = null;
         if(cursor.getCount() > 0){
             pedidos = new ArrayList<>();

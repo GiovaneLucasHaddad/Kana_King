@@ -4,7 +4,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.widget.Toast;
 
 import com.example.android.kanaking.model.ItemPedido;
 import com.example.android.kanaking.model.Pedido;
@@ -35,8 +34,8 @@ public class DaoItemPedido {
     }
 
     public int remover(ItemPedido itemPedido){
-        String selecao = Esquema.ItemPedido.SEQUENCIA + " LIKE ?";
-        String[] args = { ""+itemPedido.getSequencia() };
+        String selecao = Esquema.ItemPedido.SEQUENCIA + " = ? AND " + Esquema.ItemPedido.VENDA + " = ? AND " + Esquema.ItemPedido.CAIXA + " = ?";
+        String[] args = {"" + itemPedido.getSequencia(), "" + itemPedido.getPedido().getVenda(), "" + itemPedido.getPedido().getCaixa().getNumero()};
 
         return db.delete(Esquema.ItemPedido.TABELA, selecao, args);
     }
@@ -64,7 +63,7 @@ public class DaoItemPedido {
         String ordem = Esquema.ItemPedido.SEQUENCIA + " ASC";
 
         Cursor cursor = db.query(Esquema.ItemPedido.TABELA,projecao,selecao,args,null,null,ordem);
-        ItemPedido itemAux = null;
+        ItemPedido itemAux;
         ArrayList<ItemPedido> itemPedidos = new ArrayList<>();
         while(cursor.moveToNext()){
             itemAux = new ItemPedido();

@@ -20,6 +20,7 @@ public interface Constantes {
     // Estados de um pedido ou controle de Vendas
     int ABRINDO_CAIXA = 1;
     int FECHANDO_CAIXA = 2;
+    int REABRINDO_CAIXA = 10;
     int LANCADO = 3;
     int PREPARANDO = 4;
     int PRONTO = 5;
@@ -27,7 +28,6 @@ public interface Constantes {
     int TERMINADO = 7;
     int APAGANDO = 8;
     int ENTREGANDO_ITEM = 9;
-    int REABRINDO_CAIXA = 10;//TODO - Ao gerar nova versão do banco, colocar reabrindo caixa próximo de abrindo/fechando
 
     // Campos titulo para o JSON
     //Pedido
@@ -38,7 +38,7 @@ public interface Constantes {
     String P_PAGTO = "P_PAGTO";
     String P_DATA = "P_DATA";
     String P_HORA = "P_HORA";
-    String P_CAIXA_NUM = "P_C_NUM";
+
     //ItemPedido
     String ITEM_PEDIDOS = "ITEM_PEDIDOS";
     String IP_SEQUENCIA = "IP_SEQ";
@@ -47,7 +47,6 @@ public interface Constantes {
     String IP_QTD = "IP_QTD";
     String IP_ENTREGUE = "IP_ENTREGUE";
     String IP_OBS = "IP_OBS";
-    String IP_PEDIDO_VENDA = "IP_P_VENDA";
 
     //Formas de pagamento
     int CARTAO = 1;

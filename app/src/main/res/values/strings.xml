@@ -28,7 +28,7 @@
     <string name="title_paired_devices">Dispositivos Pareados</string>
     <string name="title_other_devices">Outros Dispositivos</string>
     <string name="none_paired">Nenhum Dispositivo pareado</string>
-    <string name="scanning">Procurando dispositivos...</string>
+    <string name="scanning">Procurando dispositivos…</string>
     <string name="select_device">Escolha com quem conectar</string>
     <string name="none_found">Nenhum dispositivo encontrado</string>
     <string name="nao_conectado">Não conectado com um dispositivo</string>
@@ -36,8 +36,8 @@
     <!--Estados de conexão-->
     <string name="title_not_connected">Não conectado</string>
     <string name="title_connected_to">Conectado com <xliff:g id="device_name">%1$s</xliff:g></string>
-    <string name="title_connecting">Conectando...</string>
-    <string name="title_listening">Aguardando conexão...</string>
+    <string name="title_connecting">Conectando…</string>
+    <string name="title_listening">Aguardando conexão…</string>
 
     <string name="caixa_fechado">Caixa fechado</string>
 

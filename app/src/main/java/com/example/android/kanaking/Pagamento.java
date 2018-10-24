@@ -7,11 +7,7 @@ public class Pagamento {
         this.idImagem = idImagem;
     }
 
-    public int getIdImagem() {
+    int getIdImagem() {
         return idImagem;
-    }
-
-    public void setIdImagem(int idImagem) {
-        this.idImagem = idImagem;
     }
 }

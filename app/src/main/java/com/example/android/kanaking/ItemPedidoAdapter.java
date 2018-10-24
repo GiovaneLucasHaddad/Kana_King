@@ -22,7 +22,7 @@ import static com.example.android.kanaking.Constantes.SIM;
 public class ItemPedidoAdapter extends BaseAdapter {
 
     private Context context;
-    private List<ItemPedido> listaItens = new ArrayList<>();
+    private List<ItemPedido> listaItens;
 
     public ItemPedidoAdapter(Context c, ArrayList<ItemPedido> lista){
         context = c;

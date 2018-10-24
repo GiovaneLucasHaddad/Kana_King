@@ -1066,10 +1066,20 @@ public class Vendas extends AppCompatActivity{
     }
 
     public void remover(Pedido pedido){
+        //Remoção do banco
         DaoPedido daoPedido = new DaoPedido(this);
         if(daoPedido.remover(pedido) < 1){
             Toast.makeText(this, "Ocorreu algum erro ao remover o Pedido", Toast.LENGTH_SHORT).show();
         }
+        ArrayList<ItemPedido> itens = pedido.getItemPedidos();
+        DaoItemPedido daoItemPedido = new DaoItemPedido(this);
+        for(int cont = 0; cont < itens.size(); cont ++){
+            if(daoItemPedido.remover(itens.get(cont)) < 1){
+                Toast.makeText(this, "Ocorreu algum erro ao remover Item do Pedido", Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        //Remoção dos objetos
         for(int cont = 0; cont < pedidosList.size(); cont++){
             if(pedidosList.get(cont).getVenda() == pedido.getVenda()){
                 pedidosList.remove(cont);
@@ -1465,10 +1475,12 @@ public class Vendas extends AppCompatActivity{
     public void relatorioPeriodo(String dataInicial, String dataFinal){
         DaoPedido daoPedido = new DaoPedido(this);
         DaoCaixa daoCaixa = new DaoCaixa(this);
-//        Toast.makeText(this, "Data inicial: " + dataInicial + " | Data final: " + dataFinal, Toast.LENGTH_SHORT).show();
         String caixasPesquisar = daoCaixa.pesuisarCaixas(dataInicial, dataFinal);
 
-//        Toast.makeText(this, "" + caixasPesquisar, Toast.LENGTH_SHORT).show();
+        if(caixasPesquisar.equals("")){
+            Toast.makeText(this, "Nenhum caixa encontrado no período pesquisado.", Toast.LENGTH_SHORT).show();
+            return;
+        }
         String[] numCaixa = caixasPesquisar.split(",");
 
         ArrayList<Pedido> pedidos = new ArrayList<>();
@@ -1477,11 +1489,6 @@ public class Vendas extends AppCompatActivity{
             ArrayList<Pedido> temp = daoPedido.buscarPeriodo(aNumCaixa);
             pedidos.addAll(temp);
         }
-//        if(pedidos.size() < 1){
-//            Toast.makeText(this, "pedidos.size() < 1", Toast.LENGTH_SHORT).show();
-//        }else{
-//            Toast.makeText(this, "pedidos.size(): " + pedidos.size(), Toast.LENGTH_SHORT).show();
-//        }
 
         Pedido pedido;
 
