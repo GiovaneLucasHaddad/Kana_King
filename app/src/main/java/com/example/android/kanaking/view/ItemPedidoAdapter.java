@@ -1,4 +1,4 @@
-package com.example.android.kanaking;
+package com.example.android.kanaking.view;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -9,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.example.android.kanaking.R;
 import com.example.android.kanaking.model.ItemPedido;
 
 import java.util.ArrayList;

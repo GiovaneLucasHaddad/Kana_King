@@ -1,4 +1,4 @@
-package com.example.android.kanaking;
+package com.example.android.kanaking.view;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -8,6 +8,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+
+import com.example.android.kanaking.R;
 
 import java.util.ArrayList;
 

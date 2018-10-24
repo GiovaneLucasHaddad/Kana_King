@@ -1,4 +1,4 @@
-package com.example.android.kanaking;
+package com.example.android.kanaking.view;
 
 public class Pagamento {
     private int idImagem;

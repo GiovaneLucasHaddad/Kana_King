@@ -31,10 +31,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.android.kanaking.ItemPedidoAdapter;
-import com.example.android.kanaking.Pagamento;
-import com.example.android.kanaking.PagamentoAdapter;
-import com.example.android.kanaking.PedidoAdapter;
 import com.example.android.kanaking.R;
 import com.example.android.kanaking.control.BD;
 import com.example.android.kanaking.control.BluetoothService;
