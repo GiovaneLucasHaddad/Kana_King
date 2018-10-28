@@ -43,11 +43,11 @@ public class BluetoothService {
     private static final String NAME_SECURE = "BluetoothSecure";
     private static final String NAME_INSECURE = "BluetoothInsecure";
 
-    // UUID único para esta aplicação//TODO - gerar UUID único
-    private static final UUID MY_UUID_SECURE =
-            UUID.fromString("fa87c0d0-afac-11de-8a39-0800200c9a66");
-    private static final UUID MY_UUID_INSECURE =
-            UUID.fromString("8ce255c0-200a-11e0-ac64-0800200c9a66");
+    // UUID único para esta aplicação // UUID gerado a partir do site "https://www.uuidgenerator.net/" no dia 27/10/2018
+    private static final UUID UUID_1 =
+            UUID.fromString("2ed7b32a-b71d-4f79-9c6d-c078da26cf48");
+    private static final UUID UUID_2 =
+            UUID.fromString("931f7758-3b99-4969-8789-b2c85b46b69d");
 
     //
     private final BluetoothAdapter mAdapter;
@@ -308,10 +308,10 @@ public class BluetoothService {
             try {
                 if (secure) {
                     tmp = mAdapter.listenUsingRfcommWithServiceRecord(NAME_SECURE,
-                            MY_UUID_SECURE);
+                            UUID_1);
                 } else {
                     tmp = mAdapter.listenUsingInsecureRfcommWithServiceRecord(
-                            NAME_INSECURE, MY_UUID_INSECURE);
+                            NAME_INSECURE, UUID_2);
                 }
             } catch (IOException e) {
 //                Log.e(TAG, "Socket Type: " + mSocketType + "listen() failed", e);
@@ -395,10 +395,10 @@ public class BluetoothService {
             try {
                 if (secure) {
                     tmp = device.createRfcommSocketToServiceRecord(
-                            MY_UUID_SECURE);
+                            UUID_1);
                 } else {
                     tmp = device.createInsecureRfcommSocketToServiceRecord(
-                            MY_UUID_INSECURE);
+                            UUID_2);
                 }
             } catch (IOException e) {
 //                Log.e(TAG, "Socket Type: " + mSocketType + "create() failed", e);
