@@ -1463,7 +1463,7 @@ public class Vendas extends AppCompatActivity{
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.rel_vendas_ate_agora);
         builder.setView(view);
-        builder.setPositiveButton("Certo!", null);
+        builder.setPositiveButton("OK", null);
         builder.show();
         //AlertDialog
     }
@@ -1542,7 +1542,7 @@ public class Vendas extends AppCompatActivity{
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.rel_vendas_periodo);
         builder.setView(view);
-        builder.setPositiveButton("Certo!", null);
+        builder.setPositiveButton("OK", null);
         builder.show();
         //AlertDialog
     }
