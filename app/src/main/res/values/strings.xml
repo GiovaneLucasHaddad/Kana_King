@@ -54,4 +54,15 @@
     <string name="data_final">Data Final</string>
     <string name="esconder">Esconder</string>
     <string name="mostrar_todos">Mostrar Todos</string>
+    <string name="creditos_descricao">"Os ícones utilizados na Interface do Usuário e na montagem do ícone do aplicativo foram feitos por:
+        - Freepik (http://www.freepik.com);
+        - Smashicons (https://www.flaticon.com/authors/smashicons);
+        - AnhGreen (https://www.flaticon.com/authors/anhgreen);
+        - Eucalyp (https://www.flaticon.com/authors/eucalyp);
+        - Alfredo Hernandez (https://www.flaticon.com/authors/alfredo-hernandez);
+        - Butterflytronics (https://www.flaticon.com/authors/butterflytronics);
+        - Catalin Fertu (https://www.flaticon.com/authors/catalin-fertu); e
+        - Those Icons (https://www.flaticon.com/authors/those-icons)
+        ambos obtidos do site www.flaticon.com (https://www.flaticon.com/) e são licenciados pela Creative Commons BY 3.0 (http://creativecommons.org/licenses/by/3.0/)"</string>
+    <string name="creditos_titulo">Créditos</string>
 </resources>

@@ -30,4 +30,9 @@
         android:id="@+id/relPeriodo"
         android:title="@string/relPeriodo"
         app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/mostrsrCreditos"
+        android:title="@string/creditos_titulo"
+        app:showAsAction="ifRoom" />
 </menu>

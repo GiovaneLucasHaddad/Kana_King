@@ -1383,6 +1383,8 @@ public class Vendas extends AppCompatActivity{
                 //AlertDialog
                 return true;
             }
+            case R.id.mostrsrCreditos:
+                mostrarCreditos();
         }
         return false;
     }
@@ -1697,5 +1699,15 @@ public class Vendas extends AppCompatActivity{
         totalAbacaxi = 0;
         totalPuro = 0;
         totalGengibre = 0;
+    }
+
+    public void mostrarCreditos(){
+        LayoutInflater layoutInflater = getLayoutInflater();
+        View view = layoutInflater.inflate(R.layout.creditos, null);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+//        builder.setTitle(R.string.rel_vendas_ate_agora);
+        builder.setView(view);
+        builder.setPositiveButton("OK", null);
+        builder.show();
     }
 }
